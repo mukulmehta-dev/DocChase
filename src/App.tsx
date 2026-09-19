@@ -1,0 +1,116 @@
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './contexts/AuthContext';
+import { isProduction, isSupabaseConfigured, CONFIG_ERROR_MESSAGE } from './lib/supabase';
+
+// Layouts
+import { PublicLayout } from './components/layout/PublicLayout';
+import { AccountantLayout } from './components/layout/AccountantLayout';
+
+// Public Pages
+import { LandingPage } from './pages/public/LandingPage';
+import { PricingPage } from './pages/public/PricingPage';
+import { SignInPage } from './pages/auth/SignInPage';
+import { SignUpPage } from './pages/auth/SignUpPage';
+import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
+
+// Accountant Pages
+import { DashboardPage } from './pages/accountant/DashboardPage';
+import { ClientsPage } from './pages/accountant/ClientsPage';
+import { ClientDetailPage } from './pages/accountant/ClientDetailPage';
+import { DocumentsPage } from './pages/accountant/DocumentsPage';
+import { DocumentReviewPage } from './pages/accountant/DocumentReviewPage';
+import { TemplatesPage } from './pages/accountant/TemplatesPage';
+import { RequestsPage } from './pages/accountant/RequestsPage';
+import { RequestDetailPage } from './pages/accountant/RequestDetailPage';
+import { CreateRequestPage } from './pages/accountant/CreateRequestPage';
+import { RemindersPage } from './pages/accountant/RemindersPage';
+import { BillingPage } from './pages/accountant/BillingPage';
+import { SettingsPage } from './pages/accountant/SettingsPage';
+
+// Client Portal
+import { ClientPortalPage } from './pages/client/ClientPortalPage';
+
+// Protected Route Guard
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center p-4">
+        <span className="material-symbols-outlined text-[36px] text-primary-container animate-spin mb-3">
+          progress_activity
+        </span>
+        <p className="text-xs text-slate-500 font-medium">Verifying accountant session...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/sign-in" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+export const App: React.FC = () => {
+  // Production configuration hard failure guard
+  if (isProduction() && !isSupabaseConfigured()) {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mb-4 shadow-sm">
+          <span className="material-symbols-outlined text-[32px]">error</span>
+        </div>
+        <h1 className="text-xl font-bold text-slate-900">Configuration Error</h1>
+        <p className="text-sm text-slate-600 max-w-md mt-2 mb-6 leading-relaxed">
+          {CONFIG_ERROR_MESSAGE}
+        </p>
+        <div className="p-4 bg-white rounded-xl border border-slate-200 text-xs text-slate-500 max-w-lg text-left font-mono">
+          Please provide valid <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> environment variables to launch DocChase in production.
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Routes>
+      {/* Public Pages */}
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/sign-in" element={<SignInPage />} />
+        <Route path="/sign-up" element={<SignUpPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      </Route>
+
+      {/* Protected Accountant Portal */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <AccountantLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/clients" element={<ClientsPage />} />
+        <Route path="/clients/:id" element={<ClientDetailPage />} />
+        <Route path="/documents" element={<DocumentsPage />} />
+        <Route path="/documents/:id" element={<DocumentReviewPage />} />
+        <Route path="/templates" element={<TemplatesPage />} />
+        <Route path="/requests" element={<RequestsPage />} />
+        <Route path="/requests/new" element={<CreateRequestPage />} />
+        <Route path="/requests/:id" element={<RequestDetailPage />} />
+        <Route path="/requests/:id/review" element={<DocumentReviewPage />} />
+        <Route path="/reminders" element={<RemindersPage />} />
+        <Route path="/billing" element={<BillingPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+      </Route>
+
+      {/* Client Document Collection Portal (Token Protected) */}
+      <Route path="/request/:token" element={<ClientPortalPage />} />
+
+      {/* Catch-all redirect */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+};

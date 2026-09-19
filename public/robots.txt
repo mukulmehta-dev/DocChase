@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# Block internal/app routes from indexing
+Disallow: /dashboard
+Disallow: /clients
+Disallow: /requests
+Disallow: /documents
+Disallow: /templates
+Disallow: /reminders
+Disallow: /settings
+Disallow: /billing
+Disallow: /upload/
+
+# Allow public marketing pages
+Allow: /
+Allow: /pricing
+Allow: /sign-in
+Allow: /sign-up
+Allow: /about
