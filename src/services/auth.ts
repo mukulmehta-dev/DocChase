@@ -57,20 +57,11 @@ export const authService = {
 
       const userId = authData.user.id;
 
-      // 1. Create or upsert profile
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          id: userId,
-          email,
-          full_name: fullName,
-        })
-        .select()
-        .single();
+      // NOTE: Profile row is created automatically by the handle_new_user trigger
+      // (migration 015) which fires AFTER INSERT on auth.users with SECURITY DEFINER.
+      // No INSERT on profiles is needed or performed here.
 
-      if (profileError) throw profileError;
-
-      // 2. Create firm workspace
+      // 1. Create firm workspace
       const { data: workspace, error: wsError } = await supabase
         .from('workspaces')
         .insert({
@@ -82,7 +73,7 @@ export const authService = {
 
       if (wsError || !workspace) throw wsError || new Error('Failed to create workspace');
 
-      // 3. Add user as owner
+      // 2. Add user as workspace owner
       const { error: memberError } = await supabase
         .from('workspace_members')
         .insert({
@@ -93,14 +84,14 @@ export const authService = {
 
       if (memberError) throw memberError;
 
-      // 4. Initialize default subscription
+      // 3. Initialize default subscription
       await supabase.from('subscriptions').insert({
         workspace_id: workspace.id,
         plan: 'free',
         status: 'active',
       });
 
-      // 5. Initialize starter template (Monthly Bookkeeping)
+      // 4. Initialize starter template (Monthly Bookkeeping)
       const { data: template } = await supabase
         .from('templates')
         .insert({
@@ -123,9 +114,25 @@ export const authService = {
         ]);
       }
 
+      // 5. Read back the profile created by the trigger (SELECT policy: auth.uid() = id)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      const resolvedProfile = profile || {
+        id: userId,
+        email,
+        full_name: fullName,
+        avatar_url: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
       return {
         user: { id: userId, email },
-        profile,
+        profile: resolvedProfile,
         currentWorkspace: workspace,
         workspaces: [workspace],
       };
