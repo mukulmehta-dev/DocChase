@@ -42,11 +42,22 @@ export const CreateRequestPage: React.FC = () => {
           clientService.getClients(currentWorkspace.id),
           templateService.getTemplates(currentWorkspace.id),
         ]);
-        setClients(cList);
+        const activeClients = cList.filter((c) => c.status === 'active');
+        setClients(activeClients);
         setTemplates(tList);
 
-        if (!selectedClientId && cList.length > 0) {
-          setSelectedClientId(cList[0].id);
+        if (preselectedClientId) {
+          const isArchived = cList.some((c) => c.id === preselectedClientId && c.status === 'archived');
+          if (isArchived) {
+            setError('The requested client is currently archived and cannot receive new requests. Please reactivate the client first.');
+          }
+          if (activeClients.some((c) => c.id === preselectedClientId)) {
+            setSelectedClientId(preselectedClientId);
+          } else if (activeClients.length > 0) {
+            setSelectedClientId(activeClients[0].id);
+          }
+        } else if (activeClients.length > 0) {
+          setSelectedClientId(activeClients[0].id);
         }
 
         if (tList.length > 0) {

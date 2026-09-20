@@ -131,29 +131,60 @@ export const clientService = {
   async updateClient(
     workspaceId: string,
     clientId: string,
-    updates: Partial<Client>
+    updates: Partial<Client>,
+    userId?: string
   ): Promise<Client> {
+    // Strictly prevent mutating immutable primary/foreign keys or timestamps
+    const { id, workspace_id, created_at, ...safeUpdates } = updates as any;
+
+    let updatedClient: Client;
     if (isSupabaseConfigured()) {
       const { data, error } = await (supabase
         .from('clients') as any)
-        .update(updates)
+        .update(safeUpdates)
         .eq('id', clientId)
         .eq('workspace_id', workspaceId)
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      updatedClient = data;
+    } else {
+      const clients = await this.getClients(workspaceId);
+      const idx = clients.findIndex((c) => c.id === clientId);
+      if (idx === -1) {
+        throw new Error('Client not found');
+      }
+      clients[idx] = { ...clients[idx], ...safeUpdates, updated_at: new Date().toISOString() };
+      localStorage.setItem(`docchase_clients_${workspaceId}`, JSON.stringify(clients));
+      updatedClient = clients[idx];
     }
 
-    const clients = await this.getClients(workspaceId);
-    const idx = clients.findIndex((c) => c.id === clientId);
-    if (idx !== -1) {
-      clients[idx] = { ...clients[idx], ...updates, updated_at: new Date().toISOString() };
-      localStorage.setItem(`docchase_clients_${workspaceId}`, JSON.stringify(clients));
-      return clients[idx];
+    // Determine audit action:
+    let action = 'client.updated';
+    if (safeUpdates.status === 'archived') {
+      action = 'client.archived';
+    } else if (safeUpdates.status === 'active' && updates.status) {
+      action = 'client.reactivated';
     }
-    throw new Error('Client not found');
+
+    try {
+      await auditService.log(
+        workspaceId,
+        action,
+        'client',
+        updatedClient.id,
+        {
+          client_name: updatedClient.company_name || updatedClient.name,
+          changes: Object.keys(safeUpdates),
+        },
+        userId
+      );
+    } catch (auditErr) {
+      console.warn('Failed to write audit log for client update', auditErr);
+    }
+
+    return updatedClient;
   },
 
   async deleteClient(workspaceId: string, clientId: string): Promise<void> {

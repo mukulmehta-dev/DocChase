@@ -7,33 +7,61 @@ import type { Client } from '../../types';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { Card } from '../../components/ui/Card';
+import { Modal } from '../../components/ui/Modal';
+import { EditClientModal } from '../../components/clients/EditClientModal';
 
 export const ClientDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { currentWorkspace } = useAuth();
+  const { currentWorkspace, user } = useAuth();
   const navigate = useNavigate();
 
   const [client, setClient] = useState<Client | null>(null);
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const load = async () => {
-      if (!currentWorkspace?.id || !id) return;
-      setLoading(true);
-      try {
-        const c = await clientService.getClient(currentWorkspace.id, id);
-        setClient(c);
+  // Modal States
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
-        const allReqs = await requestService.getRequests(currentWorkspace.id);
-        const clientReqs = allReqs.filter((r) => r.client_id === id);
-        setRequests(clientReqs);
-      } catch (err) {
-        console.error('Failed to load client detail', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const load = async () => {
+    if (!currentWorkspace?.id || !id) return;
+    setLoading(true);
+    try {
+      const c = await clientService.getClient(currentWorkspace.id, id);
+      setClient(c);
+
+      const allReqs = await requestService.getRequests(currentWorkspace.id);
+      const clientReqs = allReqs.filter((r) => r.client_id === id);
+      setRequests(clientReqs);
+    } catch (err) {
+      console.error('Failed to load client detail', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConfirmStatusToggle = async () => {
+    if (!currentWorkspace?.id || !client) return;
+    setIsUpdatingStatus(true);
+    try {
+      const newStatus = client.status === 'active' ? 'archived' : 'active';
+      const updated = await clientService.updateClient(
+        currentWorkspace.id,
+        client.id,
+        { status: newStatus },
+        user?.id
+      );
+      setClient(updated);
+      setIsStatusModalOpen(false);
+    } catch (err) {
+      console.error('Failed to update client status', err);
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
+  useEffect(() => {
     load();
   }, [currentWorkspace?.id, id]);
 
@@ -75,7 +103,9 @@ export const ClientDetailPage: React.FC = () => {
               <h1 className="text-2xl font-bold tracking-tight text-slate-900">
                 {client.company_name || client.name}
               </h1>
-              <Badge variant="ready">Active Client</Badge>
+              <Badge variant={client.status === 'active' ? 'ready' : 'neutral'}>
+                {client.status === 'active' ? 'Active Client' : 'Archived Client'}
+              </Badge>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
               Primary Contact: {client.name} • Email: {client.email}
@@ -83,15 +113,40 @@ export const ClientDetailPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center flex-wrap gap-2">
           <Button
-            variant="primary"
+            variant="secondary"
             size="sm"
-            icon="add"
-            onClick={() => navigate(`/requests/new?client_id=${client.id}`)}
+            icon="edit"
+            onClick={() => setIsEditModalOpen(true)}
           >
-            Create Request
+            Edit Client
           </Button>
+
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={client.status === 'active' ? 'archive' : 'unarchive'}
+            onClick={() => setIsStatusModalOpen(true)}
+          >
+            {client.status === 'active' ? 'Archive' : 'Reactivate'}
+          </Button>
+
+          {client.status === 'active' ? (
+            <Button
+              variant="primary"
+              size="sm"
+              icon="add"
+              onClick={() => navigate(`/requests/new?client_id=${client.id}`)}
+            >
+              Create Request
+            </Button>
+          ) : (
+            <div className="text-[11px] text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg flex items-center gap-1">
+              <span className="material-symbols-outlined text-[14px]">info</span>
+              <span>Reactivate client to create new requests</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -108,6 +163,12 @@ export const ClientDetailPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-[15px] text-slate-400">call</span>
                 <span>{client.phone}</span>
+              </div>
+            )}
+            {client.notes && (
+              <div className="mt-2 pt-2 border-t border-slate-100 text-slate-600">
+                <span className="text-[11px] text-slate-400 block font-medium">Notes:</span>
+                <p className="text-xs mt-0.5 whitespace-pre-wrap">{client.notes}</p>
               </div>
             )}
           </div>
@@ -177,6 +238,64 @@ export const ClientDetailPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Edit Client Modal */}
+      <EditClientModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        client={client}
+        onSuccess={(updated) => {
+          setClient(updated);
+        }}
+      />
+
+      {/* Archive / Reactivate Confirmation Modal */}
+      <Modal
+        isOpen={isStatusModalOpen}
+        onClose={() => setIsStatusModalOpen(false)}
+        title={client.status === 'active' ? 'Archive Client' : 'Reactivate Client'}
+      >
+        <div className="flex flex-col gap-4">
+          <p className="text-xs text-slate-600 leading-relaxed">
+            {client.status === 'active' ? (
+              <>
+                Are you sure you want to archive <strong>{client.company_name || client.name}</strong>?
+                <br /><br />
+                Archiving hides this client from the active directory and prevents dispatching new document requests.
+                <strong> All historical requests, uploaded documents, and audit logs are safely preserved.</strong>
+              </>
+            ) : (
+              <>
+                Reactivate <strong>{client.company_name || client.name}</strong>?
+                <br /><br />
+                This client will be restored to your active directory and can receive new document requests.
+              </>
+            )}
+          </p>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <Button
+              variant="secondary"
+              size="md"
+              type="button"
+              onClick={() => setIsStatusModalOpen(false)}
+              disabled={isUpdatingStatus}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant={client.status === 'active' ? 'secondary' : 'primary'}
+              size="md"
+              type="button"
+              isLoading={isUpdatingStatus}
+              icon={client.status === 'active' ? 'archive' : 'unarchive'}
+              onClick={handleConfirmStatusToggle}
+            >
+              {client.status === 'active' ? 'Archive Client' : 'Reactivate Client'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

@@ -9,15 +9,21 @@ import { Card } from '../../components/ui/Card';
 import { Modal } from '../../components/ui/Modal';
 import { Input } from '../../components/ui/Input';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { EditClientModal } from '../../components/clients/EditClientModal';
 
 export const ClientsPage: React.FC = () => {
-  const { currentWorkspace } = useAuth();
+  const { currentWorkspace, user } = useAuth();
   const navigate = useNavigate();
 
   const [clients, setClients] = useState<ClientWithRequests[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'archived'>('all');
+
+  // Edit and Status Modals
+  const [clientToEdit, setClientToEdit] = useState<ClientWithRequests | null>(null);
+  const [clientToToggleStatus, setClientToToggleStatus] = useState<ClientWithRequests | null>(null);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   // Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -39,6 +45,26 @@ export const ClientsPage: React.FC = () => {
       console.error('Failed to load clients', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleConfirmStatusToggle = async () => {
+    if (!currentWorkspace?.id || !clientToToggleStatus) return;
+    setIsUpdatingStatus(true);
+    try {
+      const newStatus = clientToToggleStatus.status === 'active' ? 'archived' : 'active';
+      await clientService.updateClient(
+        currentWorkspace.id,
+        clientToToggleStatus.id,
+        { status: newStatus },
+        user?.id
+      );
+      setClientToToggleStatus(null);
+      await fetchClients();
+    } catch (err) {
+      console.error('Failed to update client status', err);
+    } finally {
+      setIsUpdatingStatus(false);
     }
   };
 
@@ -130,6 +156,14 @@ export const ClientsPage: React.FC = () => {
           >
             Active ({clients.filter((c) => c.status === 'active').length})
           </button>
+          <button
+            onClick={() => setFilterStatus('archived')}
+            className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+              filterStatus === 'archived' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Archived ({clients.filter((c) => c.status === 'archived').length})
+          </button>
         </div>
       </div>
 
@@ -144,15 +178,17 @@ export const ClientsPage: React.FC = () => {
       ) : filteredClients.length === 0 ? (
         <EmptyState
           icon="group"
-          title={searchQuery ? 'No matching clients found' : 'No clients in your firm yet'}
+          title={searchQuery ? 'No matching clients found' : filterStatus === 'archived' ? 'No archived clients' : 'No clients in your firm yet'}
           description={
             searchQuery
               ? 'Try modifying your search criteria.'
+              : filterStatus === 'archived'
+              ? 'Clients you archive will appear here safely preserved.'
               : 'Add your first accounting client to begin collecting documents automatically.'
           }
-          actionLabel="Add Client"
-          actionIcon="person_add"
-          onAction={() => setIsAddModalOpen(true)}
+          actionLabel={filterStatus === 'archived' ? undefined : 'Add Client'}
+          actionIcon={filterStatus === 'archived' ? undefined : 'person_add'}
+          onAction={filterStatus === 'archived' ? undefined : () => setIsAddModalOpen(true)}
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -160,12 +196,12 @@ export const ClientsPage: React.FC = () => {
             <Card
               key={client.id}
               elevation="hover"
-              className="p-5 flex flex-col justify-between cursor-pointer"
+              className="p-5 flex flex-col justify-between cursor-pointer group"
               onClick={() => navigate(`/clients/${client.id}`)}
             >
               <div>
                 <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <h3 className="font-semibold text-base text-slate-900 truncate">
                       {client.company_name || client.name}
                     </h3>
@@ -173,9 +209,39 @@ export const ClientsPage: React.FC = () => {
                       Contact: {client.name}
                     </p>
                   </div>
-                  <Badge variant={client.status === 'active' ? 'ready' : 'neutral'}>
-                    {client.status.toUpperCase()}
-                  </Badge>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <Badge variant={client.status === 'active' ? 'ready' : 'neutral'}>
+                      {client.status.toUpperCase()}
+                    </Badge>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setClientToEdit(client);
+                      }}
+                      className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                      title="Edit Client Details"
+                    >
+                      <span className="material-symbols-outlined text-[17px]">edit</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setClientToToggleStatus(client);
+                      }}
+                      className={`p-1 rounded transition-colors ${
+                        client.status === 'active'
+                          ? 'text-slate-400 hover:text-amber-700 hover:bg-amber-50'
+                          : 'text-slate-400 hover:text-emerald-700 hover:bg-emerald-50'
+                      }`}
+                      title={client.status === 'active' ? 'Archive Client' : 'Reactivate Client'}
+                    >
+                      <span className="material-symbols-outlined text-[17px]">
+                        {client.status === 'active' ? 'archive' : 'unarchive'}
+                      </span>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mt-4 flex flex-col gap-1.5 text-xs text-slate-600">
@@ -260,6 +326,64 @@ export const ClientsPage: React.FC = () => {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Edit Client Modal */}
+      <EditClientModal
+        isOpen={!!clientToEdit}
+        onClose={() => setClientToEdit(null)}
+        client={clientToEdit}
+        onSuccess={() => {
+          fetchClients();
+        }}
+      />
+
+      {/* Archive / Reactivate Confirmation Modal */}
+      <Modal
+        isOpen={!!clientToToggleStatus}
+        onClose={() => setClientToToggleStatus(null)}
+        title={clientToToggleStatus?.status === 'active' ? 'Archive Client' : 'Reactivate Client'}
+      >
+        <div className="flex flex-col gap-4">
+          <p className="text-xs text-slate-600 leading-relaxed">
+            {clientToToggleStatus?.status === 'active' ? (
+              <>
+                Are you sure you want to archive <strong>{clientToToggleStatus?.company_name || clientToToggleStatus?.name}</strong>?
+                <br /><br />
+                Archiving hides this client from the active directory and prevents dispatching new document requests.
+                <strong> All historical requests, uploaded documents, and audit logs are safely preserved.</strong>
+              </>
+            ) : (
+              <>
+                Reactivate <strong>{clientToToggleStatus?.company_name || clientToToggleStatus?.name}</strong>?
+                <br /><br />
+                This client will be restored to your active directory and can receive new document requests.
+              </>
+            )}
+          </p>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <Button
+              variant="secondary"
+              size="md"
+              type="button"
+              onClick={() => setClientToToggleStatus(null)}
+              disabled={isUpdatingStatus}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant={clientToToggleStatus?.status === 'active' ? 'secondary' : 'primary'}
+              size="md"
+              type="button"
+              isLoading={isUpdatingStatus}
+              icon={clientToToggleStatus?.status === 'active' ? 'archive' : 'unarchive'}
+              onClick={handleConfirmStatusToggle}
+            >
+              {clientToToggleStatus?.status === 'active' ? 'Archive Client' : 'Reactivate Client'}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

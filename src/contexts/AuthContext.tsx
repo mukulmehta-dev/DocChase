@@ -10,12 +10,15 @@ interface AuthContextType {
   profile: Profile | null;
   currentWorkspace: Workspace | null;
   workspaces: Workspace[];
+  workspaceRole: 'owner' | 'admin' | 'member' | null;
   loading: boolean;
   signIn: (email: string, password?: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string, firmName: string) => Promise<{ needsEmailConfirmation: boolean }>;
   signOut: () => Promise<void>;
   switchWorkspace: (workspaceId: string) => Promise<void>;
   createWorkspace: (name: string) => Promise<Workspace>;
+  updateCurrentWorkspace: (updated: Partial<Workspace>) => void;
+  updateProfile: (updated: Partial<Profile>) => void;
   refreshSession: () => Promise<void>;
   resendConfirmationEmail: (email: string) => Promise<void>;
   signInWithOAuth: (provider: 'google' | 'github') => Promise<void>;
@@ -28,11 +31,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<Profile | null>(null);
   const [currentWorkspace, setCurrentWorkspace] = useState<Workspace | null>(null);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [workspaceRole, setWorkspaceRole] = useState<'owner' | 'admin' | 'member' | null>('owner');
   const [loading, setLoading] = useState(true);
 
   // Concurrency & race guards
   const inFlightSignInRef = useRef(false);
   const seqRef = useRef(0);
+
+  const fetchAndSetRole = async (workspaceId: string, userId: string) => {
+    if (isSupabaseConfigured()) {
+      try {
+        const { data } = await supabase
+          .from('workspace_members')
+          .select('role')
+          .eq('workspace_id', workspaceId)
+          .eq('user_id', userId)
+          .maybeSingle();
+        if (data?.role) {
+          setWorkspaceRole(data.role as any);
+          return;
+        }
+      } catch (err) {
+        console.warn('Failed to fetch workspace role', err);
+      }
+    }
+    setWorkspaceRole('owner');
+  };
+
+  const updateCurrentWorkspace = (updated: Partial<Workspace>) => {
+    setCurrentWorkspace((prev) => (prev ? { ...prev, ...updated } : prev));
+    setWorkspaces((prev) =>
+      prev.map((w) => (w.id === currentWorkspace?.id ? { ...w, ...updated } : w))
+    );
+  };
+
+  const updateProfile = (updated: Partial<Profile>) => {
+    setProfile((prev) => (prev ? { ...prev, ...updated } : prev));
+  };
 
   const refreshSession = async () => {
     // If an explicit signIn is already running, let it complete authoritatively
@@ -49,11 +84,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setProfile(session.profile);
         setCurrentWorkspace(session.currentWorkspace);
         setWorkspaces(session.workspaces);
+        if (session.currentWorkspace && session.user) {
+          fetchAndSetRole(session.currentWorkspace.id, session.user.id);
+        }
       } else {
         setUser(null);
         setProfile(null);
         setCurrentWorkspace(null);
         setWorkspaces([]);
+        setWorkspaceRole(null);
       }
     } catch (err) {
       console.error('Error refreshing session', err);
@@ -62,6 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setProfile(null);
         setCurrentWorkspace(null);
         setWorkspaces([]);
+        setWorkspaceRole(null);
       }
     } finally {
       if (seq === seqRef.current) {
@@ -97,6 +137,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setProfile(null);
           setCurrentWorkspace(null);
           setWorkspaces([]);
+          setWorkspaceRole(null);
           setLoading(false);
         }
       }
@@ -117,6 +158,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setProfile(session.profile);
         setCurrentWorkspace(session.currentWorkspace);
         setWorkspaces(session.workspaces);
+        if (session.currentWorkspace && session.user) {
+          fetchAndSetRole(session.currentWorkspace.id, session.user.id);
+        }
       }
     } finally {
       inFlightSignInRef.current = false;
@@ -141,12 +185,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setProfile(result.session.profile);
         setCurrentWorkspace(result.session.currentWorkspace);
         setWorkspaces(result.session.workspaces);
+        setWorkspaceRole('owner');
       } else {
         // Email confirmation is required — user is NOT authenticated yet
         setUser(null);
         setProfile(null);
         setCurrentWorkspace(null);
         setWorkspaces([]);
+        setWorkspaceRole(null);
       }
       return { needsEmailConfirmation: result.needsEmailConfirmation };
     } finally {
@@ -172,6 +218,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setProfile(null);
         setCurrentWorkspace(null);
         setWorkspaces([]);
+        setWorkspaceRole(null);
       }
     } finally {
       if (seq === seqRef.current) {
@@ -184,6 +231,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const found = workspaces.find((w) => w.id === workspaceId);
     if (found) {
       setCurrentWorkspace(found);
+      if (user) {
+        fetchAndSetRole(found.id, user.id);
+      }
     }
   };
 
@@ -192,6 +242,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const ws = await workspaceService.createWorkspace(user.id, name);
     setWorkspaces((prev) => [...prev, ws]);
     setCurrentWorkspace(ws);
+    setWorkspaceRole('owner');
     return ws;
   };
 
@@ -202,12 +253,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         profile,
         currentWorkspace,
         workspaces,
+        workspaceRole,
         loading,
         signIn,
         signUp,
         signOut,
         switchWorkspace,
         createWorkspace,
+        updateCurrentWorkspace,
+        updateProfile,
         refreshSession,
         resendConfirmationEmail,
         signInWithOAuth,
