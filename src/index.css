@@ -51,6 +51,10 @@
   font-variation-settings: 'FILL' 1;
 }
 
+/* ═══════════════════════════════════════════════════
+   LIGHT SURFACE UTILITIES — Dashboard / Authenticated App
+   ═══════════════════════════════════════════════════ */
+
 /* Atmospheric subtle canvas utilities */
 .bg-grid-subtle {
   background-size: 24px 24px;
@@ -111,6 +115,110 @@
 .tactile-rim-white {
   box-shadow: inset 0 -1px 0 0 rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.03);
 }
+
+/* ═══════════════════════════════════════════════════
+   DARK SYSTEM UTILITIES — Public Marketing Site
+   ═══════════════════════════════════════════════════ */
+
+/* Dark dot grid overlay */
+.bg-dot-dark {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Dark elevated card surfaces */
+.dark-card {
+  background-color: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.dark-card-hi {
+  background-color: #151E2E;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+/* Ambient sky-blue glow utilities */
+.glow-sky {
+  box-shadow: 0 0 60px rgba(14, 165, 233, 0.18), 0 0 120px rgba(14, 165, 233, 0.06);
+}
+
+.glow-sky-sm {
+  box-shadow: 0 0 24px rgba(14, 165, 233, 0.15), 0 8px 32px rgba(14, 165, 233, 0.08);
+}
+
+/* Directional radial backgrounds */
+.bg-dc-hero-glow {
+  background: radial-gradient(circle 900px at 65% 35%, rgba(14, 165, 233, 0.09) 0%, rgba(30, 58, 138, 0.04) 50%, transparent 70%);
+}
+
+.bg-dc-center-glow {
+  background: radial-gradient(circle 700px at 50% 50%, rgba(14, 165, 233, 0.08) 0%, transparent 65%);
+}
+
+.bg-dc-vault-glow {
+  background: radial-gradient(circle 700px at 50% -10%, rgba(30, 58, 138, 0.35) 0%, rgba(14, 165, 233, 0.06) 50%, transparent 75%);
+}
+
+/* Dark form context — overrides Input component appearance on dark cards */
+.dark-form input,
+.dark-form select,
+.dark-form textarea {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
+  color: #f1f5f9 !important;
+}
+
+.dark-form input:focus,
+.dark-form select:focus,
+.dark-form textarea:focus {
+  border-color: rgba(14, 165, 233, 0.5) !important;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.10) !important;
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  outline: none !important;
+}
+
+.dark-form input::placeholder,
+.dark-form textarea::placeholder {
+  color: #475569 !important;
+}
+
+.dark-form label {
+  color: #94a3b8 !important;
+}
+
+/* ═══════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════ */
+
+@keyframes dc-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes dc-pulse-glow {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1; }
+}
+
+@keyframes dc-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes dc-status-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+@keyframes dc-rail-glow {
+  0%, 100% { opacity: 0.35; }
+  50%       { opacity: 0.8; }
+}
+
+.animate-dc-float  { animation: dc-float      5s ease-in-out infinite; }
+.animate-dc-glow   { animation: dc-pulse-glow 3.5s ease-in-out infinite; }
+.animate-dc-status { animation: dc-status-dot 2.2s ease-in-out infinite; }
+.animate-dc-rail   { animation: dc-rail-glow  2.5s ease-in-out infinite; }
 
 /* Respect reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
