@@ -1,26 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { requestService } from '../../services/requests';
+import { documentService, type VaultItem } from '../../services/documents';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
-
-interface VaultItem {
-  id: string;
-  requestId: string;
-  requestTitle: string;
-  clientName: string;
-  period: string;
-  itemName: string;
-  required: boolean;
-  status: 'missing' | 'uploaded' | 'approved' | 'rejected';
-  fileName?: string;
-  fileSize?: number;
-  uploadedAt?: string;
-  rejectionReason?: string;
-}
 
 export const DocumentsPage: React.FC = () => {
   const { currentWorkspace } = useAuth();
@@ -36,30 +21,7 @@ export const DocumentsPage: React.FC = () => {
       if (!currentWorkspace?.id) return;
       setLoading(true);
       try {
-        const requests = await requestService.getRequests(currentWorkspace.id);
-        const allItems: VaultItem[] = [];
-
-        for (const req of requests) {
-          const details = await requestService.getRequestDetails(currentWorkspace.id, req.id);
-          if (details?.items) {
-            for (const it of details.items) {
-              allItems.push({
-                id: it.id,
-                requestId: req.id,
-                requestTitle: req.title,
-                clientName: (req as any).client_name || req.client?.name || 'Client',
-                period: req.period,
-                itemName: it.name,
-                required: it.required,
-                status: it.status,
-                fileName: (it as any).file_name,
-                fileSize: (it as any).file_size,
-                uploadedAt: (it as any).uploaded_at,
-                rejectionReason: it.rejection_reason ?? undefined,
-              });
-            }
-          }
-        }
+        const allItems = await documentService.getVaultItems(currentWorkspace.id);
         setItems(allItems);
       } catch (err) {
         console.error('Failed to load document vault', err);

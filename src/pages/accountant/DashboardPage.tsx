@@ -102,7 +102,7 @@ export const DashboardPage: React.FC = () => {
       const clientEmail = req.client?.email || req.client_email || '';
       const clientName = req.client_name || req.client?.company_name || req.client?.name || 'Client';
       const clientPortalUrl = req.access_token
-        ? `${window.location.origin}/upload/${req.access_token}`
+        ? `${window.location.origin}/request/${req.access_token}`
         : undefined;
 
       const result = await reminderService.sendSmartReminder({

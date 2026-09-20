@@ -15,7 +15,115 @@ export const ALLOWED_MIME_TYPES = [
 
 export const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB
 
+export interface VaultItem {
+  id: string;
+  requestId: string;
+  requestTitle: string;
+  clientName: string;
+  period: string;
+  itemName: string;
+  required: boolean;
+  status: 'missing' | 'uploaded' | 'approved' | 'rejected';
+  fileName?: string;
+  fileSize?: number;
+  uploadedAt?: string;
+  rejectionReason?: string;
+}
+
 export const documentService = {
+  async getVaultItems(workspaceId: string): Promise<VaultItem[]> {
+    if (isSupabaseConfigured()) {
+      const { data, error } = await supabase
+        .from('requests')
+        .select(`
+          id,
+          title,
+          period,
+          created_at,
+          client:clients(name, company_name),
+          items:request_items(
+            id,
+            name,
+            required,
+            status,
+            rejection_reason,
+            documents(
+              id,
+              original_filename,
+              file_size,
+              uploaded_at,
+              created_at
+            )
+          )
+        `)
+        .eq('workspace_id', workspaceId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const vaultItems: VaultItem[] = [];
+      const requests = (data as any[]) || [];
+      for (const req of requests) {
+        const clientData = req.client as any;
+        const clientName = clientData?.company_name || clientData?.name || 'Client';
+        const items = (req.items as any[]) || [];
+
+        for (const it of items) {
+          const docs = (it.documents as any[]) || [];
+          const latestDoc = docs.sort(
+            (a: any, b: any) =>
+              new Date(b.created_at || b.uploaded_at).getTime() -
+              new Date(a.created_at || a.uploaded_at).getTime()
+          )[0];
+
+          vaultItems.push({
+            id: it.id,
+            requestId: req.id,
+            requestTitle: req.title,
+            clientName,
+            period: req.period,
+            itemName: it.name,
+            required: it.required,
+            status: it.status,
+            fileName: latestDoc?.original_filename,
+            fileSize: latestDoc?.file_size,
+            uploadedAt: latestDoc?.uploaded_at,
+            rejectionReason: it.rejection_reason ?? undefined,
+          });
+        }
+      }
+
+      return vaultItems;
+    }
+
+    // Local Storage Mock Persistence (offline dev mode)
+    const requestsKey = `docchase_requests_${workspaceId}`;
+    const requests = JSON.parse(localStorage.getItem(requestsKey) || '[]');
+    const allItems: VaultItem[] = [];
+
+    for (const req of requests) {
+      if (req?.items) {
+        for (const it of req.items) {
+          allItems.push({
+            id: it.id,
+            requestId: req.id,
+            requestTitle: req.title,
+            clientName: req.client_name || req.client?.name || 'Client',
+            period: req.period,
+            itemName: it.name,
+            required: it.required,
+            status: it.status,
+            fileName: it.file_name || it.current_document?.original_filename,
+            fileSize: it.file_size || it.current_document?.file_size,
+            uploadedAt: it.uploaded_at || it.current_document?.uploaded_at,
+            rejectionReason: it.rejection_reason ?? undefined,
+          });
+        }
+      }
+    }
+
+    return allItems;
+  },
   async validateFileContent(file: File): Promise<{ valid: boolean; error?: string }> {
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
       return {
@@ -332,40 +440,17 @@ export const documentService = {
 
   async recalculateReadiness(workspaceId: string, requestId: string): Promise<{ isReady: boolean }> {
     if (isSupabaseConfigured()) {
-      const { data: items } = await supabase
-        .from('request_items')
-        .select('*')
-        .eq('request_id', requestId);
+      const { data, error } = await (supabase as any).rpc('calculate_request_readiness', {
+        p_workspace_id: workspaceId,
+        p_request_id: requestId,
+      });
 
-      const requiredItems = (items || []).filter((i) => i.required);
-      const approvedRequiredItems = requiredItems.filter((i) => i.status === 'approved');
-
-      const isReady = requiredItems.length > 0 && approvedRequiredItems.length === requiredItems.length;
-
-      if (isReady) {
-        const now = new Date().toISOString();
-        await supabase
-          .from('requests')
-          .update({ status: 'ready', completed_at: now })
-          .eq('id', requestId);
-
-        // Core rule: Stop all future reminders once READY
-        await supabase
-          .from('reminders')
-          .update({ status: 'cancelled' })
-          .eq('request_id', requestId)
-          .eq('status', 'scheduled');
-
-        await auditService.log(
-          workspaceId,
-          'request.completed',
-          'request',
-          requestId,
-          { title: 'All required documents approved' }
-        );
+      if (error) {
+        console.error('Failed to calculate request readiness via RPC:', error);
+        throw error;
       }
 
-      return { isReady };
+      return { isReady: Boolean(data?.is_ready) };
     }
 
     // Local storage mock
