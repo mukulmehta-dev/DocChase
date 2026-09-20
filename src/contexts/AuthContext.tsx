@@ -18,6 +18,7 @@ interface AuthContextType {
   createWorkspace: (name: string) => Promise<Workspace>;
   refreshSession: () => Promise<void>;
   resendConfirmationEmail: (email: string) => Promise<void>;
+  signInWithOAuth: (provider: 'google' | 'github') => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -165,6 +166,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await authService.resendConfirmationEmail(email);
   };
 
+  const signInWithOAuth = async (provider: 'google' | 'github') => {
+    await authService.signInWithOAuth(provider);
+  };
+
   const signOut = async () => {
     const seq = ++seqRef.current;
     setLoading(true);
@@ -213,6 +218,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         createWorkspace,
         refreshSession,
         resendConfirmationEmail,
+        signInWithOAuth,
       }}
     >
       {children}

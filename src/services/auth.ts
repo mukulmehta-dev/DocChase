@@ -454,4 +454,64 @@ export const authService = {
       throw new Error(CONFIG_ERROR_MESSAGE);
     }
   },
+
+  async signInWithOAuth(provider: 'google' | 'github'): Promise<void> {
+    assertProductionConfigured();
+    if (isSupabaseConfigured()) {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (error) throw error;
+      return;
+    }
+
+    if (isProduction()) {
+      throw new Error(CONFIG_ERROR_MESSAGE);
+    }
+  },
 };
+
+export function getFriendlyAuthErrorMessage(err: any): string {
+  if (!err) return 'Unable to sign in right now. Please try again.';
+  const code = (err.code || err.error_code || '').toString().toLowerCase();
+  const msg = (err.message || '').toLowerCase();
+  const status = Number(err.status);
+
+  if (
+    code === 'invalid_credentials' ||
+    code === 'invalid_grant' ||
+    msg.includes('invalid login credentials') ||
+    msg.includes('invalid email or password') ||
+    msg.includes('invalid_credentials')
+  ) {
+    return 'Incorrect email or password.';
+  }
+
+  if (
+    code === 'email_not_confirmed' ||
+    msg.includes('email not confirmed')
+  ) {
+    return 'Please confirm your email before signing in.';
+  }
+
+  if (
+    code === 'over_email_send_rate_limit' ||
+    code === 'rate_limit_exceeded' ||
+    status === 429 ||
+    msg.includes('rate limit') ||
+    msg.includes('too many attempts') ||
+    msg.includes('over_email_send_rate_limit')
+  ) {
+    return 'Too many attempts. Please wait a moment and try again.';
+  }
+
+  if (msg.includes('network') || msg.includes('failed to fetch')) {
+    return 'Unable to connect to server. Please check your internet connection.';
+  }
+
+  return 'Unable to sign in right now. Please try again.';
+}
+

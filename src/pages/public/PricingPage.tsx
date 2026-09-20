@@ -8,7 +8,7 @@ export const PricingPage: React.FC = () => {
     {
       name: 'Free',
       price: '$0',
-      period: 'forever',
+      period: '/month',
       description: 'Ideal for solo bookkeepers validating DocChase with initial clients.',
       badge: 'Start Here',
       features: [
@@ -25,7 +25,7 @@ export const PricingPage: React.FC = () => {
     },
     {
       name: 'Starter',
-      price: '$49',
+      price: '$9',
       period: '/month',
       description: 'The standard plan for growing accounting practices with recurring monthly retainers.',
       badge: 'Most Popular',
@@ -44,7 +44,7 @@ export const PricingPage: React.FC = () => {
     },
     {
       name: 'Pro',
-      price: '$129',
+      price: '$19',
       period: '/month',
       description: 'Designed for high-volume audit and bookkeeping firms managing multiple client accounts.',
       badge: 'Scale',
