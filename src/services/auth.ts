@@ -61,57 +61,62 @@ export const authService = {
       // (migration 015) which fires AFTER INSERT on auth.users with SECURITY DEFINER.
       // No INSERT on profiles is needed or performed here.
 
-      // 1. Create firm workspace
-      const { data: workspace, error: wsError } = await supabase
-        .from('workspaces')
-        .insert({
-          name: firmName,
-          plan: 'free',
-        })
-        .select()
-        .single();
+      // 1. Create workspace + owner membership + default subscription atomically via
+      //    SECURITY DEFINER RPC. This bypasses the email-confirmation session gap:
+      //    signUp() returns authData.user but authData.session is NULL when email
+      //    confirmation is enabled in production. Direct client-side INSERTs would
+      //    run as anon (no JWT) and fail the "TO authenticated" workspace RLS policy.
+      //    The RPC validates p_user_id against auth.users server-side.
+      type WorkspaceRpcResult = {
+        id: string; name: string; slug: string | null; logo_url: string | null;
+        plan: 'free' | 'starter' | 'pro'; created_at: string; updated_at: string;
+      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rpcCall = (supabase as any).rpc('create_workspace_for_user', {
+        p_user_id: userId,
+        p_workspace_name: firmName,
+      }) as Promise<{ data: WorkspaceRpcResult | null; error: Error | null }>;
+      const { data: wsData, error: wsError } = await rpcCall;
 
-      if (wsError || !workspace) throw wsError || new Error('Failed to create workspace');
+      if (wsError) throw wsError;
+      if (!wsData) throw new Error('Failed to create workspace');
 
-      // 2. Add user as workspace owner
-      const { error: memberError } = await supabase
-        .from('workspace_members')
-        .insert({
-          workspace_id: workspace.id,
-          user_id: userId,
-          role: 'owner',
-        });
+      // Normalise RPC result into the Workspace shape expected downstream
+      const workspace = {
+        id:         wsData.id,
+        name:       wsData.name,
+        slug:       wsData.slug,
+        logo_url:   wsData.logo_url,
+        plan:       wsData.plan,
+        created_at: wsData.created_at,
+        updated_at: wsData.updated_at,
+      };
 
-      if (memberError) throw memberError;
+      // 2. Initialize starter template if we have a session (email confirmation disabled).
+      //    When email confirmation is enabled, authData.session is null and the client
+      //    runs as anon — template creation is skipped here and can be done on first login.
+      if (authData.session) {
+        const { data: template } = await supabase
+          .from('templates')
+          .insert({
+            workspace_id: workspace.id,
+            name: 'Monthly Bookkeeping',
+            description: 'Standard monthly document collection checklist',
+            frequency: 'monthly',
+            is_active: true,
+          })
+          .select()
+          .single();
 
-      // 3. Initialize default subscription
-      await supabase.from('subscriptions').insert({
-        workspace_id: workspace.id,
-        plan: 'free',
-        status: 'active',
-      });
-
-      // 4. Initialize starter template (Monthly Bookkeeping)
-      const { data: template } = await supabase
-        .from('templates')
-        .insert({
-          workspace_id: workspace.id,
-          name: 'Monthly Bookkeeping',
-          description: 'Standard monthly document collection checklist',
-          frequency: 'monthly',
-          is_active: true,
-        })
-        .select()
-        .single();
-
-      if (template) {
-        await supabase.from('template_items').insert([
-          { template_id: template.id, name: 'Bank Statement', description: 'Checking/Savings accounts for the period', required: true, sort_order: 1 },
-          { template_id: template.id, name: 'Credit Card Statement', description: 'Monthly business credit card statements', required: true, sort_order: 2 },
-          { template_id: template.id, name: 'Sales Ledger / Revenue Summary', description: 'Point of sale or invoicing summary', required: true, sort_order: 3 },
-          { template_id: template.id, name: 'Expense Receipts (> $75)', description: 'Major business expense receipts and bills', required: false, sort_order: 4 },
-          { template_id: template.id, name: 'Payroll Summary', description: 'Monthly payroll tax filings or register', required: true, sort_order: 5 },
-        ]);
+        if (template) {
+          await supabase.from('template_items').insert([
+            { template_id: template.id, name: 'Bank Statement', description: 'Checking/Savings accounts for the period', required: true, sort_order: 1 },
+            { template_id: template.id, name: 'Credit Card Statement', description: 'Monthly business credit card statements', required: true, sort_order: 2 },
+            { template_id: template.id, name: 'Sales Ledger / Revenue Summary', description: 'Point of sale or invoicing summary', required: true, sort_order: 3 },
+            { template_id: template.id, name: 'Expense Receipts (> $75)', description: 'Major business expense receipts and bills', required: false, sort_order: 4 },
+            { template_id: template.id, name: 'Payroll Summary', description: 'Monthly payroll tax filings or register', required: true, sort_order: 5 },
+          ]);
+        }
       }
 
       // 5. Read back the profile created by the trigger (SELECT policy: auth.uid() = id)
