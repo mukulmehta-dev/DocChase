@@ -1,10 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { supabase, isProduction } from '../../lib/supabase';
 import { authService, getFriendlyAuthErrorMessage } from '../../services/auth';
+
+const PLAN_INFO: Record<string, { name: string; price: string; description: string }> = {
+  free: {
+    name: 'Free Plan',
+    price: '$0/month',
+    description: '3 active clients, 1 recurring request template',
+  },
+  starter: {
+    name: 'Starter Plan',
+    price: '$9/month',
+    description: '14-day free trial included • 15 active clients, smart reminders',
+  },
+  pro: {
+    name: 'Pro Plan',
+    price: '$19/month',
+    description: '14-day free trial included • 100 active clients, AI assistance',
+  },
+};
 
 export const SignUpPage: React.FC = () => {
   const [fullName, setFullName] = useState('');
@@ -26,6 +44,9 @@ export const SignUpPage: React.FC = () => {
 
   const { user, signUp, signInWithOAuth, resendConfirmationEmail } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const rawPlan = searchParams.get('plan')?.toLowerCase().trim() || '';
+  const selectedPlan = PLAN_INFO[rawPlan] || null;
 
   // Cooldown countdown timer for resend email
   useEffect(() => {
@@ -316,9 +337,21 @@ export const SignUpPage: React.FC = () => {
         <h1 className="font-semibold text-xl text-slate-900 text-center tracking-tight">
           Create your firm workspace
         </h1>
-        <p className="text-xs text-slate-500 text-center max-w-sm mt-1 mb-6">
-          Start collecting client documents automatically. Free starter plan includes full document tracking.
-        </p>
+        {selectedPlan ? (
+          <div
+            id="signup-selected-plan-badge"
+            className="mt-2.5 mb-5 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200/80 text-primary-container text-xs font-medium shadow-xs"
+          >
+            <span className="material-symbols-outlined text-[16px] text-primary-container">bookmark_added</span>
+            <span>
+              Selected Plan: <strong>{selectedPlan.name}</strong> ({selectedPlan.price})
+            </span>
+          </div>
+        ) : (
+          <p className="text-xs text-slate-500 text-center max-w-sm mt-1 mb-6">
+            Start collecting client documents automatically. Free starter plan includes full document tracking.
+          </p>
+        )}
 
         {/* Card Surface */}
         <div className="w-full bg-white rounded-xl shadow-md border border-slate-200 p-6 flex flex-col">
@@ -458,7 +491,17 @@ export const SignUpPage: React.FC = () => {
 
         {/* Terms & Sign in link */}
         <div className="mt-6 flex flex-col items-center gap-2 text-center text-xs text-slate-500">
-          <p>By signing up, you agree to our Terms of Service and Privacy Policy.</p>
+          <p>
+            By signing up, you agree to our{' '}
+            <Link to="/terms" id="signup-terms-link" className="font-medium text-slate-700 underline hover:text-primary-container transition-colors">
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link to="/privacy" id="signup-privacy-link" className="font-medium text-slate-700 underline hover:text-primary-container transition-colors">
+              Privacy Policy
+            </Link>
+            .
+          </p>
           <div className="flex items-center gap-1.5">
             <span>Already have an account?</span>
             <Link to="/sign-in" className="font-semibold text-primary-container hover:underline">

@@ -126,7 +126,7 @@ export const PricingPage: React.FC = () => {
             </div>
 
             <div className="mt-8">
-              <Link to="/sign-up">
+              <Link to={`/sign-up?plan=${p.name.toLowerCase()}`} id={`pricing-cta-${p.name.toLowerCase()}`}>
                 <Button variant={p.ctaVariant} size="md" fullWidth>
                   {p.cta}
                 </Button>

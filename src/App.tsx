@@ -10,6 +10,8 @@ import { AccountantLayout } from './components/layout/AccountantLayout';
 // Public Pages
 import { LandingPage } from './pages/public/LandingPage';
 import { PricingPage } from './pages/public/PricingPage';
+import { TermsPage } from './pages/public/TermsPage';
+import { PrivacyPage } from './pages/public/PrivacyPage';
 import { SignInPage } from './pages/auth/SignInPage';
 import { SignUpPage } from './pages/auth/SignUpPage';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
@@ -98,6 +100,8 @@ export const App: React.FC = () => {
       <Route element={<PublicLayout />}>
         <Route path="/" element={<LandingPage />} />
         <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
         <Route
           path="/sign-in"
           element={

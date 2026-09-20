@@ -40,6 +40,18 @@ export const LandingPage: React.FC = () => {
         {/* Live UI Preview Card */}
         <div className="mt-14 p-2 sm:p-3 bg-white rounded-2xl border border-slate-200 shadow-xl max-w-4xl mx-auto text-left overflow-hidden">
           <div className="bg-slate-50 rounded-xl p-4 sm:p-6 border border-slate-200/80">
+            {/* Sample/Demo Data Notice Banner */}
+            <div
+              id="hero-demo-data-label"
+              className="flex items-center justify-between gap-2 px-3 py-1.5 mb-4 bg-amber-50/90 border border-amber-200/90 rounded-lg text-amber-900 text-xs font-medium tracking-wide"
+            >
+              <div className="flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[16px] text-amber-600">info</span>
+                <span className="font-semibold text-[11px] uppercase tracking-wider">DEMO — SAMPLE WORKFLOW</span>
+              </div>
+              <span className="text-amber-700 text-[11px]">Sample data — for demonstration only</span>
+            </div>
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200">
               <div>
                 <div className="flex items-center gap-2">

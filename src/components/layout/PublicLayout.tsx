@@ -202,7 +202,7 @@ export const PublicLayout: React.FC = () => {
             <span className="font-semibold text-slate-700">DocChase Inc.</span>
             <span>— Stop chasing clients for documents.</span>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-x-6 gap-y-2.5">
             <Link to="/pricing" className="hover:underline">
               Pricing
             </Link>
@@ -216,6 +216,21 @@ export const PublicLayout: React.FC = () => {
             >
               Security
             </Link>
+            <Link to="/terms" className="hover:underline">
+              Terms
+            </Link>
+            <Link to="/privacy" className="hover:underline">
+              Privacy
+            </Link>
+            {/* Informational Security Badge (Non-clickable static badge) */}
+            <div
+              id="footer-encryption-badge"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[11px] font-medium select-none cursor-default"
+              title="Informational: 256-bit document encryption is standard across all DocChase storage and transport."
+            >
+              <span className="material-symbols-outlined text-[13px] text-emerald-600">lock</span>
+              <span>256-bit Document Encryption</span>
+            </div>
           </div>
         </div>
       </footer>
