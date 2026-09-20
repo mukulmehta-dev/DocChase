@@ -140,10 +140,15 @@ export const authService = {
   async signUp(email: string, password: string, fullName: string, firmName: string): Promise<SignUpResult> {
     assertProductionConfigured();
     if (isSupabaseConfigured()) {
+      const origin = typeof window !== 'undefined' && window.location?.origin
+        ? window.location.origin
+        : 'https://doc-chase-omega.vercel.app';
+
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo: `${origin}/auth/callback?verified=true`,
           data: {
             full_name: fullName,
           },
@@ -152,6 +157,14 @@ export const authService = {
 
       if (authError) throw authError;
       if (!authData.user) throw new Error('Failed to create user account.');
+
+      // In Supabase GoTrue with email confirmation enabled, when an existing email
+      // signs up, Supabase returns a user with an empty identities array to prevent enumeration.
+      if (Array.isArray(authData.user.identities) && authData.user.identities.length === 0) {
+        const conflictErr = new Error('An account with this email already exists. Please sign in instead.');
+        (conflictErr as any).code = 'user_already_exists';
+        throw conflictErr;
+      }
 
       const userId = authData.user.id;
 
@@ -431,9 +444,15 @@ export const authService = {
   async resendConfirmationEmail(email: string): Promise<void> {
     assertProductionConfigured();
     if (isSupabaseConfigured()) {
+      const origin = typeof window !== 'undefined' && window.location?.origin
+        ? window.location.origin
+        : 'https://doc-chase-omega.vercel.app';
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email,
+        options: {
+          emailRedirectTo: `${origin}/auth/callback?verified=true`,
+        },
       });
       if (error) throw error;
       return;
@@ -479,6 +498,17 @@ export function getFriendlyAuthErrorMessage(err: any): string {
   const code = (err.code || err.error_code || err.error || '').toString().toLowerCase();
   const msg = (err.message || err.error_description || err.msg || '').toLowerCase();
   const status = Number(err.status);
+
+  if (
+    code === 'user_already_exists' ||
+    code.includes('user_already_exists') ||
+    code.includes('already_registered') ||
+    msg.includes('user already exists') ||
+    msg.includes('already registered') ||
+    msg.includes('already in use')
+  ) {
+    return 'An account with this email already exists. Please sign in instead.';
+  }
 
   if (
     code === 'invalid_credentials' ||

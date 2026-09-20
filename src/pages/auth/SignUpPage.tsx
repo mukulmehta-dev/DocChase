@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
-import { isProduction } from '../../lib/supabase';
-import { getFriendlyAuthErrorMessage } from '../../services/auth';
+import { supabase, isProduction } from '../../lib/supabase';
+import { authService, getFriendlyAuthErrorMessage } from '../../services/auth';
 
 export const SignUpPage: React.FC = () => {
   const [fullName, setFullName] = useState('');
@@ -20,7 +20,11 @@ export const SignUpPage: React.FC = () => {
   const [resendError, setResendError] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
 
-  const { signUp, signInWithOAuth, resendConfirmationEmail } = useAuth();
+  const [isExistingAccount, setIsExistingAccount] = useState(false);
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [isCheckingVerification, setIsCheckingVerification] = useState(false);
+
+  const { user, signUp, signInWithOAuth, resendConfirmationEmail } = useAuth();
   const navigate = useNavigate();
 
   // Cooldown countdown timer for resend email
@@ -32,9 +36,56 @@ export const SignUpPage: React.FC = () => {
     return () => clearTimeout(timer);
   }, [cooldown]);
 
+  // Safe confirmation detection:
+  // Automatically detects when confirmation happens on this device/browser via Supabase's native cross-tab storage listener
+  useEffect(() => {
+    if (!emailConfirmationRequired || isConfirmed) return;
+
+    if (user) {
+      setIsConfirmed(true);
+      const timer = setTimeout(() => navigate('/dashboard'), 1200);
+      return () => clearTimeout(timer);
+    }
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setIsConfirmed(true);
+        setTimeout(() => navigate('/dashboard'), 1200);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [emailConfirmationRequired, isConfirmed, user, navigate]);
+
+  const handleVerifiedCheck = async () => {
+    setIsCheckingVerification(true);
+    try {
+      const session = await authService.getSession();
+      if (session?.user) {
+        setIsConfirmed(true);
+        setTimeout(() => navigate('/dashboard'), 1000);
+        return;
+      }
+      // If confirmed on another device (Device B), Device A does not yet hold a local session.
+      // Safely navigate to /sign-in with email pre-populated so user only enters password once.
+      navigate('/sign-in', {
+        state: {
+          email,
+          verifiedMessage: 'Email verified! Please enter your password to sign in on this device.',
+        },
+      });
+    } finally {
+      setIsCheckingVerification(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setIsExistingAccount(false);
+
     if (!fullName.trim()) {
       setError('Please enter your full name.');
       return;
@@ -55,6 +106,8 @@ export const SignUpPage: React.FC = () => {
     setIsLoading(true);
     try {
       const { needsEmailConfirmation } = await signUp(email.trim(), password, fullName.trim(), firmName.trim());
+      // For security, immediately wipe password from component state
+      setPassword('');
       if (needsEmailConfirmation) {
         setEmailConfirmationRequired(true);
         setCooldown(60); // Start 60s cooldown immediately on initial send
@@ -66,7 +119,15 @@ export const SignUpPage: React.FC = () => {
         console.error('[SignUpPage] Signup error:', err);
       }
       const rawMsg = err?.message?.toLowerCase() || '';
-      if (rawMsg.includes('already registered') || rawMsg.includes('user already exists')) {
+      const code = (err?.code || '').toLowerCase();
+      if (
+        code === 'user_already_exists' ||
+        rawMsg.includes('already registered') ||
+        rawMsg.includes('user already exists') ||
+        rawMsg.includes('already in use') ||
+        rawMsg.includes('already exists')
+      ) {
+        setIsExistingAccount(true);
         setError('An account with this email already exists. Please sign in instead.');
       } else {
         setError(getFriendlyAuthErrorMessage(err));
@@ -78,6 +139,7 @@ export const SignUpPage: React.FC = () => {
 
   const handleOAuth = async (provider: 'google' | 'github') => {
     setError(null);
+    setIsExistingAccount(false);
     setOauthLoading(provider);
 
     try {
@@ -120,8 +182,37 @@ export const SignUpPage: React.FC = () => {
 
   const isFormDisabled = isLoading || oauthLoading !== null;
 
-  // Dedicated email confirmation screen
+  // Dedicated email confirmation screen (Device A)
   if (emailConfirmationRequired) {
+    if (isConfirmed) {
+      return (
+        <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 animate-fade-in">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-lg border border-slate-200 p-8 flex flex-col items-center text-center">
+            <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mb-5 shadow-xs">
+              <span className="material-symbols-outlined text-[36px]">verified</span>
+            </div>
+
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+              Email verified successfully.
+            </h1>
+            <p className="text-sm text-slate-600 max-w-xs mt-2 mb-8 leading-relaxed">
+              Your confirmation was detected! Taking you to your dashboard...
+            </p>
+
+            <Button
+              variant="primary"
+              size="lg"
+              fullWidth
+              onClick={() => navigate('/dashboard')}
+              icon="arrow_forward"
+            >
+              Go to DocChase
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 animate-fade-in">
         <div className="w-full max-w-md flex flex-col items-center">
@@ -141,8 +232,17 @@ export const SignUpPage: React.FC = () => {
               {email}
             </div>
 
+            {/* Waiting for confirmation active pulse indicator */}
+            <div className="flex items-center justify-center gap-2.5 p-3 mb-5 bg-primary-container/5 rounded-lg border border-primary-container/20 text-xs text-primary-container font-medium">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-container opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-container"></span>
+              </span>
+              <span>Waiting for email confirmation...</span>
+            </div>
+
             <p className="text-xs text-slate-600 leading-relaxed mb-6">
-              Please click the link in the confirmation email to activate your account. Once confirmed, return here to sign in.
+              Please click the link in the confirmation email. If opened in this browser, this page will advance automatically.
             </p>
 
             {resendSuccess && (
@@ -161,6 +261,18 @@ export const SignUpPage: React.FC = () => {
 
             <div className="flex flex-col gap-3">
               <Button
+                id="verified-continue-btn"
+                variant="primary"
+                size="md"
+                fullWidth
+                isLoading={isCheckingVerification}
+                onClick={handleVerifiedCheck}
+                icon="task_alt"
+              >
+                I've verified my email
+              </Button>
+
+              <Button
                 id="resend-confirmation-btn"
                 variant="secondary"
                 size="md"
@@ -174,10 +286,10 @@ export const SignUpPage: React.FC = () => {
               </Button>
 
               <Button
-                variant="primary"
+                variant="secondary"
                 size="md"
                 fullWidth
-                onClick={() => navigate('/sign-in')}
+                onClick={() => navigate('/sign-in', { state: { email } })}
                 icon="login"
               >
                 Back to Sign In
@@ -211,9 +323,20 @@ export const SignUpPage: React.FC = () => {
         {/* Card Surface */}
         <div className="w-full bg-white rounded-xl shadow-md border border-slate-200 p-6 flex flex-col">
           {error && (
-            <div className="mb-4 p-2.5 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-800 flex items-center gap-2">
-              <span className="material-symbols-outlined text-[16px] text-rose-600 shrink-0">error</span>
-              <span>{error}</span>
+            <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-800 flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[16px] text-rose-600 shrink-0">error</span>
+                <span>{error}</span>
+              </div>
+              {isExistingAccount && (
+                <Link
+                  to="/sign-in"
+                  className="self-start text-xs font-semibold text-primary-container hover:underline mt-0.5 flex items-center gap-1 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[14px]">login</span>
+                  Sign in to your account
+                </Link>
+              )}
             </div>
           )}
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -7,10 +7,16 @@ import { isProduction } from '../../lib/supabase';
 import { getFriendlyAuthErrorMessage } from '../../services/auth';
 
 export const SignInPage: React.FC = () => {
-  const [email, setEmail] = useState(() => (isProduction() ? '' : 'sarah@acornbookkeeping.com'));
+  const location = useLocation();
+  const locationState = location.state as { email?: string; verifiedMessage?: string } | null;
+  const queryParams = new URLSearchParams(location.search);
+  const initialEmail = locationState?.email || queryParams.get('email') || (isProduction() ? '' : 'sarah@acornbookkeeping.com');
+
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState(() => (isProduction() ? '' : 'VaultSecure2024!'));
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [infoMessage, setInfoMessage] = useState<string | null>(locationState?.verifiedMessage || null);
   const [isLoading, setIsLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<'google' | 'github' | null>(null);
   const [isUnconfirmed, setIsUnconfirmed] = useState(false);
@@ -23,6 +29,7 @@ export const SignInPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
+    setInfoMessage(null);
     setIsUnconfirmed(false);
     setResendStatus(null);
 
@@ -130,6 +137,13 @@ export const SignInPage: React.FC = () => {
 
         {/* Card Surface */}
         <div className="w-full bg-white rounded-xl shadow-md border border-slate-200 p-6 flex flex-col">
+          {infoMessage && !error && (
+            <div className="mb-4 p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800 flex items-center gap-2">
+              <span className="material-symbols-outlined text-[16px] text-emerald-600 shrink-0">check_circle</span>
+              <span>{infoMessage}</span>
+            </div>
+          )}
+
           {error && (
             <div className="mb-4 p-2.5 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-800 flex flex-col gap-2">
               <div className="flex items-center gap-2">
