@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { authService } from '../services/auth';
 import type { AuthUser } from '../services/auth';
 import { workspaceService } from '../services/workspaces';
@@ -50,7 +51,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
+    // Initial session load on mount
     refreshSession();
+
+    // Subscribe to auth state changes so the app reacts to:
+    //  - SIGNED_IN: email confirmation redirect, OAuth callback, session restore
+    //  - TOKEN_REFRESHED: automatic token refresh
+    //  - SIGNED_OUT: token expiry, explicit sign-out from another tab
+    // Without this, the Supabase client may have a valid session (stored in
+    // localStorage, or just parsed from the URL fragment after email confirmation)
+    // but React state still shows user=null — causing all DB requests to run as
+    // the anon role and producing "permission denied for table clients".
+    if (!isSupabaseConfigured()) return;
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, _session) => {
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          // Session is now available — reload full session (profile + workspaces)
+          await refreshSession();
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+          setProfile(null);
+          setCurrentWorkspace(null);
+          setWorkspaces([]);
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const signIn = async (email: string, password?: string) => {
