@@ -128,7 +128,7 @@ export const PublicLayout: React.FC = () => {
 
           <div className="flex items-center gap-2">
             <Link to="/sign-in" className="hidden sm:block">
-              <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white">
+              <Button variant="outline-dark" size="sm">
                 Sign In
               </Button>
             </Link>
@@ -184,7 +184,7 @@ export const PublicLayout: React.FC = () => {
                 <div className="h-px bg-white/[0.06] my-2 mx-1" />
                 <div className="flex gap-2 px-1">
                   <Link to="/sign-in" className="flex-1" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button variant="secondary" size="sm" fullWidth>
+                    <Button variant="secondary-dark" size="sm" fullWidth>
                       Sign In
                     </Button>
                   </Link>

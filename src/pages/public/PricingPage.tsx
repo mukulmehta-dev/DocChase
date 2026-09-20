@@ -19,7 +19,7 @@ export const PricingPage: React.FC = () => {
         'Community Support',
       ],
       cta: 'Get Started Free',
-      ctaVariant: 'secondary' as const,
+      ctaVariant: 'secondary-dark' as const,
       popular: false,
     },
     {
@@ -57,7 +57,7 @@ export const PricingPage: React.FC = () => {
         'Priority Technical Support',
       ],
       cta: 'Start 14-Day Free Trial',
-      ctaVariant: 'secondary' as const,
+      ctaVariant: 'secondary-dark' as const,
       popular: false,
     },
   ];

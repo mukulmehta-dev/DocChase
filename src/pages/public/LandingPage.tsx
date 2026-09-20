@@ -204,7 +204,7 @@ export const LandingPage: React.FC = () => {
                   </Button>
                 </Link>
                 <Link to="/pricing">
-                  <Button variant="ghost" size="lg" icon="sell" className="text-slate-300 hover:text-white">
+                  <Button variant="outline-dark" size="lg" icon="sell">
                     View Pricing
                   </Button>
                 </Link>

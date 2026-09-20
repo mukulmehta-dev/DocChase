@@ -198,7 +198,7 @@ export const SignInPage: React.FC = () => {
               id="google-signin-btn"
               onClick={() => handleOAuth('google')}
               disabled={isFormDisabled}
-              className="w-full h-10 px-4 rounded-lg border border-white/[0.10] bg-white/[0.04] hover:bg-white/[0.08] text-slate-200 text-xs font-semibold flex items-center justify-center gap-2.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full h-10 px-4 rounded-lg border border-white/[0.10] bg-white/[0.04] hover:bg-slate-800/80 hover:border-sky-500/40 hover:text-white hover:shadow-[0_0_16px_rgba(14,165,233,0.12)] text-slate-200 text-xs font-semibold flex items-center justify-center gap-2.5 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50"
             >
               {oauthLoading === 'google' ? (
                 <span className="material-symbols-outlined text-[18px] animate-spin text-slate-400">progress_activity</span>
@@ -218,7 +218,7 @@ export const SignInPage: React.FC = () => {
               id="github-signin-btn"
               onClick={() => handleOAuth('github')}
               disabled={isFormDisabled}
-              className="w-full h-10 px-4 rounded-lg border border-white/[0.10] bg-white/[0.04] hover:bg-white/[0.08] text-slate-200 text-xs font-semibold flex items-center justify-center gap-2.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full h-10 px-4 rounded-lg border border-white/[0.10] bg-white/[0.04] hover:bg-slate-800/80 hover:border-sky-500/40 hover:text-white hover:shadow-[0_0_16px_rgba(14,165,233,0.12)] text-slate-200 text-xs font-semibold flex items-center justify-center gap-2.5 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50"
             >
               {oauthLoading === 'github' ? (
                 <span className="material-symbols-outlined text-[18px] animate-spin text-slate-400">progress_activity</span>

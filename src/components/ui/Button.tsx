@@ -3,7 +3,7 @@ import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'destructive' | 'ghost' | 'outline';
+  variant?: 'primary' | 'secondary' | 'destructive' | 'ghost' | 'outline' | 'secondary-dark' | 'outline-dark';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   icon?: string;
@@ -28,11 +28,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-medium transition-all duration-150 select-none rounded-lg disabled:opacity-50 disabled:pointer-events-none active:scale-[0.99] focus:outline-none';
+      'inline-flex items-center justify-center font-medium transition-all duration-150 select-none rounded-lg disabled:opacity-50 disabled:pointer-events-none active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#070B14]';
 
     const variantStyles = {
       primary:
-        'bg-sky-500 text-white border border-sky-400 shadow-[0_1px_2px_rgba(14,165,233,0.25)] hover:bg-sky-400 hover:border-sky-300 active:bg-sky-600 tactile-rim',
+        'bg-sky-500 text-white border border-sky-400 shadow-[0_1px_2px_rgba(14,165,233,0.25)] hover:bg-sky-400 hover:border-sky-300 hover:shadow-[0_0_20px_rgba(14,165,233,0.30)] active:bg-sky-600 tactile-rim',
       secondary:
         'bg-white text-on-surface border border-slate-200 hover:bg-slate-50 hover:border-slate-300 shadow-sm tactile-rim-white',
       destructive:
@@ -41,6 +41,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         'bg-transparent text-on-surface-variant hover:bg-slate-100 hover:text-on-surface',
       outline:
         'bg-transparent text-sky-600 border border-sky-400 hover:bg-sky-50 active:bg-sky-100',
+      'secondary-dark':
+        'bg-white/[0.05] text-slate-200 border border-white/[0.12] hover:bg-slate-800/80 hover:border-sky-500/50 hover:text-white hover:shadow-[0_0_16px_rgba(14,165,233,0.18)] active:bg-white/[0.08]',
+      'outline-dark':
+        'bg-transparent text-slate-300 border border-white/[0.12] hover:bg-slate-800/70 hover:border-sky-400/60 hover:text-white hover:shadow-[0_0_16px_rgba(14,165,233,0.18)] active:bg-white/[0.05]',
     };
 
     const sizeStyles = {
