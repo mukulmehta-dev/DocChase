@@ -87,7 +87,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* 5-Step Core Workflow */}
-      <section id="features" className="py-16 bg-white border-y border-slate-200">
+      <section id="features" className="py-16 bg-white border-y border-slate-200 scroll-mt-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
@@ -164,6 +164,85 @@ export const LandingPage: React.FC = () => {
                   Get Started Free
                 </Button>
               </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+      {/* Security Architecture Section */}
+      <section id="security" className="py-16 bg-slate-50 border-y border-slate-200 scroll-mt-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-xs font-semibold text-primary-container mb-3">
+              <span className="material-symbols-outlined text-[16px]">shield</span>
+              <span>Architecture & Security</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+              Bank-grade security for accounting paperwork
+            </h2>
+            <p className="text-sm text-slate-500 mt-2">
+              How DocChase protects client documents, firm data, and communication at every layer of the application.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-6 rounded-xl border border-slate-200 bg-white shadow-xs flex flex-col">
+              <div className="w-10 h-10 rounded-lg bg-blue-50 text-primary-container flex items-center justify-center mb-4">
+                <span className="material-symbols-outlined text-[22px]">lock</span>
+              </div>
+              <h3 className="font-semibold text-slate-900 text-base">Encrypted Transport</h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                All traffic between clients, accountants, and servers is strictly transmitted over HTTPS using industry-standard TLS transport encryption.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-xl border border-slate-200 bg-white shadow-xs flex flex-col">
+              <div className="w-10 h-10 rounded-lg bg-blue-50 text-primary-container flex items-center justify-center mb-4">
+                <span className="material-symbols-outlined text-[22px]">dataset</span>
+              </div>
+              <h3 className="font-semibold text-slate-900 text-base">Database Row-Level Security</h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                PostgreSQL Row Level Security (RLS) is enforced directly at the database engine level, guaranteeing users can only read and write data in their workspace.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-xl border border-slate-200 bg-white shadow-xs flex flex-col">
+              <div className="w-10 h-10 rounded-lg bg-blue-50 text-primary-container flex items-center justify-center mb-4">
+                <span className="material-symbols-outlined text-[22px]">domain</span>
+              </div>
+              <h3 className="font-semibold text-slate-900 text-base">Workspace Isolation</h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                Firm workspaces enforce strict multi-tenant boundaries. Team members access only their firm's clients, requests, and document cycles.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-xl border border-slate-200 bg-white shadow-xs flex flex-col">
+              <div className="w-10 h-10 rounded-lg bg-blue-50 text-primary-container flex items-center justify-center mb-4">
+                <span className="material-symbols-outlined text-[22px]">vpn_key</span>
+              </div>
+              <h3 className="font-semibold text-slate-900 text-base">Token-Protected Client Portals</h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                Clients upload via unique, cryptographically random secure link tokens. Clients never need passwords, reducing phishing and credential risk.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-xl border border-slate-200 bg-white shadow-xs flex flex-col">
+              <div className="w-10 h-10 rounded-lg bg-blue-50 text-primary-container flex items-center justify-center mb-4">
+                <span className="material-symbols-outlined text-[22px]">folder_managed</span>
+              </div>
+              <h3 className="font-semibold text-slate-900 text-base">Protected Document Vault</h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                Client uploads are stored in private cloud storage buckets with access restricted exclusively to authorized firm personnel.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-xl border border-slate-200 bg-white shadow-xs flex flex-col">
+              <div className="w-10 h-10 rounded-lg bg-blue-50 text-primary-container flex items-center justify-center mb-4">
+                <span className="material-symbols-outlined text-[22px]">verified_user</span>
+              </div>
+              <h3 className="font-semibold text-slate-900 text-base">Hardened Authentication</h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                Firm accounts are protected by secure credential hashing, automated session token management, and verified email confirmation controls.
+              </p>
             </div>
           </div>
         </div>
