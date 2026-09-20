@@ -476,16 +476,19 @@ export const authService = {
 
 export function getFriendlyAuthErrorMessage(err: any): string {
   if (!err) return 'Unable to sign in right now. Please try again.';
-  const code = (err.code || err.error_code || '').toString().toLowerCase();
-  const msg = (err.message || '').toLowerCase();
+  const code = (err.code || err.error_code || err.error || '').toString().toLowerCase();
+  const msg = (err.message || err.error_description || err.msg || '').toLowerCase();
   const status = Number(err.status);
 
   if (
     code === 'invalid_credentials' ||
     code === 'invalid_grant' ||
+    code.includes('invalid_credentials') ||
+    code.includes('invalid_grant') ||
     msg.includes('invalid login credentials') ||
     msg.includes('invalid email or password') ||
-    msg.includes('invalid_credentials')
+    msg.includes('invalid credentials') ||
+    msg.includes('invalid_grant')
   ) {
     return 'Incorrect email or password.';
   }

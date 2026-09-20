@@ -109,7 +109,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password?: string) => {
     inFlightSignInRef.current = true;
     const seq = ++seqRef.current;
-    setLoading(true);
     try {
       const session = await authService.signIn(email, password);
       if (seq === seqRef.current) {
@@ -118,13 +117,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setProfile(session.profile);
         setCurrentWorkspace(session.currentWorkspace);
         setWorkspaces(session.workspaces);
-        setLoading(false);
       }
     } finally {
       inFlightSignInRef.current = false;
-      if (seq === seqRef.current) {
-        setLoading(false);
-      }
     }
   };
 
@@ -135,7 +130,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     firmName: string
   ): Promise<{ needsEmailConfirmation: boolean }> => {
     const seq = ++seqRef.current;
-    setLoading(true);
     try {
       const result = await authService.signUp(email, password, fullName, firmName);
       if (seq !== seqRef.current) {
@@ -156,9 +150,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       return { needsEmailConfirmation: result.needsEmailConfirmation };
     } finally {
-      if (seq === seqRef.current) {
-        setLoading(false);
-      }
+      // In-flight signUp completion
     }
   };
 

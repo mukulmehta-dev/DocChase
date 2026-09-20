@@ -55,6 +55,7 @@ export const SignInPage: React.FC = () => {
         setError(friendlyMsg);
       }
       // Preserve email, clear password
+      setEmail(submittedEmail);
       setPassword('');
     } finally {
       setIsLoading(false);

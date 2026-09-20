@@ -145,7 +145,7 @@ async function runTestSuite() {
 
   // Item 6: Signup with confirmation enabled -> confirmation screen (needsEmailConfirmation: true)
   console.log('\n--- Auth Test 6: Signup With Email Confirmation Enabled ---');
-  const disposableEmail = `test.signup.${Date.now()}@docchase-test-domain.com`;
+  const disposableEmail = `test.signup.${Date.now()}@gmail.com`;
   let signupResult: any = null;
   let signupRateLimited = false;
   try {
