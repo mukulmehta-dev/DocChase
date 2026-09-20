@@ -1,5 +1,5 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { isProduction, isSupabaseConfigured, CONFIG_ERROR_MESSAGE } from './lib/supabase';
 
@@ -53,6 +53,46 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
+// Guard for pages accessible only when unauthenticated (e.g. Sign In / Sign Up)
+const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return null;
+  }
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+// Auth Callback Handler for Email Confirmation Links
+const AuthCallback: React.FC = () => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading) {
+      if (user) {
+        navigate('/dashboard', { replace: true });
+      } else {
+        navigate('/sign-in', { replace: true });
+      }
+    }
+  }, [user, loading, navigate]);
+
+  return (
+    <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center p-4">
+      <span className="material-symbols-outlined text-[36px] text-primary-container animate-spin mb-3">
+        progress_activity
+      </span>
+      <p className="text-xs text-slate-500 font-medium">Verifying account confirmation...</p>
+    </div>
+  );
+};
+
 export const App: React.FC = () => {
   // Production configuration hard failure guard
   if (isProduction() && !isSupabaseConfigured()) {
@@ -74,12 +114,29 @@ export const App: React.FC = () => {
 
   return (
     <Routes>
+      {/* Auth Callback Route */}
+      <Route path="/auth/callback" element={<AuthCallback />} />
+
       {/* Public Pages */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<LandingPage />} />
         <Route path="/pricing" element={<PricingPage />} />
-        <Route path="/sign-in" element={<SignInPage />} />
-        <Route path="/sign-up" element={<SignUpPage />} />
+        <Route
+          path="/sign-in"
+          element={
+            <PublicOnlyRoute>
+              <SignInPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/sign-up"
+          element={
+            <PublicOnlyRoute>
+              <SignUpPage />
+            </PublicOnlyRoute>
+          }
+        />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       </Route>
 

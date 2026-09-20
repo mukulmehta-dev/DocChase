@@ -55,6 +55,13 @@ export const clientService = {
     },
     userId?: string
   ): Promise<Client> {
+    if (isSupabaseConfigured()) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Not authenticated. Please sign in to create clients.');
+      }
+    }
+
     // 1. Enforce Plan Limits
     const existing = await this.getClients(workspaceId);
     const limitCheck = billingService.checkClientCreationAllowed(plan, existing.length);

@@ -18,6 +18,12 @@ export interface AuthSession {
   workspaces: Workspace[];
 }
 
+export interface SignUpResult {
+  session: AuthSession | null;
+  needsEmailConfirmation: boolean;
+  user: { id: string; email: string } | null;
+}
+
 // Helper for local mock storage in dev mode
 const getDevStorage = <T>(key: string, defaultVal: T): T => {
   if (isProduction()) return defaultVal;
@@ -39,7 +45,7 @@ const setDevStorage = <T>(key: string, val: T): void => {
 };
 
 export const authService = {
-  async signUp(email: string, password: string, fullName: string, firmName: string): Promise<AuthSession> {
+  async signUp(email: string, password: string, fullName: string, firmName: string): Promise<SignUpResult> {
     assertProductionConfigured();
     if (isSupabaseConfigured()) {
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -92,34 +98,41 @@ export const authService = {
         updated_at: wsData.updated_at,
       };
 
-      // 2. Initialize starter template if we have a session (email confirmation disabled).
-      //    When email confirmation is enabled, authData.session is null and the client
-      //    runs as anon — template creation is skipped here and can be done on first login.
-      if (authData.session) {
-        const { data: template } = await supabase
-          .from('templates')
-          .insert({
-            workspace_id: workspace.id,
-            name: 'Monthly Bookkeeping',
-            description: 'Standard monthly document collection checklist',
-            frequency: 'monthly',
-            is_active: true,
-          })
-          .select()
-          .single();
-
-        if (template) {
-          await supabase.from('template_items').insert([
-            { template_id: template.id, name: 'Bank Statement', description: 'Checking/Savings accounts for the period', required: true, sort_order: 1 },
-            { template_id: template.id, name: 'Credit Card Statement', description: 'Monthly business credit card statements', required: true, sort_order: 2 },
-            { template_id: template.id, name: 'Sales Ledger / Revenue Summary', description: 'Point of sale or invoicing summary', required: true, sort_order: 3 },
-            { template_id: template.id, name: 'Expense Receipts (> $75)', description: 'Major business expense receipts and bills', required: false, sort_order: 4 },
-            { template_id: template.id, name: 'Payroll Summary', description: 'Monthly payroll tax filings or register', required: true, sort_order: 5 },
-          ]);
-        }
+      // 2. In production with email confirmation enabled, authData.session is null.
+      //    The workspace and profile trigger were already executed server-side.
+      //    DO NOT fabricate an in-memory session (no JWT exists yet).
+      if (!authData.session) {
+        return {
+          session: null,
+          needsEmailConfirmation: true,
+          user: { id: userId, email },
+        };
       }
 
-      // 5. Read back the profile created by the trigger (SELECT policy: auth.uid() = id)
+      // If a real session exists immediately (e.g. email confirmation disabled):
+      const { data: template } = await supabase
+        .from('templates')
+        .insert({
+          workspace_id: workspace.id,
+          name: 'Monthly Bookkeeping',
+          description: 'Standard monthly document collection checklist',
+          frequency: 'monthly',
+          is_active: true,
+        })
+        .select()
+        .single();
+
+      if (template) {
+        await supabase.from('template_items').insert([
+          { template_id: template.id, name: 'Bank Statement', description: 'Checking/Savings accounts for the period', required: true, sort_order: 1 },
+          { template_id: template.id, name: 'Credit Card Statement', description: 'Monthly business credit card statements', required: true, sort_order: 2 },
+          { template_id: template.id, name: 'Sales Ledger / Revenue Summary', description: 'Point of sale or invoicing summary', required: true, sort_order: 3 },
+          { template_id: template.id, name: 'Expense Receipts (> $75)', description: 'Major business expense receipts and bills', required: false, sort_order: 4 },
+          { template_id: template.id, name: 'Payroll Summary', description: 'Monthly payroll tax filings or register', required: true, sort_order: 5 },
+        ]);
+      }
+
+      // Read back the profile created by the trigger
       const { data: profile } = await supabase
         .from('profiles')
         .select('*')
@@ -136,10 +149,14 @@ export const authService = {
       };
 
       return {
+        session: {
+          user: { id: userId, email },
+          profile: resolvedProfile,
+          currentWorkspace: workspace,
+          workspaces: [workspace],
+        },
+        needsEmailConfirmation: false,
         user: { id: userId, email },
-        profile: resolvedProfile,
-        currentWorkspace: workspace,
-        workspaces: [workspace],
       };
     }
 
@@ -187,7 +204,11 @@ export const authService = {
     };
 
     setDevStorage(DEV_AUTH_KEY, session);
-    return session;
+    return {
+      session,
+      needsEmailConfirmation: false,
+      user: { id: userId, email },
+    };
   },
 
   async signIn(email: string, password?: string): Promise<AuthSession> {
@@ -221,20 +242,22 @@ export const authService = {
         .filter(Boolean);
 
       if (workspaces.length === 0) {
-        // Create a default workspace if none exists yet
-        const { data: newWs } = await supabase
-          .from('workspaces')
-          .insert({ name: 'My Accounting Firm', plan: 'free' })
-          .select()
-          .single();
+        // Create a default workspace if none exists yet via SECURITY DEFINER RPC
+        const { data: wsData } = await (supabase as any).rpc('create_workspace_for_user', {
+          p_user_id: userId,
+          p_workspace_name: 'My Accounting Firm',
+        });
 
-        if (newWs) {
-          await supabase.from('workspace_members').insert({
-            workspace_id: newWs.id,
-            user_id: userId,
-            role: 'owner',
+        if (wsData) {
+          workspaces.push({
+            id: wsData.id,
+            name: wsData.name,
+            slug: wsData.slug,
+            logo_url: wsData.logo_url,
+            plan: wsData.plan,
+            created_at: wsData.created_at,
+            updated_at: wsData.updated_at,
           });
-          workspaces.push(newWs);
         }
       }
 
@@ -304,7 +327,9 @@ export const authService = {
     if (isSupabaseConfigured()) {
       await supabase.auth.signOut();
     }
-    localStorage.removeItem(DEV_AUTH_KEY);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem(DEV_AUTH_KEY);
+    }
   },
 
   async getSession(): Promise<AuthSession | null> {
@@ -332,7 +357,27 @@ export const authService = {
         .map((m: any) => m.workspaces)
         .filter(Boolean);
 
-      if (!workspaces.length) return null;
+      if (!workspaces.length) {
+        // Self-heal workspace via SECURITY DEFINER RPC
+        const { data: wsData } = await (supabase as any).rpc('create_workspace_for_user', {
+          p_user_id: userId,
+          p_workspace_name: 'My Accounting Firm',
+        });
+
+        if (wsData) {
+          workspaces.push({
+            id: wsData.id,
+            name: wsData.name,
+            slug: wsData.slug,
+            logo_url: wsData.logo_url,
+            plan: wsData.plan,
+            created_at: wsData.created_at,
+            updated_at: wsData.updated_at,
+          });
+        } else {
+          return null;
+        }
+      }
 
       return {
         user: { id: userId, email: session.user.email || '' },
@@ -354,6 +399,18 @@ export const authService = {
     }
 
     return getDevStorage<AuthSession | null>(DEV_AUTH_KEY, null);
+  },
+
+  async resendConfirmationEmail(email: string): Promise<void> {
+    assertProductionConfigured();
+    if (isSupabaseConfigured()) {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+      });
+      if (error) throw error;
+      return;
+    }
   },
 
   async resetPassword(email: string): Promise<void> {

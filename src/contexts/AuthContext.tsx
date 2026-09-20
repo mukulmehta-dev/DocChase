@@ -12,11 +12,12 @@ interface AuthContextType {
   workspaces: Workspace[];
   loading: boolean;
   signIn: (email: string, password?: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string, firmName: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string, firmName: string) => Promise<{ needsEmailConfirmation: boolean }>;
   signOut: () => Promise<void>;
   switchWorkspace: (workspaceId: string) => Promise<void>;
   createWorkspace: (name: string) => Promise<Workspace>;
   refreshSession: () => Promise<void>;
+  resendConfirmationEmail: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -95,17 +96,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signUp = async (email: string, password: string, fullName: string, firmName: string) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    fullName: string,
+    firmName: string
+  ): Promise<{ needsEmailConfirmation: boolean }> => {
     setLoading(true);
     try {
-      const session = await authService.signUp(email, password, fullName, firmName);
-      setUser(session.user);
-      setProfile(session.profile);
-      setCurrentWorkspace(session.currentWorkspace);
-      setWorkspaces(session.workspaces);
+      const result = await authService.signUp(email, password, fullName, firmName);
+      if (result.session && !result.needsEmailConfirmation) {
+        setUser(result.session.user);
+        setProfile(result.session.profile);
+        setCurrentWorkspace(result.session.currentWorkspace);
+        setWorkspaces(result.session.workspaces);
+      } else {
+        // Email confirmation is required — user is NOT authenticated yet
+        setUser(null);
+        setProfile(null);
+        setCurrentWorkspace(null);
+        setWorkspaces([]);
+      }
+      return { needsEmailConfirmation: result.needsEmailConfirmation };
     } finally {
       setLoading(false);
     }
+  };
+
+  const resendConfirmationEmail = async (email: string) => {
+    await authService.resendConfirmationEmail(email);
   };
 
   const signOut = async () => {
@@ -150,6 +169,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         switchWorkspace,
         createWorkspace,
         refreshSession,
+        resendConfirmationEmail,
       }}
     >
       {children}

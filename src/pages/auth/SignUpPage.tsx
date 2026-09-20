@@ -11,8 +11,12 @@ export const SignUpPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [emailConfirmationRequired, setEmailConfirmationRequired] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
+  const [resendError, setResendError] = useState<string | null>(null);
 
-  const { signUp } = useAuth();
+  const { signUp, resendConfirmationEmail } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,14 +33,103 @@ export const SignUpPage: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await signUp(email, password, fullName, firmName);
-      navigate('/dashboard');
+      const { needsEmailConfirmation } = await signUp(email, password, fullName, firmName);
+      if (needsEmailConfirmation) {
+        setEmailConfirmationRequired(true);
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err: any) {
       setError(err?.message || 'Failed to create account. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleResend = async () => {
+    setIsResending(true);
+    setResendError(null);
+    setResendSuccess(false);
+    try {
+      await resendConfirmationEmail(email);
+      setResendSuccess(true);
+    } catch (err: any) {
+      setResendError(err?.message || 'Failed to resend confirmation email.');
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  if (emailConfirmationRequired) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 animate-fade-in">
+        <div className="w-full max-w-md flex flex-col items-center">
+          <div className="w-14 h-14 rounded-xl bg-emerald-500 flex items-center justify-center shadow-md mb-4 text-white">
+            <span className="material-symbols-outlined text-[32px]">mark_email_read</span>
+          </div>
+
+          <h1 className="font-semibold text-xl text-slate-900 text-center tracking-tight">
+            Check your email
+          </h1>
+          <p className="text-xs text-slate-500 text-center max-w-sm mt-1 mb-6">
+            We've sent a verification link to activate your firm workspace.
+          </p>
+
+          <div className="w-full bg-white rounded-xl shadow-md border border-slate-200 p-6 flex flex-col text-center">
+            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-700 font-medium mb-4 break-all">
+              {email}
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed mb-6">
+              Please click the link in the confirmation email to verify your address. Once verified, you can sign in to access your workspace.
+            </p>
+
+            {resendSuccess && (
+              <div className="mb-4 p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800 flex items-center justify-center gap-2">
+                <span className="material-symbols-outlined text-[16px] text-emerald-600">check_circle</span>
+                <span>Verification email resent! Please check your inbox.</span>
+              </div>
+            )}
+
+            {resendError && (
+              <div className="mb-4 p-2.5 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-800 flex items-center justify-center gap-2">
+                <span className="material-symbols-outlined text-[16px] text-rose-600">error</span>
+                <span>{resendError}</span>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-3">
+              <Button
+                variant="primary"
+                size="md"
+                fullWidth
+                onClick={() => navigate('/sign-in')}
+                icon="login"
+              >
+                Go to Sign In
+              </Button>
+
+              <Button
+                variant="secondary"
+                size="sm"
+                fullWidth
+                disabled={isResending}
+                isLoading={isResending}
+                onClick={handleResend}
+                icon="forward_to_inbox"
+              >
+                Resend Confirmation Email
+              </Button>
+            </div>
+          </div>
+
+          <div className="mt-6 text-center text-xs text-slate-500">
+            Didn't receive the email? Check your spam or junk folder.
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">

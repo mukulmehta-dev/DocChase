@@ -4,27 +4,54 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 
+import { isProduction } from '../../lib/supabase';
+
 export const SignInPage: React.FC = () => {
-  const [email, setEmail] = useState('sarah@acornbookkeeping.com');
-  const [password, setPassword] = useState('VaultSecure2024!');
+  const [email, setEmail] = useState(() => (isProduction() ? '' : 'sarah@acornbookkeeping.com'));
+  const [password, setPassword] = useState(() => (isProduction() ? '' : 'VaultSecure2024!'));
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUnconfirmed, setIsUnconfirmed] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendStatus, setResendStatus] = useState<{ success: boolean; message: string } | null>(null);
 
-  const { signIn } = useAuth();
+  const { signIn, resendConfirmationEmail } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setIsUnconfirmed(false);
+    setResendStatus(null);
     setIsLoading(true);
     try {
       await signIn(email, password);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err?.message || 'Invalid email or password. Please try again.');
+      const msg = err?.message || 'Invalid email or password. Please try again.';
+      if (msg.toLowerCase().includes('email not confirmed')) {
+        setIsUnconfirmed(true);
+        setError('Your email address has not been confirmed yet. Please check your inbox for the confirmation link.');
+      } else {
+        setError(msg);
+      }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!email) return;
+    setIsResending(true);
+    setResendStatus(null);
+    try {
+      await resendConfirmationEmail(email);
+      setResendStatus({ success: true, message: 'Confirmation email resent! Please check your inbox.' });
+    } catch (err: any) {
+      setResendStatus({ success: false, message: err?.message || 'Failed to resend confirmation email.' });
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -52,9 +79,37 @@ export const SignInPage: React.FC = () => {
         {/* Card Surface */}
         <div className="w-full bg-white rounded-xl shadow-md border border-slate-200 p-6 flex flex-col">
           {error && (
-            <div className="mb-4 p-2.5 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-800 flex items-center gap-2">
-              <span className="material-symbols-outlined text-[16px] text-rose-600">error</span>
-              <span>{error}</span>
+            <div className="mb-4 p-2.5 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-800 flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[16px] text-rose-600">error</span>
+                <span>{error}</span>
+              </div>
+              {isUnconfirmed && (
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={isResending}
+                  className="self-start text-xs font-semibold text-primary-container hover:underline disabled:opacity-50 mt-1 flex items-center gap-1"
+                >
+                  <span className="material-symbols-outlined text-[14px]">forward_to_inbox</span>
+                  {isResending ? 'Sending...' : 'Resend confirmation email'}
+                </button>
+              )}
+            </div>
+          )}
+
+          {resendStatus && (
+            <div
+              className={`mb-4 p-2.5 rounded-lg text-xs flex items-center gap-2 ${
+                resendStatus.success
+                  ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
+                  : 'bg-rose-50 border border-rose-200 text-rose-800'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[16px]">
+                {resendStatus.success ? 'check_circle' : 'error'}
+              </span>
+              <span>{resendStatus.message}</span>
             </div>
           )}
 
