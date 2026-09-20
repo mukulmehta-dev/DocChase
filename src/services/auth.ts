@@ -14,7 +14,7 @@ export interface AuthUser {
 export interface AuthSession {
   user: AuthUser;
   profile: Profile;
-  currentWorkspace: Workspace;
+  currentWorkspace: Workspace | null;
   workspaces: Workspace[];
 }
 
@@ -44,6 +44,98 @@ const setDevStorage = <T>(key: string, val: T): void => {
   }
 };
 
+/**
+ * Safely loads workspaces for an authenticated user.
+ * - Explicitly checks for errors and never treats query errors as "zero workspaces"
+ * - Safe retry on transient error
+ * - Direct lookup fallback if relational join workspaces(*) is null
+ * - Restricts create_workspace_for_user RPC strictly to membersError === null && members.length === 0
+ * - Never throws or returns null: preserves authenticated session
+ */
+async function loadUserWorkspaces(userId: string): Promise<Workspace[]> {
+  let { data: members, error: membersError } = await supabase
+    .from('workspace_members')
+    .select('workspace_id, role, workspaces(*)')
+    .eq('user_id', userId);
+
+  // Safe retry on transient failure
+  if (membersError) {
+    console.warn('[authService] Error fetching workspace_members, attempting retry:', membersError.message);
+    const retry = await supabase
+      .from('workspace_members')
+      .select('workspace_id, role, workspaces(*)')
+      .eq('user_id', userId);
+    members = retry.data;
+    membersError = retry.error;
+  }
+
+  // If query failed with an error, do NOT call create_workspace_for_user and do NOT assume 0 workspaces
+  if (membersError) {
+    console.error('[authService] Failed to load workspace_members for user:', userId, membersError);
+    return [];
+  }
+
+  if (!members) {
+    return [];
+  }
+
+  // Extract workspaces from relational join
+  let workspaces: Workspace[] = members
+    .map((m: any) => m.workspaces)
+    .filter(Boolean);
+
+  // Handle relational join failure safely:
+  // If membership rows exist but nested workspaces(*) join returned null/empty
+  if (members.length > 0 && workspaces.length === 0) {
+    const wsIds = members.map((m: any) => m.workspace_id).filter(Boolean);
+    if (wsIds.length > 0) {
+      console.warn('[authService] Membership exists but nested workspaces join was empty. Performing direct lookup for IDs:', wsIds);
+      const { data: directWorkspaces, error: directWsError } = await supabase
+        .from('workspaces')
+        .select('*')
+        .in('id', wsIds);
+
+      if (!directWsError && directWorkspaces && directWorkspaces.length > 0) {
+        workspaces = directWorkspaces as Workspace[];
+      } else if (directWsError) {
+        console.error('[authService] Direct workspace lookup failed:', directWsError);
+      }
+    }
+  }
+
+  // Restrict automatic workspace creation:
+  // create_workspace_for_user may ONLY be called when:
+  // - membersError is strictly null
+  // - members query genuinely returned 0 rows (members.length === 0)
+  if (membersError === null && members.length === 0) {
+    console.log('[authService] Confirmed user has 0 workspaces. Provisioning default workspace via RPC...');
+    try {
+      const { data: wsData, error: rpcError } = await (supabase as any).rpc('create_workspace_for_user', {
+        p_user_id: userId,
+        p_workspace_name: 'My Accounting Firm',
+      });
+
+      if (rpcError) {
+        console.error('[authService] create_workspace_for_user RPC error:', rpcError);
+      } else if (wsData) {
+        workspaces.push({
+          id: wsData.id,
+          name: wsData.name,
+          slug: wsData.slug,
+          logo_url: wsData.logo_url,
+          plan: wsData.plan,
+          created_at: wsData.created_at,
+          updated_at: wsData.updated_at,
+        });
+      }
+    } catch (rpcErr) {
+      console.error('[authService] Failed to execute create_workspace_for_user RPC:', rpcErr);
+    }
+  }
+
+  return workspaces;
+}
+
 export const authService = {
   async signUp(email: string, password: string, fullName: string, firmName: string): Promise<SignUpResult> {
     assertProductionConfigured();
@@ -63,21 +155,22 @@ export const authService = {
 
       const userId = authData.user.id;
 
-      // NOTE: Profile row is created automatically by the handle_new_user trigger
-      // (migration 015) which fires AFTER INSERT on auth.users with SECURITY DEFINER.
-      // No INSERT on profiles is needed or performed here.
+      // In production with email confirmation enabled, authData.session is null.
+      // Do NOT execute client-side authenticated RPCs as anon.
+      // When the user confirms email and signs in, workspace provisioning occurs safely.
+      if (!authData.session) {
+        return {
+          session: null,
+          needsEmailConfirmation: true,
+          user: { id: userId, email },
+        };
+      }
 
-      // 1. Create workspace + owner membership + default subscription atomically via
-      //    SECURITY DEFINER RPC. This bypasses the email-confirmation session gap:
-      //    signUp() returns authData.user but authData.session is NULL when email
-      //    confirmation is enabled in production. Direct client-side INSERTs would
-      //    run as anon (no JWT) and fail the "TO authenticated" workspace RLS policy.
-      //    The RPC validates p_user_id against auth.users server-side.
+      // If a real session exists immediately (e.g. email confirmation disabled):
       type WorkspaceRpcResult = {
         id: string; name: string; slug: string | null; logo_url: string | null;
         plan: 'free' | 'starter' | 'pro'; created_at: string; updated_at: string;
       };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const rpcCall = (supabase as any).rpc('create_workspace_for_user', {
         p_user_id: userId,
         p_workspace_name: firmName,
@@ -87,7 +180,6 @@ export const authService = {
       if (wsError) throw wsError;
       if (!wsData) throw new Error('Failed to create workspace');
 
-      // Normalise RPC result into the Workspace shape expected downstream
       const workspace = {
         id:         wsData.id,
         name:       wsData.name,
@@ -98,18 +190,6 @@ export const authService = {
         updated_at: wsData.updated_at,
       };
 
-      // 2. In production with email confirmation enabled, authData.session is null.
-      //    The workspace and profile trigger were already executed server-side.
-      //    DO NOT fabricate an in-memory session (no JWT exists yet).
-      if (!authData.session) {
-        return {
-          session: null,
-          needsEmailConfirmation: true,
-          user: { id: userId, email },
-        };
-      }
-
-      // If a real session exists immediately (e.g. email confirmation disabled):
       const { data: template } = await supabase
         .from('templates')
         .insert({
@@ -231,37 +311,9 @@ export const authService = {
         .eq('id', userId)
         .single();
 
-      // Fetch user workspaces
-      const { data: members } = await supabase
-        .from('workspace_members')
-        .select('workspace_id, role, workspaces(*)')
-        .eq('user_id', userId);
-
-      const workspaces: Workspace[] = (members || [])
-        .map((m: any) => m.workspaces)
-        .filter(Boolean);
-
-      if (workspaces.length === 0) {
-        // Create a default workspace if none exists yet via SECURITY DEFINER RPC
-        const { data: wsData } = await (supabase as any).rpc('create_workspace_for_user', {
-          p_user_id: userId,
-          p_workspace_name: 'My Accounting Firm',
-        });
-
-        if (wsData) {
-          workspaces.push({
-            id: wsData.id,
-            name: wsData.name,
-            slug: wsData.slug,
-            logo_url: wsData.logo_url,
-            plan: wsData.plan,
-            created_at: wsData.created_at,
-            updated_at: wsData.updated_at,
-          });
-        }
-      }
-
-      const activeWorkspace = workspaces[0];
+      // Fetch user workspaces with safe error handling and direct lookup fallback
+      const workspaces = await loadUserWorkspaces(userId);
+      const activeWorkspace = workspaces.length > 0 ? workspaces[0] : null;
 
       return {
         user: { id: userId, email: data.user.email || email },
@@ -348,37 +400,12 @@ export const authService = {
         .eq('id', userId)
         .single();
 
-      const { data: members } = await supabase
-        .from('workspace_members')
-        .select('workspace_id, role, workspaces(*)')
-        .eq('user_id', userId);
+      // Fetch user workspaces with safe error handling and direct lookup fallback
+      const workspaces = await loadUserWorkspaces(userId);
+      const activeWorkspace = workspaces.length > 0 ? workspaces[0] : null;
 
-      const workspaces: Workspace[] = (members || [])
-        .map((m: any) => m.workspaces)
-        .filter(Boolean);
-
-      if (!workspaces.length) {
-        // Self-heal workspace via SECURITY DEFINER RPC
-        const { data: wsData } = await (supabase as any).rpc('create_workspace_for_user', {
-          p_user_id: userId,
-          p_workspace_name: 'My Accounting Firm',
-        });
-
-        if (wsData) {
-          workspaces.push({
-            id: wsData.id,
-            name: wsData.name,
-            slug: wsData.slug,
-            logo_url: wsData.logo_url,
-            plan: wsData.plan,
-            created_at: wsData.created_at,
-            updated_at: wsData.updated_at,
-          });
-        } else {
-          return null;
-        }
-      }
-
+      // An authenticated user MUST remain authenticated even if workspaces is temporarily empty.
+      // Never return null when session.user is valid!
       return {
         user: { id: userId, email: session.user.email || '' },
         profile: profile || {
@@ -389,7 +416,7 @@ export const authService = {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
-        currentWorkspace: workspaces[0],
+        currentWorkspace: activeWorkspace,
         workspaces,
       };
     }
