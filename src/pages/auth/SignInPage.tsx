@@ -19,14 +19,24 @@ export const SignInPage: React.FC = () => {
   const { signIn, resendConfirmationEmail } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setIsUnconfirmed(false);
     setResendStatus(null);
+
+    const formData = new FormData(e.currentTarget);
+    const submittedEmail = ((formData.get('email') as string) || email).trim();
+    const submittedPassword = (formData.get('password') as string) || password;
+
+    if (!submittedEmail || !submittedPassword) {
+      setError('Please enter both email and password.');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await signIn(email, password);
+      await signIn(submittedEmail, submittedPassword);
       navigate('/dashboard');
     } catch (err: any) {
       const msg = err?.message || 'Invalid email or password. Please try again.';
@@ -115,8 +125,11 @@ export const SignInPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <Input
+              id="work-email"
+              name="email"
               label="Work Email"
               type="email"
+              autoComplete="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -125,8 +138,11 @@ export const SignInPage: React.FC = () => {
             />
 
             <Input
+              id="work-password"
+              name="password"
               label="Password"
               type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}

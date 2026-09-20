@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { authService } from '../services/auth';
 import type { AuthUser } from '../services/auth';
@@ -29,10 +29,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Concurrency & race guards
+  const inFlightSignInRef = useRef(false);
+  const seqRef = useRef(0);
+
   const refreshSession = async () => {
+    // If an explicit signIn is already running, let it complete authoritatively
+    if (inFlightSignInRef.current) return;
+
+    const seq = ++seqRef.current;
+    setLoading(true);
     try {
-      setLoading(true);
       const session = await authService.getSession();
+      if (seq !== seqRef.current) return; // Stale operation superseded
+
       if (session) {
         setUser(session.user);
         setProfile(session.profile);
@@ -46,8 +56,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (err) {
       console.error('Error refreshing session', err);
+      if (seq === seqRef.current) {
+        setUser(null);
+        setProfile(null);
+        setCurrentWorkspace(null);
+        setWorkspaces([]);
+      }
     } finally {
-      setLoading(false);
+      if (seq === seqRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -55,26 +73,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Initial session load on mount
     refreshSession();
 
-    // Subscribe to auth state changes so the app reacts to:
-    //  - SIGNED_IN: email confirmation redirect, OAuth callback, session restore
-    //  - TOKEN_REFRESHED: automatic token refresh
-    //  - SIGNED_OUT: token expiry, explicit sign-out from another tab
-    // Without this, the Supabase client may have a valid session (stored in
-    // localStorage, or just parsed from the URL fragment after email confirmation)
-    // but React state still shows user=null — causing all DB requests to run as
-    // the anon role and producing "permission denied for table clients".
     if (!isSupabaseConfigured()) return;
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, _session) => {
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          // Session is now available — reload full session (profile + workspaces)
+        if (event === 'SIGNED_IN') {
+          // If an explicit signIn() is currently in-flight, it will commit state authoritatively.
+          // Do NOT fire a concurrent refreshSession that races and overwrites state.
+          if (inFlightSignInRef.current) {
+            return;
+          }
           await refreshSession();
+        } else if (event === 'TOKEN_REFRESHED') {
+          // Token refreshed in background: do not wipe workspace or cause loading flash
+          // Session is still active. Only reload if user was unexpectedly missing.
+          if (!user && !inFlightSignInRef.current) {
+            await refreshSession();
+          }
         } else if (event === 'SIGNED_OUT') {
+          seqRef.current += 1;
           setUser(null);
           setProfile(null);
           setCurrentWorkspace(null);
           setWorkspaces([]);
+          setLoading(false);
         }
       }
     );
@@ -84,15 +106,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signIn = async (email: string, password?: string) => {
+    inFlightSignInRef.current = true;
+    const seq = ++seqRef.current;
     setLoading(true);
     try {
       const session = await authService.signIn(email, password);
-      setUser(session.user);
-      setProfile(session.profile);
-      setCurrentWorkspace(session.currentWorkspace);
-      setWorkspaces(session.workspaces);
+      if (seq === seqRef.current) {
+        // Atomic batch update for all auth parameters
+        setUser(session.user);
+        setProfile(session.profile);
+        setCurrentWorkspace(session.currentWorkspace);
+        setWorkspaces(session.workspaces);
+        setLoading(false);
+      }
     } finally {
-      setLoading(false);
+      inFlightSignInRef.current = false;
+      if (seq === seqRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -102,9 +133,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     fullName: string,
     firmName: string
   ): Promise<{ needsEmailConfirmation: boolean }> => {
+    const seq = ++seqRef.current;
     setLoading(true);
     try {
       const result = await authService.signUp(email, password, fullName, firmName);
+      if (seq !== seqRef.current) {
+        return { needsEmailConfirmation: result.needsEmailConfirmation };
+      }
+
       if (result.session && !result.needsEmailConfirmation) {
         setUser(result.session.user);
         setProfile(result.session.profile);
@@ -119,7 +155,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       return { needsEmailConfirmation: result.needsEmailConfirmation };
     } finally {
-      setLoading(false);
+      if (seq === seqRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -128,15 +166,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
+    const seq = ++seqRef.current;
     setLoading(true);
     try {
       await authService.signOut();
-      setUser(null);
-      setProfile(null);
-      setCurrentWorkspace(null);
-      setWorkspaces([]);
+      if (seq === seqRef.current) {
+        setUser(null);
+        setProfile(null);
+        setCurrentWorkspace(null);
+        setWorkspaces([]);
+      }
     } finally {
-      setLoading(false);
+      if (seq === seqRef.current) {
+        setLoading(false);
+      }
     }
   };
 
