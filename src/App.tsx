@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { isProduction, isSupabaseConfigured, CONFIG_ERROR_MESSAGE } from './lib/supabase';
 
 // Layouts
@@ -92,63 +93,65 @@ export const App: React.FC = () => {
   }
 
   return (
-    <Routes>
-      {/* Auth Callback Route */}
-      <Route path="/auth/callback" element={<AuthCallbackPage />} />
+    <ThemeProvider>
+      <Routes>
+        {/* Auth Callback Route */}
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
-      {/* Public Pages */}
-      <Route element={<PublicLayout />}>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/pricing" element={<PricingPage />} />
-        <Route path="/terms" element={<TermsPage />} />
-        <Route path="/privacy" element={<PrivacyPage />} />
+        {/* Public Pages */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route
+            path="/sign-in"
+            element={
+              <PublicOnlyRoute>
+                <SignInPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/sign-up"
+            element={
+              <PublicOnlyRoute>
+                <SignUpPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        </Route>
+
+        {/* Protected Accountant Portal */}
         <Route
-          path="/sign-in"
           element={
-            <PublicOnlyRoute>
-              <SignInPage />
-            </PublicOnlyRoute>
+            <ProtectedRoute>
+              <AccountantLayout />
+            </ProtectedRoute>
           }
-        />
-        <Route
-          path="/sign-up"
-          element={
-            <PublicOnlyRoute>
-              <SignUpPage />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-      </Route>
+        >
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/clients" element={<ClientsPage />} />
+          <Route path="/clients/:id" element={<ClientDetailPage />} />
+          <Route path="/documents" element={<DocumentsPage />} />
+          <Route path="/documents/:id" element={<DocumentReviewPage />} />
+          <Route path="/templates" element={<TemplatesPage />} />
+          <Route path="/requests" element={<RequestsPage />} />
+          <Route path="/requests/new" element={<CreateRequestPage />} />
+          <Route path="/requests/:id" element={<RequestDetailPage />} />
+          <Route path="/requests/:id/review" element={<DocumentReviewPage />} />
+          <Route path="/reminders" element={<RemindersPage />} />
+          <Route path="/billing" element={<BillingPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+        </Route>
 
-      {/* Protected Accountant Portal */}
-      <Route
-        element={
-          <ProtectedRoute>
-            <AccountantLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/clients" element={<ClientsPage />} />
-        <Route path="/clients/:id" element={<ClientDetailPage />} />
-        <Route path="/documents" element={<DocumentsPage />} />
-        <Route path="/documents/:id" element={<DocumentReviewPage />} />
-        <Route path="/templates" element={<TemplatesPage />} />
-        <Route path="/requests" element={<RequestsPage />} />
-        <Route path="/requests/new" element={<CreateRequestPage />} />
-        <Route path="/requests/:id" element={<RequestDetailPage />} />
-        <Route path="/requests/:id/review" element={<DocumentReviewPage />} />
-        <Route path="/reminders" element={<RemindersPage />} />
-        <Route path="/billing" element={<BillingPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-      </Route>
+        {/* Client Document Collection Portal (Token Protected) */}
+        <Route path="/request/:token" element={<ClientPortalPage />} />
 
-      {/* Client Document Collection Portal (Token Protected) */}
-      <Route path="/request/:token" element={<ClientPortalPage />} />
-
-      {/* Catch-all redirect */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        {/* Catch-all redirect */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </ThemeProvider>
   );
 };

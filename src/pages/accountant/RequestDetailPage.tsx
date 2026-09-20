@@ -169,17 +169,17 @@ export const RequestDetailPage: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate('/requests')}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
             <span className="material-symbols-outlined text-[20px]">arrow_back</span>
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900">{request.title}</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{request.title}</h1>
               <Badge variant={request.status}>{request.status?.toUpperCase()}</Badge>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Client: <strong className="text-slate-700">{(request as any).client_name || request.client?.name}</strong> • Period: {request.period} • Due: {request.due_date}
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Client: <strong className="text-slate-700 dark:text-slate-200">{(request as any).client_name || request.client?.name}</strong> • Period: {request.period} • Due: {request.due_date}
             </p>
           </div>
         </div>
@@ -200,12 +200,12 @@ export const RequestDetailPage: React.FC = () => {
       </div>
 
       {/* Shareable Client Link Bar */}
-      <Card padding="md" elevation="low" className="bg-blue-50/40 border-blue-200">
+      <Card padding="md" elevation="low" className="bg-blue-50/40 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900/50">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-xs">
-            <span className="material-symbols-outlined text-[18px] text-primary-container">lock</span>
-            <span className="font-semibold text-slate-800">Client Secure Upload Link:</span>
-            <span className="font-mono text-[11px] text-slate-600 truncate max-w-xs sm:max-w-md">
+            <span className="material-symbols-outlined text-[18px] text-primary-container dark:text-sky-400">lock</span>
+            <span className="font-semibold text-slate-800 dark:text-slate-200">Client Secure Upload Link:</span>
+            <span className="font-mono text-[11px] text-slate-600 dark:text-slate-400 truncate max-w-xs sm:max-w-md">
               {clientPortalUrl}
             </span>
           </div>
@@ -229,12 +229,12 @@ export const RequestDetailPage: React.FC = () => {
       {/* Progress Metric Bar */}
       <Card padding="md" elevation="low">
         <div className="flex items-center justify-between text-xs mb-2">
-          <span className="font-semibold text-slate-700">Readiness Verification</span>
-          <span className="font-bold text-slate-900 tabular-nums">
+          <span className="font-semibold text-slate-700 dark:text-slate-300">Readiness Verification</span>
+          <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
             {approvedCount} of {items.length} Approved ({requiredCount} Required)
           </span>
         </div>
-        <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+        <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-300 ${
               isReady ? 'bg-emerald-500' : 'bg-primary-container'
@@ -246,7 +246,7 @@ export const RequestDetailPage: React.FC = () => {
 
       {/* Checklist Items Breakdown */}
       <div className="flex flex-col gap-3">
-        <h2 className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+        <h2 className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
           Requested Document Items ({items.length})
         </h2>
 
@@ -254,9 +254,9 @@ export const RequestDetailPage: React.FC = () => {
           <Card key={item.id} elevation="low" className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-sm text-slate-900">{item.name}</span>
+                <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">{item.name}</span>
                 {item.required ? (
-                  <span className="text-[10px] font-bold text-rose-700 bg-rose-50 px-1.5 py-0.2 rounded border border-rose-200">
+                  <span className="text-[10px] font-bold text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 px-1.5 py-0.5 rounded border border-rose-200/50 dark:border-rose-900/50">
                     Required
                   </span>
                 ) : (
@@ -265,19 +265,19 @@ export const RequestDetailPage: React.FC = () => {
                 <Badge variant={item.status}>{item.status.toUpperCase()}</Badge>
               </div>
               {item.description && (
-                <p className="text-xs text-slate-500 mt-0.5">{item.description}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{item.description}</p>
               )}
 
               {/* Document metadata or rejection note */}
               {(item as any).file_name && (
-                <div className="mt-2 text-[11px] text-slate-600 flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded border border-slate-200 w-fit">
+                <div className="mt-2 text-[11px] text-slate-600 dark:text-slate-300 flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded border border-slate-200 dark:border-slate-800 w-fit">
                   <span className="material-symbols-outlined text-[14px]">description</span>
                   <span>Uploaded: {(item as any).file_name}</span>
                 </div>
               )}
 
               {item.status === 'rejected' && item.rejection_reason && (
-                <div className="mt-2 text-xs text-rose-800 bg-rose-50 p-2 rounded border border-rose-200">
+                <div className="mt-2 text-xs text-rose-800 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 p-2 rounded border border-rose-200 dark:border-rose-900/50">
                   <strong>Rejection Note:</strong> {item.rejection_reason}
                 </div>
               )}
@@ -310,8 +310,8 @@ export const RequestDetailPage: React.FC = () => {
               )}
 
               {item.status === 'approved' && (
-                <span className="text-xs text-emerald-700 font-semibold flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[16px] text-emerald-600">verified</span>
+                <span className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[16px] text-emerald-600 dark:text-emerald-400">verified</span>
                   Approved
                 </span>
               )}
@@ -337,7 +337,7 @@ export const RequestDetailPage: React.FC = () => {
             helperText="The client will see this note directly on their upload portal."
           />
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 mt-2">
+          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 mt-2">
             <Button variant="secondary" size="md" type="button" onClick={() => setRejectingItem(null)}>
               Cancel
             </Button>

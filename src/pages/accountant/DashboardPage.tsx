@@ -155,10 +155,10 @@ export const DashboardPage: React.FC = () => {
               Operational Overview
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
             Good day, {firstName}
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             {stats.totalCycles > 0
               ? `Here's what needs your attention today across ${stats.totalCycles} active client cycles.`
               : `Welcome to ${currentWorkspace?.name || 'DocChase'}. Add your first client to begin collecting documents.`}
@@ -190,37 +190,37 @@ export const DashboardPage: React.FC = () => {
         {/* Total Clients */}
         <Card padding="md" elevation="low" className="flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500">Clients</span>
-            <span className="material-symbols-outlined text-[20px] text-slate-400">group</span>
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Clients</span>
+            <span className="material-symbols-outlined text-[20px] text-slate-400 dark:text-slate-500">group</span>
           </div>
           <div className="mt-3">
-            <div className="text-2xl sm:text-3xl font-bold text-slate-900 tabular-nums">
+            <div className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tabular-nums">
               {stats.totalClients}
             </div>
-            <p className="text-[11px] text-slate-500 mt-0.5 truncate">Active client accounts</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">Active client accounts</p>
           </div>
         </Card>
 
         {/* Total Cycles */}
         <Card padding="md" elevation="low" className="flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500">Total Cycles</span>
-            <span className="material-symbols-outlined text-[20px] text-slate-400">domain</span>
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Total Cycles</span>
+            <span className="material-symbols-outlined text-[20px] text-slate-400 dark:text-slate-500">domain</span>
           </div>
           <div className="mt-3">
-            <div className="text-2xl sm:text-3xl font-bold text-slate-900 tabular-nums">
+            <div className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tabular-nums">
               {stats.totalCycles}
             </div>
-            <p className="text-[11px] text-slate-500 mt-0.5 truncate">Active monthly accounts</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">Active monthly accounts</p>
           </div>
         </Card>
 
         {/* Ready */}
         <Card padding="md" elevation="low" className="flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500">Ready</span>
-            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold border border-emerald-200">
-              <span className="material-symbols-outlined text-[13px] text-emerald-600">
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Ready</span>
+            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-[11px] font-semibold border border-emerald-200 dark:border-emerald-800/60">
+              <span className="material-symbols-outlined text-[13px] text-emerald-600 dark:text-emerald-400">
                 check_circle
               </span>
               {stats.totalCycles > 0
@@ -229,28 +229,28 @@ export const DashboardPage: React.FC = () => {
             </span>
           </div>
           <div className="mt-3">
-            <div className="text-2xl sm:text-3xl font-bold text-slate-900 tabular-nums flex items-baseline gap-1.5">
+            <div className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tabular-nums flex items-baseline gap-1.5">
               {stats.readyCycles}
-              <span className="text-xs font-normal text-slate-500">cycles</span>
+              <span className="text-xs font-normal text-slate-500 dark:text-slate-400">cycles</span>
             </div>
-            <p className="text-[11px] text-slate-500 mt-0.5 truncate">All documents approved</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">All documents approved</p>
           </div>
         </Card>
 
         {/* Overdue */}
         <Card padding="md" elevation="low" className="flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-rose-600">Overdue</span>
-            <span className="w-5 h-5 rounded-full bg-rose-50 text-rose-700 flex items-center justify-center border border-rose-200">
+            <span className="text-xs font-medium text-rose-600 dark:text-rose-400">Overdue</span>
+            <span className="w-5 h-5 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 flex items-center justify-center border border-rose-200 dark:border-rose-800/60">
               <span className="material-symbols-outlined text-[13px]">priority_high</span>
             </span>
           </div>
           <div className="mt-3">
-            <div className="text-2xl sm:text-3xl font-bold text-rose-700 tabular-nums flex items-baseline gap-1.5">
+            <div className="text-2xl sm:text-3xl font-bold text-rose-700 dark:text-rose-400 tabular-nums flex items-baseline gap-1.5">
               {stats.overdueCycles}
-              <span className="text-xs font-normal text-rose-600/80">clients</span>
+              <span className="text-xs font-normal text-rose-600/80 dark:text-rose-400/80">clients</span>
             </div>
-            <p className="text-[11px] text-rose-600/80 mt-0.5 truncate">Past statutory deadline</p>
+            <p className="text-[11px] text-rose-600/80 dark:text-rose-400/80 mt-0.5 truncate">Past statutory deadline</p>
           </div>
         </Card>
       </div>
@@ -270,10 +270,10 @@ export const DashboardPage: React.FC = () => {
           {/* Requests List */}
           <div className="lg:col-span-2 flex flex-col gap-4">
             <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-base text-slate-900">Active Document Requests</h2>
+              <h2 className="font-semibold text-base text-slate-900 dark:text-slate-100">Active Document Requests</h2>
               <button
                 onClick={() => navigate('/requests')}
-                className="text-xs font-medium text-primary-container hover:underline"
+                className="text-xs font-medium text-primary-container dark:text-sky-400 hover:underline"
               >
                 View all requests
               </button>
@@ -283,20 +283,20 @@ export const DashboardPage: React.FC = () => {
               {recentRequests.map((req) => (
                 <div
                   key={req.id}
-                  className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition-all flex flex-col gap-3"
+                  className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm hover:shadow-md transition-all flex flex-col gap-3"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-slate-900">{req.client_name || 'Client'}</span>
+                        <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">{req.client_name || 'Client'}</span>
                         <Badge variant={req.status as any}>{req.status?.toUpperCase()}</Badge>
                       </div>
-                      <p className="text-xs text-slate-500 mt-0.5">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                         {req.title} • Period: {req.period}
                       </p>
                     </div>
 
-                    <span className="text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                    <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
                       Due: {req.due_date}
                     </span>
                   </div>
@@ -305,17 +305,17 @@ export const DashboardPage: React.FC = () => {
                   {reminderMessage?.id === req.id && reminderMessage && (
                     <div className={`text-[11px] px-2 py-1.5 rounded ${
                       reminderMessage.success
-                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                        : 'bg-rose-50 text-rose-700 border border-rose-200'
+                        ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60'
+                        : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60'
                     }`}>
                       {reminderMessage.text}
                     </div>
                   )}
 
                   {/* Actions Bar */}
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
-                    <span className="text-slate-500">
-                      Progress: <strong className="text-slate-800 font-medium">{req.approved_count || 0} / {req.total_count || 5} approved</strong>
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
+                    <span className="text-slate-500 dark:text-slate-400">
+                      Progress: <strong className="text-slate-800 dark:text-slate-200 font-medium">{req.approved_count || 0} / {req.total_count || 5} approved</strong>
                     </span>
 
                     <div className="flex items-center gap-2">
@@ -347,21 +347,21 @@ export const DashboardPage: React.FC = () => {
 
           {/* Activity Timeline */}
           <div className="flex flex-col gap-4">
-            <h2 className="font-semibold text-base text-slate-900">Recent Firm Activity</h2>
+            <h2 className="font-semibold text-base text-slate-900 dark:text-slate-100">Recent Firm Activity</h2>
             <Card padding="md" elevation="low" className="flex flex-col gap-3.5">
               {recentActivity.length === 0 ? (
-                <p className="text-xs text-slate-400 py-6 text-center">
+                <p className="text-xs text-slate-400 dark:text-slate-500 py-6 text-center">
                   Document uploads and review actions will appear here in real-time.
                 </p>
               ) : (
                 recentActivity.map((act, idx) => (
-                  <div key={idx} className="flex items-start gap-2.5 pb-3 border-b border-slate-100 last:border-0 last:pb-0 text-xs">
-                    <span className="material-symbols-outlined text-[16px] text-primary-container mt-0.5">
+                  <div key={idx} className="flex items-start gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800 last:border-0 last:pb-0 text-xs">
+                    <span className="material-symbols-outlined text-[16px] text-primary-container dark:text-sky-400 mt-0.5">
                       {act.icon || 'history'}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-slate-800 font-medium truncate">{act.title}</p>
-                      <p className="text-slate-400 text-[11px]">{act.time}</p>
+                      <p className="text-slate-800 dark:text-slate-200 font-medium truncate">{act.title}</p>
+                      <p className="text-slate-400 dark:text-slate-500 text-[11px]">{act.time}</p>
                     </div>
                   </div>
                 ))

@@ -172,13 +172,13 @@ export const DocumentReviewPage: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate(`/requests/${request.id}`)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
             <span className="material-symbols-outlined text-[20px]">arrow_back</span>
           </button>
           <div>
-            <h1 className="text-xl font-bold text-slate-900">Document Review: {request.title}</h1>
-            <p className="text-xs text-slate-500">
+            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Document Review: {request.title}</h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Client: {(request as any).client_name || request.client?.name} • Period: {request.period}
             </p>
           </div>
@@ -201,8 +201,8 @@ export const DocumentReviewPage: React.FC = () => {
                 onClick={() => handleSelectItem(item)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 border ${
                   selectedItem?.id === item.id
-                    ? 'bg-blue-50 text-primary-container border-blue-200 shadow-sm'
-                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                    ? 'bg-blue-50 dark:bg-blue-950/40 text-primary-container dark:text-sky-400 border-blue-200 dark:border-blue-800 shadow-sm'
+                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60'
                 }`}
               >
                 <span>{item.name}</span>
@@ -214,7 +214,7 @@ export const DocumentReviewPage: React.FC = () => {
                       ? 'bg-rose-500'
                       : item.status === 'uploaded'
                       ? 'bg-blue-500'
-                      : 'bg-slate-300'
+                      : 'bg-slate-300 dark:bg-slate-600'
                   }`}
                 />
               </button>
@@ -258,35 +258,35 @@ export const DocumentReviewPage: React.FC = () => {
         {/* Right Column: AI Document Assistance & Review Action (5 cols) */}
         <div className="lg:col-span-5 flex flex-col gap-4">
           {/* AI Intelligence Card */}
-          <Card elevation="low" className="p-5 flex flex-col gap-3 bg-blue-50/30 border-blue-200">
+          <Card elevation="low" className="p-5 flex flex-col gap-3 bg-blue-50/30 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900/50">
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary-container text-[20px]">psychology</span>
-              <h3 className="font-bold text-sm text-slate-900">DocChase AI Document Intelligence</h3>
+              <span className="material-symbols-outlined text-primary-container dark:text-sky-400 text-[20px]">psychology</span>
+              <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">DocChase AI Document Intelligence</h3>
             </div>
-            <p className="text-xs text-slate-600">
+            <p className="text-xs text-slate-600 dark:text-slate-400">
               Heuristic & Gemini assistant scan. AI does <strong>not</strong> auto-approve documents.
             </p>
 
             {aiAnalysis && (
               <div className="mt-2 flex flex-col gap-2.5 text-xs">
-                <div className="flex items-center justify-between p-2 rounded bg-white border border-slate-200">
-                  <span className="text-slate-500">Likely Document Type:</span>
-                  <strong className="text-slate-800">{aiAnalysis.detected_type}</strong>
+                <div className="flex items-center justify-between p-2 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                  <span className="text-slate-500 dark:text-slate-400">Likely Document Type:</span>
+                  <strong className="text-slate-800 dark:text-slate-200">{aiAnalysis.detected_type}</strong>
                 </div>
 
-                <div className="flex items-center justify-between p-2 rounded bg-white border border-slate-200">
-                  <span className="text-slate-500">Detected Period / Month:</span>
-                  <strong className="text-slate-800">{aiAnalysis.detected_period || 'Not explicitly stated'}</strong>
+                <div className="flex items-center justify-between p-2 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                  <span className="text-slate-500 dark:text-slate-400">Detected Period / Month:</span>
+                  <strong className="text-slate-800 dark:text-slate-200">{aiAnalysis.detected_period || 'Not explicitly stated'}</strong>
                 </div>
 
-                <div className="flex items-center justify-between p-2 rounded bg-white border border-slate-200">
-                  <span className="text-slate-500">Legibility / Quality:</span>
-                  <span className="font-semibold text-emerald-700 capitalize">{aiAnalysis.readability_indicator}</span>
+                <div className="flex items-center justify-between p-2 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                  <span className="text-slate-500 dark:text-slate-400">Legibility / Quality:</span>
+                  <span className="font-semibold text-emerald-700 dark:text-emerald-400 capitalize">{aiAnalysis.readability_indicator}</span>
                 </div>
 
                 {aiAnalysis.potential_mismatch && (
-                  <div className="p-2.5 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800 flex items-start gap-1.5">
-                    <span className="material-symbols-outlined text-[16px] text-amber-600 flex-shrink-0 mt-0.5">
+                  <div className="p-2.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 rounded text-xs text-amber-800 dark:text-amber-300 flex items-start gap-1.5">
+                    <span className="material-symbols-outlined text-[16px] text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5">
                       warning
                     </span>
                     <span>{aiAnalysis.potential_mismatch}</span>
@@ -298,13 +298,13 @@ export const DocumentReviewPage: React.FC = () => {
 
           {/* Review Decision Panel */}
           <Card elevation="low" className="p-5 flex flex-col gap-3">
-            <h3 className="font-bold text-sm text-slate-900">Accountant Review Decision</h3>
-            <p className="text-xs text-slate-500">
+            <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">Accountant Review Decision</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Once approved, this item will no longer be targeted by reminders. If all required items are approved,
               the request cycle will become <strong>Ready</strong>.
             </p>
 
-            <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
+            <div className="flex items-center gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
               <Button
                 variant="destructive"
                 size="md"
@@ -345,7 +345,7 @@ export const DocumentReviewPage: React.FC = () => {
             onChange={(e) => setRejectionReason(e.target.value)}
           />
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 mt-2">
+          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 mt-2">
             <Button variant="secondary" size="md" type="button" onClick={() => setIsRejectModalOpen(false)}>
               Cancel
             </Button>

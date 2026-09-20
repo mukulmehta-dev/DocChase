@@ -118,8 +118,8 @@ export const ClientsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Clients</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Clients</h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             Manage your firm's client accounts and active document collection cycles.
           </p>
         </div>
@@ -139,11 +139,11 @@ export const ClientsPage: React.FC = () => {
           />
         </div>
 
-        <div className="flex items-center gap-1.5 self-start sm:self-auto bg-slate-100 p-1 rounded-lg">
+        <div className="flex items-center gap-1.5 self-start sm:self-auto bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
           <button
             onClick={() => setFilterStatus('all')}
             className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-              filterStatus === 'all' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+              filterStatus === 'all' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
             All ({clients.length})
@@ -151,7 +151,7 @@ export const ClientsPage: React.FC = () => {
           <button
             onClick={() => setFilterStatus('active')}
             className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-              filterStatus === 'active' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+              filterStatus === 'active' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
             Active ({clients.filter((c) => c.status === 'active').length})
@@ -159,7 +159,7 @@ export const ClientsPage: React.FC = () => {
           <button
             onClick={() => setFilterStatus('archived')}
             className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-              filterStatus === 'archived' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+              filterStatus === 'archived' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
             Archived ({clients.filter((c) => c.status === 'archived').length})
@@ -202,10 +202,10 @@ export const ClientsPage: React.FC = () => {
               <div>
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-base text-slate-900 truncate">
+                    <h3 className="font-semibold text-base text-slate-900 dark:text-slate-100 truncate">
                       {client.company_name || client.name}
                     </h3>
-                    <p className="text-xs text-slate-500 truncate mt-0.5">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
                       Contact: {client.name}
                     </p>
                   </div>
@@ -219,7 +219,7 @@ export const ClientsPage: React.FC = () => {
                         e.stopPropagation();
                         setClientToEdit(client);
                       }}
-                      className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                      className="p-1 rounded text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                       title="Edit Client Details"
                     >
                       <span className="material-symbols-outlined text-[17px]">edit</span>
@@ -232,8 +232,8 @@ export const ClientsPage: React.FC = () => {
                       }}
                       className={`p-1 rounded transition-colors ${
                         client.status === 'active'
-                          ? 'text-slate-400 hover:text-amber-700 hover:bg-amber-50'
-                          : 'text-slate-400 hover:text-emerald-700 hover:bg-emerald-50'
+                          ? 'text-slate-400 dark:text-slate-500 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40'
+                          : 'text-slate-400 dark:text-slate-500 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
                       }`}
                       title={client.status === 'active' ? 'Archive Client' : 'Reactivate Client'}
                     >
@@ -244,23 +244,23 @@ export const ClientsPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="mt-4 flex flex-col gap-1.5 text-xs text-slate-600">
+                <div className="mt-4 flex flex-col gap-1.5 text-xs text-slate-600 dark:text-slate-400">
                   <div className="flex items-center gap-2 truncate">
-                    <span className="material-symbols-outlined text-[15px] text-slate-400">mail</span>
+                    <span className="material-symbols-outlined text-[15px] text-slate-400 dark:text-slate-500">mail</span>
                     <span className="truncate">{client.email}</span>
                   </div>
                   {client.phone && (
                     <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-[15px] text-slate-400">call</span>
+                      <span className="material-symbols-outlined text-[15px] text-slate-400 dark:text-slate-500">call</span>
                       <span>{client.phone}</span>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                <span>Active Cycles: <strong>{client.total_requests_count || 0}</strong></span>
-                <span className="font-semibold text-primary-container hover:underline flex items-center gap-0.5">
+              <div className="mt-5 pt-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                <span>Active Cycles: <strong className="text-slate-800 dark:text-slate-200">{client.total_requests_count || 0}</strong></span>
+                <span className="font-semibold text-primary-container dark:text-sky-400 hover:underline flex items-center gap-0.5">
                   View Detail <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
                 </span>
               </div>
@@ -317,7 +317,7 @@ export const ClientsPage: React.FC = () => {
             onChange={(e) => setPhone(e.target.value)}
           />
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 mt-2">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 mt-2">
             <Button variant="secondary" size="md" type="button" onClick={() => setIsAddModalOpen(false)}>
               Cancel
             </Button>
@@ -345,7 +345,7 @@ export const ClientsPage: React.FC = () => {
         title={clientToToggleStatus?.status === 'active' ? 'Archive Client' : 'Reactivate Client'}
       >
         <div className="flex flex-col gap-4">
-          <p className="text-xs text-slate-600 leading-relaxed">
+          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
             {clientToToggleStatus?.status === 'active' ? (
               <>
                 Are you sure you want to archive <strong>{clientToToggleStatus?.company_name || clientToToggleStatus?.name}</strong>?
@@ -362,7 +362,7 @@ export const ClientsPage: React.FC = () => {
             )}
           </p>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
             <Button
               variant="secondary"
               size="md"

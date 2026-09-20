@@ -34,13 +34,13 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       primary:
         'bg-sky-500 text-white border border-sky-400 shadow-[0_1px_2px_rgba(14,165,233,0.25)] hover:bg-sky-400 hover:border-sky-300 hover:shadow-[0_0_20px_rgba(14,165,233,0.30)] active:bg-sky-600 tactile-rim',
       secondary:
-        'bg-white text-on-surface border border-slate-200 hover:bg-slate-50 hover:border-slate-300 shadow-sm tactile-rim-white',
+        'bg-white dark:bg-slate-800 text-on-surface dark:text-slate-100 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600 shadow-sm tactile-rim-white',
       destructive:
-        'bg-white text-error border border-error-container hover:bg-error-container/20 shadow-sm',
+        'bg-white dark:bg-slate-800 text-error dark:text-rose-400 border border-error-container dark:border-rose-900/50 hover:bg-error-container/20 dark:hover:bg-rose-950/40 shadow-sm',
       ghost:
-        'bg-transparent text-on-surface-variant hover:bg-slate-100 hover:text-on-surface',
+        'bg-transparent text-on-surface-variant dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-on-surface dark:hover:text-slate-100',
       outline:
-        'bg-transparent text-sky-600 border border-sky-400 hover:bg-sky-50 active:bg-sky-100',
+        'bg-transparent text-sky-600 dark:text-sky-400 border border-sky-400 dark:border-sky-500/50 hover:bg-sky-50 dark:hover:bg-sky-950/40 active:bg-sky-100 dark:active:bg-sky-900/50',
       'secondary-dark':
         'bg-white/[0.05] text-slate-200 border border-white/[0.12] hover:bg-slate-800/80 hover:border-sky-500/50 hover:text-white hover:shadow-[0_0_16px_rgba(14,165,233,0.18)] active:bg-white/[0.08]',
       'outline-dark':

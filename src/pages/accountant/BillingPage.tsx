@@ -63,24 +63,24 @@ export const BillingPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Subscription & Billing</h1>
-        <p className="text-xs text-slate-500 mt-0.5">Manage your firm's plan, usage quotas, and Stripe billing.</p>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Subscription & Billing</h1>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Manage your firm's plan, usage quotas, and Stripe billing.</p>
       </div>
 
       {isCheckoutSuccess && (
-        <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800 flex items-center justify-between">
+        <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 rounded-lg text-xs text-emerald-800 dark:text-emerald-300 flex items-center justify-between">
           <span>Stripe checkout completed successfully! Your workspace subscription has been updated.</span>
         </div>
       )}
 
       {isCheckoutCanceled && (
-        <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-600">
+        <div className="p-4 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-600 dark:text-slate-400">
           Stripe checkout was canceled. No charges were made.
         </div>
       )}
 
       {errorMessage && (
-        <div className="p-4 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-800">
+        <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 rounded-lg text-xs text-rose-800 dark:text-rose-300">
           {errorMessage}
         </div>
       )}
@@ -88,9 +88,9 @@ export const BillingPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <Card elevation="low" className="p-5 flex flex-col justify-between">
           <div>
-            <span className="text-xs text-slate-500 font-medium">Current Plan</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Current Plan</span>
             <div className="mt-2 flex items-center gap-2">
-              <span className="text-xl font-bold text-slate-900">{currentPlan}</span>
+              <span className="text-xl font-bold text-slate-900 dark:text-slate-100">{currentPlan}</span>
               {status === 'active' ? (
                 <Badge variant="ready">Active</Badge>
               ) : status === 'past_due' ? (
@@ -99,13 +99,13 @@ export const BillingPage: React.FC = () => {
                 <Badge variant="error">{status.toUpperCase()}</Badge>
               )}
             </div>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               {currentPlan === 'FREE' && 'Free tier: 3 clients, 1 active request.'}
               {currentPlan === 'STARTER' && 'Starter: 15 clients, 50 active cycles, AI checklist.'}
               {currentPlan === 'PRO' && 'Pro: 100 clients, 500 active cycles, AI Suite.'}
             </p>
             {entitlements?.cancel_at_period_end && entitlements.current_period_end && (
-              <p className="text-xs text-amber-700 font-medium mt-1">
+              <p className="text-xs text-amber-700 dark:text-amber-400 font-medium mt-1">
                 Cancels on {new Date(entitlements.current_period_end).toLocaleDateString()}
               </p>
             )}
@@ -151,15 +151,15 @@ export const BillingPage: React.FC = () => {
 
         <Card elevation="low" className="p-5 flex flex-col justify-between">
           <div>
-            <span className="text-xs text-slate-500 font-medium">Client Quota</span>
-            <div className="mt-2 text-xl font-bold text-slate-900">
-              {clientsCount} / {clientLimit} <span className="text-xs font-normal text-slate-400">clients</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Client Quota</span>
+            <div className="mt-2 text-xl font-bold text-slate-900 dark:text-slate-100">
+              {clientsCount} / {clientLimit} <span className="text-xs font-normal text-slate-400 dark:text-slate-500">clients</span>
             </div>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               {clientsCount >= clientLimit ? 'Quota reached. Upgrade to add more.' : `${clientLimit - clientsCount} client slot(s) available.`}
             </p>
           </div>
-          <div className="w-full bg-slate-100 h-2 rounded-full mt-4 overflow-hidden">
+          <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full mt-4 overflow-hidden">
             <div
               className={`h-full rounded-full transition-all ${clientPercent >= 100 ? 'bg-rose-500' : 'bg-primary-container'}`}
               style={{ width: `${clientPercent}%` }}
@@ -169,15 +169,15 @@ export const BillingPage: React.FC = () => {
 
         <Card elevation="low" className="p-5 flex flex-col justify-between">
           <div>
-            <span className="text-xs text-slate-500 font-medium">Active Request Cycles</span>
-            <div className="mt-2 text-xl font-bold text-slate-900">
-              {requestsCount} / {requestLimit} <span className="text-xs font-normal text-slate-400">active</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Active Request Cycles</span>
+            <div className="mt-2 text-xl font-bold text-slate-900 dark:text-slate-100">
+              {requestsCount} / {requestLimit} <span className="text-xs font-normal text-slate-400 dark:text-slate-500">active</span>
             </div>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               {requestsCount >= requestLimit ? 'Active cycle quota reached.' : `${requestLimit - requestsCount} request slot(s) available.`}
             </p>
           </div>
-          <div className="w-full bg-slate-100 h-2 rounded-full mt-4 overflow-hidden">
+          <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full mt-4 overflow-hidden">
             <div
               className={`h-full rounded-full transition-all ${requestPercent >= 100 ? 'bg-amber-500' : 'bg-emerald-500'}`}
               style={{ width: `${requestPercent}%` }}
@@ -187,13 +187,13 @@ export const BillingPage: React.FC = () => {
       </div>
 
       <Card elevation="low" className="p-6">
-        <h3 className="font-semibold text-sm text-slate-900 mb-1">Stripe Test Mode Billing</h3>
-        <p className="text-xs text-slate-500 mb-4">
+        <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 mb-1">Stripe Test Mode Billing</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
           All checkout and subscription actions run in Stripe TEST MODE. Invoices and payment methods are securely managed through Stripe.
         </p>
         <div className="flex items-center gap-3">
           <Badge variant="neutral">TEST MODE</Badge>
-          <span className="text-xs text-slate-400">Zero live card charges</span>
+          <span className="text-xs text-slate-400 dark:text-slate-500">Zero live card charges</span>
         </div>
       </Card>
     </div>

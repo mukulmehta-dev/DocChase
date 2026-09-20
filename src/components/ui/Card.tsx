@@ -26,9 +26,9 @@ export const Card: React.FC<CardProps> = ({
   };
 
   const elevationStyles = {
-    flat: 'bg-white border border-slate-200',
-    low: 'bg-white border border-slate-200 shadow-sm',
-    hover: 'bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-150',
+    flat: 'bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100',
+    low: 'bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-slate-950/30 text-slate-900 dark:text-slate-100',
+    hover: 'bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-slate-950/30 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-150 text-slate-900 dark:text-slate-100',
   };
 
   return (
@@ -43,13 +43,13 @@ export const Card: React.FC<CardProps> = ({
       {...props}
     >
       {header && (
-        <div className="px-4 py-3.5 border-b border-slate-100 flex items-center justify-between">
+        <div className="px-4 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           {header}
         </div>
       )}
       <div className={paddingStyles[padding]}>{children}</div>
       {footer && (
-        <div className="px-4 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+        <div className="px-4 py-3 bg-slate-50 dark:bg-[#0E1526] border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
           {footer}
         </div>
       )}

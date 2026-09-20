@@ -56,8 +56,8 @@ export const DocumentsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Documents Vault</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Documents Vault</h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             Encrypted client document repository, verification tracking, and review status.
           </p>
         </div>
@@ -76,20 +76,20 @@ export const DocumentsPage: React.FC = () => {
       {/* Metric Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card elevation="low" padding="md" className="flex flex-col">
-          <span className="text-xs text-slate-500 font-medium">Total Tracked Items</span>
-          <span className="text-2xl font-bold text-slate-900 mt-1 tabular-nums">{totalCount}</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Total Tracked Items</span>
+          <span className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1 tabular-nums">{totalCount}</span>
         </Card>
-        <Card elevation="low" padding="md" className="flex flex-col border-blue-200 bg-blue-50/20">
-          <span className="text-xs text-blue-700 font-medium">Needs Review</span>
-          <span className="text-2xl font-bold text-primary-container mt-1 tabular-nums">{pendingReviewCount}</span>
+        <Card elevation="low" padding="md" className="flex flex-col border-blue-200 dark:border-blue-900/50 bg-blue-50/20 dark:bg-blue-950/20">
+          <span className="text-xs text-blue-700 dark:text-blue-400 font-medium">Needs Review</span>
+          <span className="text-2xl font-bold text-primary-container dark:text-sky-400 mt-1 tabular-nums">{pendingReviewCount}</span>
         </Card>
-        <Card elevation="low" padding="md" className="flex flex-col border-emerald-200 bg-emerald-50/20">
-          <span className="text-xs text-emerald-700 font-medium">Approved Documents</span>
-          <span className="text-2xl font-bold text-emerald-700 mt-1 tabular-nums">{approvedCount}</span>
+        <Card elevation="low" padding="md" className="flex flex-col border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/20 dark:bg-emerald-950/20">
+          <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">Approved Documents</span>
+          <span className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 mt-1 tabular-nums">{approvedCount}</span>
         </Card>
-        <Card elevation="low" padding="md" className="flex flex-col border-rose-200 bg-rose-50/20">
-          <span className="text-xs text-rose-700 font-medium">Rejected / Replaced</span>
-          <span className="text-2xl font-bold text-rose-700 mt-1 tabular-nums">{rejectedCount}</span>
+        <Card elevation="low" padding="md" className="flex flex-col border-rose-200 dark:border-rose-900/50 bg-rose-50/20 dark:bg-rose-950/20">
+          <span className="text-xs text-rose-700 dark:text-rose-400 font-medium">Rejected / Replaced</span>
+          <span className="text-2xl font-bold text-rose-700 dark:text-rose-400 mt-1 tabular-nums">{rejectedCount}</span>
         </Card>
       </div>
 
@@ -110,7 +110,7 @@ export const DocumentsPage: React.FC = () => {
               className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
                 filter === t.id
                   ? 'bg-primary-container text-white shadow-sm'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60'
               }`}
             >
               {t.label}
@@ -119,7 +119,7 @@ export const DocumentsPage: React.FC = () => {
         </div>
 
         <div className="relative w-full sm:w-64">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400 pointer-events-none">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400 dark:text-slate-500 pointer-events-none">
             search
           </span>
           <input
@@ -127,7 +127,7 @@ export const DocumentsPage: React.FC = () => {
             placeholder="Search documents or clients..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full h-9 pl-9 pr-3 rounded-lg border border-slate-300 text-xs bg-white text-slate-800 focus:border-primary-container outline-none"
+            className="w-full h-9 pl-9 pr-3 rounded-lg border border-slate-300 dark:border-slate-700 text-xs bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:border-primary-container dark:focus:border-sky-500 outline-none"
           />
         </div>
       </div>
@@ -138,7 +138,7 @@ export const DocumentsPage: React.FC = () => {
           <span className="material-symbols-outlined text-[32px] text-primary-container animate-spin mb-2">
             progress_activity
           </span>
-          <p className="text-xs text-slate-500">Scanning document vault...</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Scanning document vault...</p>
         </div>
       ) : filteredItems.length === 0 ? (
         <EmptyState
@@ -150,7 +150,7 @@ export const DocumentsPage: React.FC = () => {
         <Card elevation="low" className="p-0 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-500 uppercase font-semibold border-b border-slate-200 text-[11px]">
+              <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 uppercase font-semibold border-b border-slate-200 dark:border-slate-800 text-[11px]">
                 <tr>
                   <th className="px-4 py-3">Document Requirement</th>
                   <th className="px-4 py-3">Client</th>
@@ -160,31 +160,31 @@ export const DocumentsPage: React.FC = () => {
                   <th className="px-4 py-3 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
                 {filteredItems.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
+                  <tr key={item.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <span className="material-symbols-outlined text-[18px] text-slate-400">
                           description
                         </span>
                         <div>
-                          <strong className="text-slate-900 block">{item.itemName}</strong>
+                          <strong className="text-slate-900 dark:text-slate-100 block">{item.itemName}</strong>
                           <span className="text-[10px] text-slate-400">
                             {item.required ? 'Required' : 'Optional'}
                           </span>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 font-medium text-slate-800">{item.clientName}</td>
-                    <td className="px-4 py-3 font-mono text-[11px] text-slate-500">{item.period}</td>
+                    <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200">{item.clientName}</td>
+                    <td className="px-4 py-3 font-mono text-[11px] text-slate-500 dark:text-slate-400">{item.period}</td>
                     <td className="px-4 py-3">
                       <Badge variant={item.status}>{item.status.toUpperCase()}</Badge>
                     </td>
                     <td className="px-4 py-3">
                       {item.fileName ? (
                         <div className="flex flex-col text-[11px]">
-                          <span className="font-mono text-slate-800 truncate max-w-xs">{item.fileName}</span>
+                          <span className="font-mono text-slate-800 dark:text-slate-200 truncate max-w-xs">{item.fileName}</span>
                           {item.fileSize && (
                             <span className="text-slate-400 text-[10px]">
                               {(item.fileSize / 1024).toFixed(0)} KB

@@ -41,8 +41,8 @@ export const RequestsPage: React.FC = () => {
     <div className="flex flex-col gap-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Document Requests</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Document Requests</h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             Active and completed collection cycles across all your accounting clients.
           </p>
         </div>
@@ -52,35 +52,35 @@ export const RequestsPage: React.FC = () => {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-1.5 self-start bg-slate-100 p-1 rounded-lg">
+      <div className="flex items-center gap-1.5 self-start bg-slate-100 dark:bg-slate-800 p-1 rounded-lg overflow-x-auto">
         <button
           onClick={() => setFilter('all')}
-          className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-            filter === 'all' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+          className={`px-3 py-1 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
+            filter === 'all' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
           }`}
         >
           All ({requests.length})
         </button>
         <button
           onClick={() => setFilter('in_progress')}
-          className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-            filter === 'in_progress' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+          className={`px-3 py-1 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
+            filter === 'in_progress' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
           }`}
         >
           Waiting / In Progress ({requests.filter((r) => r.status !== 'ready' && r.status !== 'overdue').length})
         </button>
         <button
           onClick={() => setFilter('ready')}
-          className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-            filter === 'ready' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+          className={`px-3 py-1 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
+            filter === 'ready' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
           }`}
         >
           Ready ({requests.filter((r) => r.status === 'ready').length})
         </button>
         <button
           onClick={() => setFilter('overdue')}
-          className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-            filter === 'overdue' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+          className={`px-3 py-1 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
+            filter === 'overdue' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
           }`}
         >
           Overdue ({requests.filter((r) => r.status === 'overdue').length})
@@ -92,7 +92,7 @@ export const RequestsPage: React.FC = () => {
           <span className="material-symbols-outlined text-[32px] text-primary-container animate-spin mb-2">
             progress_activity
           </span>
-          <p className="text-xs text-slate-500">Loading requests...</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Loading requests...</p>
         </div>
       ) : filteredRequests.length === 0 ? (
         <EmptyState
@@ -113,18 +113,18 @@ export const RequestsPage: React.FC = () => {
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-base text-slate-900 truncate">
+                  <span className="font-semibold text-base text-slate-900 dark:text-slate-100 truncate">
                     {req.client_name || 'Client'}
                   </span>
                   <Badge variant={req.status}>{req.status?.toUpperCase()}</Badge>
                 </div>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  {req.title} • Period: <strong className="text-slate-700 font-medium">{req.period}</strong> • Due: {req.due_date}
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  {req.title} • Period: <strong className="text-slate-700 dark:text-slate-300 font-medium">{req.period}</strong> • Due: {req.due_date}
                 </p>
 
                 {/* Progress bar */}
                 <div className="mt-3 flex items-center gap-3 max-w-sm">
-                  <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="flex-1 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${
                         req.status === 'ready' ? 'bg-emerald-500' : 'bg-primary-container'
@@ -134,7 +134,7 @@ export const RequestsPage: React.FC = () => {
                       }}
                     />
                   </div>
-                  <span className="text-[11px] font-medium text-slate-600 tabular-nums">
+                  <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400 tabular-nums">
                     {req.approved_count || 0} / {req.total_count || 0} approved
                   </span>
                 </div>
