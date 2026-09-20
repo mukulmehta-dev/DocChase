@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { authService } from '../../services/auth';
+import { authService, getFriendlyAuthErrorMessage } from '../../services/auth';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 
@@ -15,10 +15,25 @@ export const ForgotPasswordPage: React.FC = () => {
     setError(null);
     setIsLoading(true);
     try {
-      await authService.resetPassword(email);
+      await authService.resetPassword(email.trim());
       setSubmitted(true);
     } catch (err: any) {
-      setError(err?.message || 'Failed to send reset email.');
+      const code = (err?.code || err?.error_code || '').toString().toLowerCase();
+      const msg = (err?.message || '').toLowerCase();
+      const status = Number(err?.status);
+
+      const isRateLimit =
+        status === 429 ||
+        code === 'over_email_send_rate_limit' ||
+        code === 'rate_limit_exceeded' ||
+        msg.includes('rate limit') ||
+        msg.includes('too many attempts');
+
+      if (isRateLimit) {
+        setError('Please wait a moment before requesting another reset email.');
+      } else {
+        setError(getFriendlyAuthErrorMessage(err));
+      }
     } finally {
       setIsLoading(false);
     }
