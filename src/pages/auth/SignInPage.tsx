@@ -115,12 +115,13 @@ export const SignInPage: React.FC = () => {
   const isFormDisabled = isLoading || oauthLoading !== null;
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
-      <div className="w-full max-w-sm flex flex-col items-center">
+    <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 relative">
+      <div className="absolute inset-0 bg-radial-hero pointer-events-none" aria-hidden="true" />
+      <div className="relative w-full max-w-sm flex flex-col items-center">
         {/* Brand Icon & Delight Micro-badge */}
         <div className="relative mb-4 group">
-          <div className="w-14 h-14 rounded-xl bg-primary-container flex items-center justify-center shadow-md">
-            <span className="material-symbols-outlined text-[32px] text-white">fact_check</span>
+          <div className="w-14 h-14 rounded-xl bg-sky-500 flex items-center justify-center shadow-md">
+            <span className="material-symbols-outlined text-[32px] text-white" style={{ fontVariationSettings: "'FILL' 1" }}>fact_check</span>
           </div>
           <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-sm">
             <span className="w-2.5 h-2.5 rounded-full bg-primary-container animate-pulse" />
@@ -136,7 +137,7 @@ export const SignInPage: React.FC = () => {
         </p>
 
         {/* Card Surface */}
-        <div className="w-full bg-white rounded-xl shadow-md border border-slate-200 p-6 flex flex-col">
+        <div className="w-full bg-white rounded-xl elevation-2 p-6 flex flex-col">
           {infoMessage && !error && (
             <div className="mb-4 p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800 flex items-center gap-2">
               <span className="material-symbols-outlined text-[16px] text-emerald-600 shrink-0">check_circle</span>
