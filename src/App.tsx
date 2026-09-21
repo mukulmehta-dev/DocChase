@@ -40,11 +40,11 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center p-4">
-        <span className="material-symbols-outlined text-[36px] text-primary-container animate-spin mb-3">
+      <div className="min-h-screen bg-[#fafafa] dark:bg-[#09090b] flex flex-col items-center justify-center p-4">
+        <span className="material-symbols-outlined text-[36px] text-neutral-900 dark:text-white animate-spin mb-3">
           progress_activity
         </span>
-        <p className="text-xs text-slate-500 font-medium">Verifying accountant session...</p>
+        <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Verifying accountant session...</p>
       </div>
     );
   }
@@ -77,15 +77,15 @@ export const App: React.FC = () => {
   // Production configuration hard failure guard
   if (isProduction() && !isSupabaseConfigured()) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mb-4 shadow-sm">
+      <div className="min-h-screen bg-[#fafafa] dark:bg-[#09090b] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-850 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-4 shadow-sm">
           <span className="material-symbols-outlined text-[32px]">error</span>
         </div>
-        <h1 className="text-xl font-bold text-slate-900">Configuration Error</h1>
-        <p className="text-sm text-slate-600 max-w-md mt-2 mb-6 leading-relaxed">
+        <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">Configuration Error</h1>
+        <p className="text-sm text-neutral-600 dark:text-neutral-400 max-w-md mt-2 mb-6 leading-relaxed">
           {CONFIG_ERROR_MESSAGE}
         </p>
-        <div className="p-4 bg-white rounded-xl border border-slate-200 text-xs text-slate-500 max-w-lg text-left font-mono">
+        <div className="p-4 bg-white dark:bg-[#121215] rounded-xl border border-neutral-200 dark:border-neutral-800 text-xs text-neutral-500 dark:text-neutral-400 max-w-lg text-left font-mono">
           Please provide valid <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> environment variables to launch DocChase in production.
         </div>
       </div>

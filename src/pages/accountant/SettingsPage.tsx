@@ -132,23 +132,23 @@ export const SettingsPage: React.FC = () => {
   return (
     <div className="max-w-3xl mx-auto flex flex-col gap-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight">
           Firm & Workspace Settings
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+        <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">
           Configure practice branding, account preferences, and firm workspaces.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 overflow-x-auto">
+      <div className="flex items-center gap-2 border-b border-neutral-200 dark:border-neutral-800 overflow-x-auto">
         <button
           type="button"
           onClick={() => setSearchParams({ tab: 'firm' })}
           className={`pb-3 px-1 text-xs sm:text-sm font-medium border-b-2 transition-colors flex items-center gap-1.5 whitespace-nowrap ${
             currentTab === 'firm'
-              ? 'border-primary-container text-primary-container dark:text-sky-400'
-              : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+              ? 'border-neutral-900 text-neutral-900 dark:border-white dark:text-white font-semibold'
+              : 'border-transparent text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100'
           }`}
         >
           <span className="material-symbols-outlined text-[18px]">store</span>
@@ -160,8 +160,8 @@ export const SettingsPage: React.FC = () => {
           onClick={() => setSearchParams({ tab: 'workspace' })}
           className={`pb-3 px-1 text-xs sm:text-sm font-medium border-b-2 transition-colors flex items-center gap-1.5 whitespace-nowrap ${
             currentTab === 'workspace'
-              ? 'border-primary-container text-primary-container dark:text-sky-400'
-              : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+              ? 'border-neutral-900 text-neutral-900 dark:border-white dark:text-white font-semibold'
+              : 'border-transparent text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100'
           }`}
         >
           <span className="material-symbols-outlined text-[18px]">domain</span>
@@ -173,8 +173,8 @@ export const SettingsPage: React.FC = () => {
           onClick={() => setSearchParams({ tab: 'appearance' })}
           className={`pb-3 px-1 text-xs sm:text-sm font-medium border-b-2 transition-colors flex items-center gap-1.5 whitespace-nowrap ${
             currentTab === 'appearance'
-              ? 'border-primary-container text-primary-container dark:text-sky-400'
-              : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+              ? 'border-neutral-900 text-neutral-900 dark:border-white dark:text-white font-semibold'
+              : 'border-transparent text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100'
           }`}
         >
           <span className="material-symbols-outlined text-[18px]">palette</span>
@@ -186,13 +186,13 @@ export const SettingsPage: React.FC = () => {
       {currentTab === 'firm' && (
         <Card padding="lg" elevation="low">
           <form onSubmit={handleSavePractice} className="flex flex-col gap-5">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-              <h2 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
+            <div className="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-neutral-800">
+              <h2 className="font-semibold text-sm text-neutral-900 dark:text-neutral-100">
                 Practice Information
               </h2>
               {workspaceRole && (
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs text-slate-400 font-normal">Role in Firm:</span>
+                  <span className="text-xs text-neutral-400 font-normal">Role in Firm:</span>
                   <Badge variant={isOwnerOrAdmin ? 'ready' : 'neutral'}>
                     {workspaceRole.toUpperCase()}
                   </Badge>
@@ -253,7 +253,7 @@ export const SettingsPage: React.FC = () => {
               helperText="Contact support to update your primary login credentials."
             />
 
-            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+            <div className="pt-3 border-t border-neutral-100 dark:border-neutral-800 flex justify-end">
               <Button
                 variant="primary"
                 size="md"
@@ -274,15 +274,15 @@ export const SettingsPage: React.FC = () => {
           {/* Workspaces List */}
           <Card padding="lg" elevation="low" className="flex flex-col gap-4">
             <div>
-              <h2 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
+              <h2 className="font-semibold text-sm text-neutral-900 dark:text-neutral-100">
                 Your Accounting Workspaces
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
                 Switch between different accounting firms or legal entities you manage.
               </p>
             </div>
 
-            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
               {workspaces.map((ws) => {
                 const isActive = ws.id === currentWorkspace?.id;
                 return (
@@ -292,7 +292,7 @@ export const SettingsPage: React.FC = () => {
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">{ws.name}</span>
+                        <span className="font-semibold text-sm text-neutral-900 dark:text-neutral-100">{ws.name}</span>
                         <Badge variant={ws.plan === 'pro' ? 'ready' : ws.plan === 'starter' ? 'in_progress' : 'neutral'}>
                           {ws.plan.toUpperCase()}
                         </Badge>
@@ -303,8 +303,8 @@ export const SettingsPage: React.FC = () => {
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                        ID: <code className="font-mono text-[11px] text-slate-500 dark:text-slate-400">{ws.id}</code>
+                      <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-0.5">
+                        ID: <code className="font-mono text-[11px] text-neutral-500 dark:text-neutral-400">{ws.id}</code>
                       </p>
                     </div>
 
@@ -318,7 +318,7 @@ export const SettingsPage: React.FC = () => {
                         Switch Workspace
                       </Button>
                     ) : (
-                      <span className="text-xs text-slate-400 dark:text-slate-500 italic">Current Active Workspace</span>
+                      <span className="text-xs text-neutral-400 dark:text-neutral-500 italic">Current Active Workspace</span>
                     )}
                   </div>
                 );
@@ -330,10 +330,10 @@ export const SettingsPage: React.FC = () => {
           <Card padding="lg" elevation="low">
             <form onSubmit={handleCreateWorkspace} className="flex flex-col gap-4">
               <div>
-                <h2 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
+                <h2 className="font-semibold text-sm text-neutral-900 dark:text-neutral-100">
                   Create New Workspace
                 </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
                   Set up a separate accounting firm workspace with its own client directory, document requests, and audit trails.
                 </p>
               </div>
@@ -380,16 +380,16 @@ export const SettingsPage: React.FC = () => {
       {/* Tab Content: Appearance */}
       {currentTab === 'appearance' && (
         <Card padding="lg" elevation="low" className="flex flex-col gap-6">
-          <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
-            <h2 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
+          <div className="pb-3 border-b border-neutral-100 dark:border-neutral-800">
+            <h2 className="font-semibold text-sm text-neutral-900 dark:text-neutral-100">
               Application Theme
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
               Customize how DocChase looks on your device. Choose Light, Dark, or automatically match your system settings.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Light Option */}
             <button
               type="button"
@@ -397,26 +397,26 @@ export const SettingsPage: React.FC = () => {
               onClick={() => setTheme('light')}
               className={`p-4 rounded-xl border text-left flex flex-col gap-3 transition-all relative ${
                 theme === 'light'
-                  ? 'border-sky-500 bg-sky-50/40 dark:bg-sky-950/20 ring-2 ring-sky-500/20'
-                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0E1526] hover:border-slate-300 dark:hover:border-slate-700'
+                  ? 'border-neutral-900 dark:border-white bg-neutral-100/70 dark:bg-neutral-800/60 ring-2 ring-neutral-900/10 dark:ring-white/20'
+                  : 'border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#121215] hover:border-neutral-300 dark:hover:border-neutral-700'
               }`}
             >
               <div className="flex items-center justify-between w-full">
                 <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
-                  theme === 'light' ? 'bg-sky-500 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                  theme === 'light' ? 'bg-black dark:bg-white text-white dark:text-black shadow-sm' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300'
                 }`}>
                   <span className="material-symbols-outlined text-[20px]">light_mode</span>
                 </div>
                 <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                  theme === 'light' ? 'border-sky-500 bg-sky-500' : 'border-slate-300 dark:border-slate-600'
+                  theme === 'light' ? 'border-neutral-900 bg-neutral-900 dark:border-white dark:bg-white' : 'border-neutral-300 dark:border-neutral-600'
                 }`}>
-                  {theme === 'light' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                  {theme === 'light' && <div className="w-1.5 h-1.5 rounded-full bg-white dark:bg-black" />}
                 </div>
               </div>
 
               <div>
-                <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">Light</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                <h3 className="font-semibold text-sm text-neutral-900 dark:text-neutral-100">Light</h3>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 leading-relaxed">
                   Clean, high-contrast light interface designed for daytime productivity.
                 </p>
               </div>
@@ -429,27 +429,27 @@ export const SettingsPage: React.FC = () => {
               onClick={() => setTheme('dark')}
               className={`p-4 rounded-xl border text-left flex flex-col gap-3 transition-all relative ${
                 theme === 'dark'
-                  ? 'border-sky-500 bg-sky-50/40 dark:bg-sky-950/20 ring-2 ring-sky-500/20'
-                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0E1526] hover:border-slate-300 dark:hover:border-slate-700'
+                  ? 'border-neutral-900 dark:border-white bg-neutral-100/70 dark:bg-neutral-800/60 ring-2 ring-neutral-900/10 dark:ring-white/20'
+                  : 'border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#121215] hover:border-neutral-300 dark:hover:border-neutral-700'
               }`}
             >
               <div className="flex items-center justify-between w-full">
                 <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
-                  theme === 'dark' ? 'bg-sky-500 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                  theme === 'dark' ? 'bg-black dark:bg-white text-white dark:text-black shadow-sm' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300'
                 }`}>
                   <span className="material-symbols-outlined text-[20px]">dark_mode</span>
                 </div>
                 <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                  theme === 'dark' ? 'border-sky-500 bg-sky-500' : 'border-slate-300 dark:border-slate-600'
+                  theme === 'dark' ? 'border-neutral-900 bg-neutral-900 dark:border-white dark:bg-white' : 'border-neutral-300 dark:border-neutral-600'
                 }`}>
-                  {theme === 'dark' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                  {theme === 'dark' && <div className="w-1.5 h-1.5 rounded-full bg-white dark:bg-black" />}
                 </div>
               </div>
 
               <div>
-                <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">Dark</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-                  Deep slate palette aligned with DocChase's signature visual aesthetic.
+                <h3 className="font-semibold text-sm text-neutral-900 dark:text-neutral-100">Dark</h3>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 leading-relaxed">
+                  Deep charcoal palette aligned with DocChase's monochrome aesthetic.
                 </p>
               </div>
             </button>
@@ -461,39 +461,39 @@ export const SettingsPage: React.FC = () => {
               onClick={() => setTheme('system')}
               className={`p-4 rounded-xl border text-left flex flex-col gap-3 transition-all relative ${
                 theme === 'system'
-                  ? 'border-sky-500 bg-sky-50/40 dark:bg-sky-950/20 ring-2 ring-sky-500/20'
-                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0E1526] hover:border-slate-300 dark:hover:border-slate-700'
+                  ? 'border-neutral-900 dark:border-white bg-neutral-100/70 dark:bg-neutral-800/60 ring-2 ring-neutral-900/10 dark:ring-white/20'
+                  : 'border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#121215] hover:border-neutral-300 dark:hover:border-neutral-700'
               }`}
             >
               <div className="flex items-center justify-between w-full">
                 <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
-                  theme === 'system' ? 'bg-sky-500 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                  theme === 'system' ? 'bg-black dark:bg-white text-white dark:text-black shadow-sm' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300'
                 }`}>
                   <span className="material-symbols-outlined text-[20px]">desktop_windows</span>
                 </div>
                 <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                  theme === 'system' ? 'border-sky-500 bg-sky-500' : 'border-slate-300 dark:border-slate-600'
+                  theme === 'system' ? 'border-neutral-900 bg-neutral-900 dark:border-white dark:bg-white' : 'border-neutral-300 dark:border-neutral-600'
                 }`}>
-                  {theme === 'system' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                  {theme === 'system' && <div className="w-1.5 h-1.5 rounded-full bg-white dark:bg-black" />}
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center gap-1.5">
-                  <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">System</h3>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500">
+                  <h3 className="font-semibold text-sm text-neutral-900 dark:text-neutral-100">System</h3>
+                  <span className="text-[10px] uppercase font-bold text-neutral-400 dark:text-neutral-500">
                     ({resolvedTheme})
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 leading-relaxed">
                   Syncs automatically with your operating system or browser light/dark mode.
                 </p>
               </div>
             </button>
           </div>
 
-          <div className="p-3.5 bg-slate-50 dark:bg-[#0E1526] border border-slate-200 dark:border-slate-800 rounded-lg flex items-center gap-2.5 text-xs text-slate-600 dark:text-slate-400">
-            <span className="material-symbols-outlined text-[18px] text-sky-500 shrink-0">info</span>
+          <div className="p-3.5 bg-neutral-50 dark:bg-[#121215] border border-neutral-200 dark:border-neutral-800 rounded-lg flex items-center gap-2.5 text-xs text-neutral-600 dark:text-neutral-400">
+            <span className="material-symbols-outlined text-[18px] text-neutral-500 shrink-0">info</span>
             <span>
               Theme changes apply instantly across your accountant portal and persist across sessions.
             </span>

@@ -64,12 +64,12 @@ export const AuthCallbackPage: React.FC = () => {
 
   if (errorMessage) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mb-4 shadow-sm">
+      <div className="min-h-screen bg-[#fafafa] dark:bg-[#09090b] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-4 shadow-sm">
           <span className="material-symbols-outlined text-[32px]">error</span>
         </div>
-        <h1 className="text-xl font-bold text-slate-900 tracking-tight">Verification Failed</h1>
-        <p className="text-sm text-slate-600 max-w-sm mt-2 mb-6 leading-relaxed">
+        <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight">Verification Failed</h1>
+        <p className="text-sm text-neutral-600 dark:text-neutral-400 max-w-sm mt-2 mb-6 leading-relaxed">
           {errorMessage}
         </p>
         <Button
@@ -86,17 +86,17 @@ export const AuthCallbackPage: React.FC = () => {
 
   if (isVerified) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center p-6 text-center animate-fade-in">
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-lg border border-slate-200 p-8 flex flex-col items-center">
+      <div className="min-h-screen bg-[#fafafa] dark:bg-[#09090b] flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+        <div className="w-full max-w-md bg-white dark:bg-[#121215] rounded-2xl shadow-lg border border-neutral-200 dark:border-neutral-800 p-8 flex flex-col items-center">
           {/* Delight verification badge */}
-          <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mb-5 shadow-xs">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-5 shadow-xs">
             <span className="material-symbols-outlined text-[36px]">verified</span>
           </div>
 
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight">
             Email verified successfully.
           </h1>
-          <p className="text-sm text-slate-600 max-w-xs mt-2 mb-8 leading-relaxed">
+          <p className="text-sm text-neutral-600 dark:text-neutral-400 max-w-xs mt-2 mb-8 leading-relaxed">
             Your DocChase account has been verified and is ready to use.
           </p>
 
@@ -115,11 +115,11 @@ export const AuthCallbackPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center p-4">
-      <span className="material-symbols-outlined text-[36px] text-primary-container animate-spin mb-3">
+    <div className="min-h-screen bg-[#fafafa] dark:bg-[#09090b] flex flex-col items-center justify-center p-4">
+      <span className="material-symbols-outlined text-[36px] text-neutral-900 dark:text-white animate-spin mb-3">
         progress_activity
       </span>
-      <p className="text-xs text-slate-500 font-medium">Verifying account confirmation...</p>
+      <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Verifying account confirmation...</p>
     </div>
   );
 };

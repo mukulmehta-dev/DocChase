@@ -138,10 +138,10 @@ export const RequestDetailPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <span className="material-symbols-outlined text-[32px] text-primary-container animate-spin mb-2">
+        <span className="material-symbols-outlined text-[32px] text-neutral-900 dark:text-white animate-spin mb-2">
           progress_activity
         </span>
-        <p className="text-xs text-slate-500">Loading request workspace...</p>
+        <p className="text-xs text-neutral-500 dark:text-neutral-400">Loading collection request details...</p>
       </div>
     );
   }
@@ -149,7 +149,7 @@ export const RequestDetailPage: React.FC = () => {
   if (!request) {
     return (
       <div className="text-center py-16">
-        <h2 className="text-lg font-bold text-slate-900">Request not found</h2>
+        <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Request not found</h2>
         <Button variant="secondary" size="sm" onClick={() => navigate('/requests')} className="mt-4">
           Return to Requests
         </Button>
@@ -169,17 +169,17 @@ export const RequestDetailPage: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate('/requests')}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
           >
             <span className="material-symbols-outlined text-[20px]">arrow_back</span>
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{request.title}</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">{request.title}</h1>
               <Badge variant={request.status}>{request.status?.toUpperCase()}</Badge>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Client: <strong className="text-slate-700 dark:text-slate-200">{(request as any).client_name || request.client?.name}</strong> • Period: {request.period} • Due: {request.due_date}
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+              Client: <strong className="text-neutral-700 dark:text-neutral-200">{(request as any).client_name || request.client?.name}</strong> • Period: {request.period} • Due: {request.due_date}
             </p>
           </div>
         </div>
@@ -200,12 +200,12 @@ export const RequestDetailPage: React.FC = () => {
       </div>
 
       {/* Shareable Client Link Bar */}
-      <Card padding="md" elevation="low" className="bg-blue-50/40 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900/50">
+      <Card padding="md" elevation="low" className="bg-neutral-50 dark:bg-[#121215] border-neutral-200 dark:border-neutral-800">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-xs">
-            <span className="material-symbols-outlined text-[18px] text-primary-container dark:text-sky-400">lock</span>
-            <span className="font-semibold text-slate-800 dark:text-slate-200">Client Secure Upload Link:</span>
-            <span className="font-mono text-[11px] text-slate-600 dark:text-slate-400 truncate max-w-xs sm:max-w-md">
+            <span className="material-symbols-outlined text-[18px] text-neutral-900 dark:text-white">lock</span>
+            <span className="font-semibold text-neutral-800 dark:text-neutral-200">Client Secure Upload Link:</span>
+            <span className="font-mono text-[11px] text-neutral-600 dark:text-neutral-400 truncate max-w-xs sm:max-w-md">
               {clientPortalUrl}
             </span>
           </div>
@@ -229,15 +229,15 @@ export const RequestDetailPage: React.FC = () => {
       {/* Progress Metric Bar */}
       <Card padding="md" elevation="low">
         <div className="flex items-center justify-between text-xs mb-2">
-          <span className="font-semibold text-slate-700 dark:text-slate-300">Readiness Verification</span>
-          <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
+          <span className="font-semibold text-neutral-700 dark:text-neutral-300">Readiness Verification</span>
+          <span className="font-bold text-neutral-900 dark:text-neutral-100 tabular-nums">
             {approvedCount} of {items.length} Approved ({requiredCount} Required)
           </span>
         </div>
-        <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+        <div className="w-full h-2.5 bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-300 ${
-              isReady ? 'bg-emerald-500' : 'bg-primary-container'
+              isReady ? 'bg-emerald-500' : 'bg-neutral-900 dark:bg-white'
             }`}
             style={{ width: `${items.length > 0 ? (approvedCount / items.length) * 100 : 0}%` }}
           />
@@ -246,7 +246,7 @@ export const RequestDetailPage: React.FC = () => {
 
       {/* Checklist Items Breakdown */}
       <div className="flex flex-col gap-3">
-        <h2 className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+        <h2 className="text-xs font-bold text-neutral-600 dark:text-neutral-400 uppercase tracking-wider">
           Requested Document Items ({items.length})
         </h2>
 
@@ -254,23 +254,23 @@ export const RequestDetailPage: React.FC = () => {
           <Card key={item.id} elevation="low" className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">{item.name}</span>
+                <span className="font-semibold text-sm text-neutral-900 dark:text-neutral-100">{item.name}</span>
                 {item.required ? (
                   <span className="text-[10px] font-bold text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 px-1.5 py-0.5 rounded border border-rose-200/50 dark:border-rose-900/50">
                     Required
                   </span>
                 ) : (
-                  <span className="text-[10px] text-slate-400">Optional</span>
+                  <span className="text-[10px] text-neutral-400">Optional</span>
                 )}
                 <Badge variant={item.status}>{item.status.toUpperCase()}</Badge>
               </div>
               {item.description && (
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{item.description}</p>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">{item.description}</p>
               )}
 
               {/* Document metadata or rejection note */}
               {(item as any).file_name && (
-                <div className="mt-2 text-[11px] text-slate-600 dark:text-slate-300 flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded border border-slate-200 dark:border-slate-800 w-fit">
+                <div className="mt-2 text-[11px] text-neutral-600 dark:text-neutral-300 flex items-center gap-1.5 bg-neutral-50 dark:bg-neutral-900 px-2 py-1 rounded border border-neutral-200 dark:border-neutral-800 w-fit">
                   <span className="material-symbols-outlined text-[14px]">description</span>
                   <span>Uploaded: {(item as any).file_name}</span>
                 </div>
@@ -337,7 +337,7 @@ export const RequestDetailPage: React.FC = () => {
             helperText="The client will see this note directly on their upload portal."
           />
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 mt-2">
+          <div className="flex justify-end gap-2 pt-3 border-t border-neutral-100 dark:border-neutral-800 mt-2">
             <Button variant="secondary" size="md" type="button" onClick={() => setRejectingItem(null)}>
               Cancel
             </Button>

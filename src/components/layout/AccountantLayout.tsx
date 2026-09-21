@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
+import { Logo } from '../ui/Logo';
+import { PageTransitionBar } from '../ui/PageTransitionBar';
 
 export const AccountantLayout: React.FC = () => {
   const { profile, currentWorkspace, workspaces, switchWorkspace, signOut } = useAuth();
@@ -26,35 +28,32 @@ export const AccountantLayout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#090D16] flex flex-col text-slate-900 dark:text-slate-100">
+    <div className="min-h-screen bg-[#fafafa] dark:bg-[#09090b] flex flex-col text-neutral-900 dark:text-neutral-100">
+      <PageTransitionBar />
+
       {/* Top Fixed Header */}
-      <header className="fixed top-0 inset-x-0 z-40 h-16 bg-white dark:bg-[#0E1526] border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 sm:px-6 shadow-[0_1px_2px_rgba(0,0,0,0.03)] dark:shadow-[0_1px_2px_rgba(0,0,0,0.2)]">
+      <header className="fixed top-0 inset-x-0 z-40 h-16 bg-white dark:bg-[#0e0e11] border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between px-4 sm:px-6 shadow-[0_1px_2px_rgba(0,0,0,0.03)] dark:shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
         {/* Left: Brand & Firm Switcher */}
         <div className="flex items-center gap-3 min-w-0">
           <div
             onClick={() => navigate('/dashboard')}
             className="cursor-pointer flex items-center gap-2.5"
           >
-            <div className="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-white shadow-sm flex-shrink-0">
-              <span className="material-symbols-outlined text-[19px]">fact_check</span>
-            </div>
-            <span className="font-bold text-base tracking-tight text-slate-900 dark:text-slate-100 hidden sm:inline">
-              DocChase
-            </span>
+            <Logo size="md" />
           </div>
 
-          <div className="h-5 w-[1px] bg-slate-200 dark:bg-slate-800 mx-1 hidden sm:block" />
+          <div className="h-5 w-[1px] bg-neutral-200 dark:border-neutral-800 mx-1 hidden sm:block" />
 
           {/* Firm / Workspace Selector Dropdown */}
           <div className="relative">
             <button
               onClick={() => setWorkspaceDropdownOpen(!workspaceDropdownOpen)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors text-left"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800/60 transition-colors text-left"
             >
-              <span className="font-medium text-xs sm:text-sm text-slate-700 dark:text-slate-200 truncate max-w-[140px] sm:max-w-[180px]">
+              <span className="font-medium text-xs sm:text-sm text-neutral-700 dark:text-neutral-200 truncate max-w-[140px] sm:max-w-[180px]">
                 {currentWorkspace?.name || 'My Firm'}
               </span>
-              <span className="material-symbols-outlined text-[16px] text-slate-400 dark:text-slate-500">
+              <span className="material-symbols-outlined text-[16px] text-neutral-400 dark:text-neutral-500">
                 unfold_more
               </span>
             </button>
@@ -65,8 +64,8 @@ export const AccountantLayout: React.FC = () => {
                   className="fixed inset-0 z-10"
                   onClick={() => setWorkspaceDropdownOpen(false)}
                 />
-                <div className="absolute left-0 mt-1.5 w-60 bg-white dark:bg-[#0E1526] rounded-xl shadow-lg dark:shadow-2xl border border-slate-200 dark:border-slate-800 py-1.5 z-20 animate-fade-in">
-                  <div className="px-3 py-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                <div className="absolute left-0 mt-1.5 w-60 bg-white dark:bg-[#121215] rounded-xl shadow-lg dark:shadow-2xl border border-neutral-200 dark:border-neutral-800 py-1.5 z-20 animate-fade-in">
+                  <div className="px-3 py-1.5 text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">
                     Workspaces
                   </div>
                   {workspaces.map((ws) => (
@@ -76,27 +75,27 @@ export const AccountantLayout: React.FC = () => {
                         switchWorkspace(ws.id);
                         setWorkspaceDropdownOpen(false);
                       }}
-                      className={`w-full px-3 py-2 text-left text-xs sm:text-sm flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors ${
+                      className={`w-full px-3 py-2 text-left text-xs sm:text-sm flex items-center justify-between hover:bg-neutral-50 dark:hover:bg-neutral-800/60 transition-colors ${
                         ws.id === currentWorkspace?.id
-                          ? 'font-semibold text-primary-container dark:text-sky-400 bg-blue-50/50 dark:bg-sky-950/40'
-                          : 'text-slate-700 dark:text-slate-300'
+                          ? 'font-semibold text-neutral-900 dark:text-white bg-neutral-100 dark:bg-neutral-800'
+                          : 'text-neutral-700 dark:text-neutral-300'
                       }`}
                     >
                       <span className="truncate">{ws.name}</span>
                       {ws.id === currentWorkspace?.id && (
-                        <span className="material-symbols-outlined text-[16px] text-primary-container dark:text-sky-400">
+                        <span className="material-symbols-outlined text-[16px] text-neutral-900 dark:text-white">
                           check
                         </span>
                       )}
                     </button>
                   ))}
-                  <div className="h-[1px] bg-slate-100 dark:bg-slate-800 my-1" />
+                  <div className="h-[1px] bg-neutral-100 dark:bg-neutral-800 my-1" />
                   <button
                     onClick={() => {
                       setWorkspaceDropdownOpen(false);
                       navigate('/settings?tab=workspace');
                     }}
-                    className="w-full px-3 py-2 text-left text-xs text-primary-container dark:text-sky-400 font-medium hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center gap-1.5"
+                    className="w-full px-3 py-2 text-left text-xs text-neutral-900 dark:text-white font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800/60 flex items-center gap-1.5"
                   >
                     <span className="material-symbols-outlined text-[16px]">add</span>
                     Create Workspace
@@ -123,7 +122,7 @@ export const AccountantLayout: React.FC = () => {
           <div className="relative">
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-white font-medium text-xs shadow-sm hover:opacity-95 transition-opacity"
+              className="w-8 h-8 rounded-full bg-black dark:bg-white text-white dark:text-black font-semibold text-xs shadow-sm hover:opacity-90 transition-opacity border border-neutral-700 dark:border-neutral-300"
               aria-label="User profile"
             >
               {profile?.full_name ? profile.full_name.charAt(0).toUpperCase() : 'U'}
@@ -132,21 +131,21 @@ export const AccountantLayout: React.FC = () => {
             {userMenuOpen && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setUserMenuOpen(false)} />
-                <div className="absolute right-0 mt-1.5 w-56 bg-white dark:bg-[#0E1526] rounded-xl shadow-lg dark:shadow-2xl border border-slate-200 dark:border-slate-800 py-1.5 z-20 animate-fade-in">
-                  <div className="px-3.5 py-2 border-b border-slate-100 dark:border-slate-800">
-                    <p className="font-semibold text-xs text-slate-900 dark:text-slate-100 truncate">
+                <div className="absolute right-0 mt-1.5 w-56 bg-white dark:bg-[#121215] rounded-xl shadow-lg dark:shadow-2xl border border-neutral-200 dark:border-neutral-800 py-1.5 z-20 animate-fade-in">
+                  <div className="px-3.5 py-2 border-b border-neutral-100 dark:border-neutral-800">
+                    <p className="font-semibold text-xs text-neutral-900 dark:text-neutral-100 truncate">
                       {profile?.full_name || 'Accountant'}
                     </p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{profile?.email}</p>
+                    <p className="text-[11px] text-neutral-500 dark:text-neutral-400 truncate">{profile?.email}</p>
                   </div>
                   <button
                     onClick={() => {
                       setUserMenuOpen(false);
                       navigate('/settings');
                     }}
-                    className="w-full px-3.5 py-2 text-left text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center gap-2"
+                    className="w-full px-3.5 py-2 text-left text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800/60 flex items-center gap-2"
                   >
-                    <span className="material-symbols-outlined text-[16px] text-slate-400 dark:text-slate-500">
+                    <span className="material-symbols-outlined text-[16px] text-neutral-400 dark:text-neutral-500">
                       settings
                     </span>
                     Settings
@@ -156,14 +155,14 @@ export const AccountantLayout: React.FC = () => {
                       setUserMenuOpen(false);
                       navigate('/billing');
                     }}
-                    className="w-full px-3.5 py-2 text-left text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center gap-2"
+                    className="w-full px-3.5 py-2 text-left text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800/60 flex items-center gap-2"
                   >
-                    <span className="material-symbols-outlined text-[16px] text-slate-400 dark:text-slate-500">
+                    <span className="material-symbols-outlined text-[16px] text-neutral-400 dark:text-neutral-500">
                       credit_card
                     </span>
                     Plan & Billing
                   </button>
-                  <div className="h-[1px] bg-slate-100 dark:bg-slate-800 my-1" />
+                  <div className="h-[1px] bg-neutral-100 dark:bg-neutral-800 my-1" />
                   <button
                     onClick={() => {
                       setUserMenuOpen(false);
@@ -184,17 +183,17 @@ export const AccountantLayout: React.FC = () => {
       {/* Main App Container */}
       <div className="flex-1 flex pt-16">
         {/* Desktop Sidebar (Persistent 240px) */}
-        <aside className="hidden lg:flex w-60 flex-col bg-white dark:bg-[#0E1526] border-r border-slate-200 dark:border-slate-800 fixed top-16 bottom-0 z-30 p-3 overflow-y-auto">
+        <aside className="hidden lg:flex w-60 flex-col bg-white dark:bg-[#0e0e11] border-r border-neutral-200 dark:border-neutral-800 fixed top-16 bottom-0 z-30 p-3 overflow-y-auto">
           <nav className="flex flex-col gap-1 flex-1">
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
+                  `flex items-center gap-3 px-3 py-2 rounded-lg text-xs sm:text-sm transition-all duration-150 ${
                     isActive
-                      ? 'bg-blue-50 dark:bg-sky-950/50 text-primary-container dark:text-sky-400 font-semibold'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-100'
+                      ? 'bg-neutral-900 text-white dark:bg-neutral-800/90 dark:text-white dark:border dark:border-white/10 font-semibold shadow-sm'
+                      : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800/60 hover:text-neutral-900 dark:hover:text-neutral-100 font-medium'
                   }`
                 }
               >
@@ -205,16 +204,16 @@ export const AccountantLayout: React.FC = () => {
           </nav>
 
           {/* Sidebar Footer Plan Indicator */}
-          <div className="mt-auto p-3 bg-slate-50 dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-xl">
+          <div className="mt-auto p-3 bg-neutral-50 dark:bg-[#121215] border border-neutral-200 dark:border-neutral-800 rounded-xl">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              <span className="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                 Active Plan
               </span>
-              <span className="text-[11px] font-bold text-primary-container dark:text-sky-300 uppercase px-1.5 py-0.5 rounded bg-blue-100/60 dark:bg-sky-950/60">
+              <span className="text-[11px] font-bold text-neutral-900 dark:text-white uppercase px-2 py-0.5 rounded-md bg-neutral-200/70 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700">
                 {currentWorkspace?.plan || 'Free'}
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Stop chasing. Automated document tracking.</p>
+            <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1.5 leading-relaxed">Stop chasing. Automated document tracking.</p>
           </div>
         </aside>
 
@@ -226,14 +225,14 @@ export const AccountantLayout: React.FC = () => {
         </main>
       </div>
 
-      {/* Mobile Bottom Navigation Bar (Stitch Compliant) */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-[#0E1526]/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 pb-safe shadow-[0_-1px_8px_rgba(0,0,0,0.03)] dark:shadow-[0_-1px_8px_rgba(0,0,0,0.2)]">
+      {/* Mobile Bottom Navigation Bar */}
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-[#0e0e11]/95 backdrop-blur-md border-t border-neutral-200 dark:border-neutral-800 pb-safe shadow-[0_-1px_8px_rgba(0,0,0,0.03)] dark:shadow-[0_-1px_8px_rgba(0,0,0,0.3)]">
         <div className="flex items-center justify-around h-14">
           <NavLink
             to="/dashboard"
             className={({ isActive }) =>
               `flex flex-col items-center justify-center flex-1 py-1 gap-0.5 transition-colors ${
-                isActive ? 'text-primary-container dark:text-sky-400 font-medium' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                isActive ? 'text-neutral-900 dark:text-white font-semibold' : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
               }`
             }
           >
@@ -245,7 +244,7 @@ export const AccountantLayout: React.FC = () => {
             to="/requests"
             className={({ isActive }) =>
               `flex flex-col items-center justify-center flex-1 py-1 gap-0.5 transition-colors ${
-                isActive ? 'text-primary-container dark:text-sky-400 font-medium' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                isActive ? 'text-neutral-900 dark:text-white font-semibold' : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
               }`
             }
           >
@@ -257,7 +256,7 @@ export const AccountantLayout: React.FC = () => {
             to="/clients"
             className={({ isActive }) =>
               `flex flex-col items-center justify-center flex-1 py-1 gap-0.5 transition-colors ${
-                isActive ? 'text-primary-container dark:text-sky-400 font-medium' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                isActive ? 'text-neutral-900 dark:text-white font-semibold' : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
               }`
             }
           >
@@ -269,7 +268,7 @@ export const AccountantLayout: React.FC = () => {
             to="/documents"
             className={({ isActive }) =>
               `flex flex-col items-center justify-center flex-1 py-1 gap-0.5 transition-colors ${
-                isActive ? 'text-primary-container dark:text-sky-400 font-medium' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                isActive ? 'text-neutral-900 dark:text-white font-semibold' : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
               }`
             }
           >
@@ -281,7 +280,7 @@ export const AccountantLayout: React.FC = () => {
             to="/settings"
             className={({ isActive }) =>
               `flex flex-col items-center justify-center flex-1 py-1 gap-0.5 transition-colors ${
-                isActive ? 'text-primary-container dark:text-sky-400 font-medium' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                isActive ? 'text-neutral-900 dark:text-white font-semibold' : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
               }`
             }
           >

@@ -93,26 +93,26 @@ export const ClientPortalPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center p-4">
-        <span className="material-symbols-outlined text-[36px] text-primary-container animate-spin mb-3">
+      <div className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center p-4">
+        <span className="material-symbols-outlined text-[36px] text-neutral-900 animate-spin mb-3">
           progress_activity
         </span>
-        <p className="text-xs text-slate-500 font-medium">Verifying secure portal access...</p>
+        <p className="text-xs text-neutral-500 font-medium">Verifying secure portal access...</p>
       </div>
     );
   }
 
   if (error || !portalData) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center p-4 text-center">
+      <div className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center p-4 text-center">
         <div className="w-14 h-14 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mb-3 shadow-sm">
           <span className="material-symbols-outlined text-[28px]">link_off</span>
         </div>
-        <h1 className="font-bold text-lg text-slate-900">Request Link Invalid or Revoked</h1>
-        <p className="text-xs text-slate-500 max-w-sm mt-1 mb-5">
+        <h1 className="font-bold text-lg text-neutral-900">Request Link Invalid or Revoked</h1>
+        <p className="text-xs text-neutral-500 max-w-sm mt-1 mb-5">
           {error || 'This link may have expired or was cancelled by your accounting firm.'}
         </p>
-        <p className="text-[11px] text-slate-400">
+        <p className="text-[11px] text-neutral-400">
           Please contact your accountant or bookkeeper to obtain a new secure link.
         </p>
       </div>
@@ -126,26 +126,26 @@ export const ClientPortalPage: React.FC = () => {
   const isComplete = requiredItems.length > 0 && approvedRequiredCount === requiredItems.length;
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center py-6 sm:py-10 px-4 sm:px-6">
+    <div className="min-h-screen bg-[#fafafa] flex flex-col items-center py-6 sm:py-10 px-4 sm:px-6">
       <div className="w-full max-w-xl flex flex-col gap-5">
         {/* Top Firm Branding Card */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm">
-          <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-100">
+        <div className="bg-white rounded-2xl border border-neutral-200 p-5 sm:p-6 shadow-sm">
+          <div className="flex items-start justify-between gap-4 pb-4 border-b border-neutral-100">
             <div>
               <div className="flex items-center gap-1.5 mb-1">
-                <span className="w-2 h-2 rounded-full bg-primary-container" />
-                <span className="text-[11px] font-bold text-primary-container uppercase tracking-wider">
+                <span className="w-2 h-2 rounded-full bg-neutral-900" />
+                <span className="text-[11px] font-bold text-neutral-900 uppercase tracking-wider">
                   {portalData.workspace?.name || 'DocChase Accounting'}
                 </span>
               </div>
-              <h1 className="font-bold text-lg sm:text-xl text-slate-900">{portalData.request.title}</h1>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Client: <strong className="text-slate-700">{portalData.client.name}</strong> • Period: {portalData.request.period}
+              <h1 className="font-bold text-lg sm:text-xl text-neutral-900">{portalData.request.title}</h1>
+              <p className="text-xs text-neutral-500 mt-0.5">
+                Client: <strong className="text-neutral-700">{portalData.client.name}</strong> • Period: {portalData.request.period}
               </p>
             </div>
             <div className="text-right flex-shrink-0">
-              <span className="text-[11px] font-medium text-slate-400 block">Due Date</span>
-              <span className="text-xs sm:text-sm font-bold text-slate-900 bg-slate-100 px-2.5 py-1 rounded-md">
+              <span className="text-[11px] font-medium text-neutral-400 block">Due Date</span>
+              <span className="text-xs sm:text-sm font-bold text-neutral-900 bg-neutral-100 px-2.5 py-1 rounded-md">
                 {portalData.request.due_date}
               </span>
             </div>
@@ -154,12 +154,12 @@ export const ClientPortalPage: React.FC = () => {
           {/* Progress Bar */}
           <div className="pt-4 flex flex-col gap-1.5">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-medium text-slate-600">Verification Readiness</span>
-              <span className="font-bold text-slate-900 tabular-nums">
+              <span className="font-medium text-neutral-600">Verification Readiness</span>
+              <span className="font-bold text-neutral-900 tabular-nums">
                 {approvedCount} of {items.length} Approved ({Math.round((approvedCount / (items.length || 1)) * 100)}%)
               </span>
             </div>
-            <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+            <div className="w-full h-2.5 bg-neutral-100 rounded-full overflow-hidden">
               <div
                 className="h-full bg-emerald-500 transition-all duration-300 rounded-full"
                 style={{ width: `${(approvedCount / (items.length || 1)) * 100}%` }}
@@ -190,7 +190,7 @@ export const ClientPortalPage: React.FC = () => {
 
         {/* Document Checklist Items */}
         <div className="flex flex-col gap-3">
-          <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">
+          <h2 className="text-xs font-bold text-neutral-500 uppercase tracking-wider px-1">
             Requested Documents ({items.length})
           </h2>
 
@@ -205,23 +205,23 @@ export const ClientPortalPage: React.FC = () => {
                     ? 'border-rose-300 ring-2 ring-rose-100'
                     : item.status === 'approved'
                     ? 'border-emerald-200 bg-emerald-50/20'
-                    : 'border-slate-200'
+                    : 'border-neutral-200'
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-sm text-slate-900">{item.name}</span>
+                      <span className="font-semibold text-sm text-neutral-900">{item.name}</span>
                       {item.required ? (
                         <span className="text-[10px] font-bold text-rose-700 bg-rose-50 px-1.5 py-0.2 rounded border border-rose-200">
                           Required
                         </span>
                       ) : (
-                        <span className="text-[10px] text-slate-400">Optional</span>
+                        <span className="text-[10px] text-neutral-400">Optional</span>
                       )}
                     </div>
                     {item.description && (
-                      <p className="text-xs text-slate-500 mt-0.5">{item.description}</p>
+                      <p className="text-xs text-neutral-500 mt-0.5">{item.description}</p>
                     )}
                   </div>
 
@@ -255,14 +255,14 @@ export const ClientPortalPage: React.FC = () => {
                     />
 
                     {isUploadingThis ? (
-                      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg flex flex-col gap-2 text-center">
-                        <div className="flex items-center justify-between text-xs text-blue-900 font-medium">
+                      <div className="p-4 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg flex flex-col gap-2 text-center">
+                        <div className="flex items-center justify-between text-xs text-neutral-900 dark:text-neutral-100 font-medium">
                           <span>Uploading & encrypting file...</span>
                           <span>{uploadProgress}%</span>
                         </div>
-                        <div className="w-full h-1.5 bg-blue-100 rounded-full overflow-hidden">
+                        <div className="w-full h-1.5 bg-neutral-200 dark:bg-neutral-700 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-primary-container transition-all"
+                            className="h-full bg-neutral-900 dark:bg-white transition-all"
                             style={{ width: `${uploadProgress}%` }}
                           />
                         </div>
@@ -270,12 +270,12 @@ export const ClientPortalPage: React.FC = () => {
                     ) : (
                       <div
                         onClick={() => handleTriggerUpload(item.id)}
-                        className="border-2 border-dashed border-slate-200 hover:border-primary-container rounded-lg p-3 text-center transition-colors bg-slate-50/60 hover:bg-blue-50/30 cursor-pointer flex items-center justify-center gap-2 select-none"
+                        className="border-2 border-dashed border-neutral-200 hover:border-neutral-900 rounded-lg p-3 text-center transition-colors bg-neutral-50/60 hover:bg-neutral-100/60 cursor-pointer flex items-center justify-center gap-2 select-none"
                       >
-                        <span className="material-symbols-outlined text-[18px] text-primary-container">
+                        <span className="material-symbols-outlined text-[18px] text-neutral-900">
                           cloud_upload
                         </span>
-                        <span className="text-xs font-semibold text-slate-700">
+                        <span className="text-xs font-semibold text-neutral-700">
                           {item.status === 'rejected'
                             ? 'Upload Replacement Document'
                             : item.status === 'uploaded'
@@ -288,9 +288,9 @@ export const ClientPortalPage: React.FC = () => {
                 )}
 
                 {(item.current_document?.original_filename || (item as any).file_name) && (
-                  <div className="text-[11px] text-slate-600 flex items-center justify-between pt-1 border-t border-slate-100">
+                  <div className="text-[11px] text-neutral-600 flex items-center justify-between pt-1 border-t border-neutral-100">
                     <span className="flex items-center gap-1.5 truncate">
-                      <span className="material-symbols-outlined text-[15px] text-slate-400">attachment</span>
+                      <span className="material-symbols-outlined text-[15px] text-neutral-400">attachment</span>
                       <strong className="truncate font-medium">
                         {item.current_document?.original_filename || (item as any).file_name}
                       </strong>
@@ -306,7 +306,7 @@ export const ClientPortalPage: React.FC = () => {
         </div>
 
         {/* Bank-Grade Security Footer */}
-        <div className="text-center py-6 text-xs text-slate-400 flex items-center justify-center gap-1.5">
+        <div className="text-center py-6 text-xs text-neutral-400 flex items-center justify-center gap-1.5">
           <span className="material-symbols-outlined text-[14px]">lock</span>
           <span>Secured with 256-bit TLS bank-level document encryption.</span>
         </div>

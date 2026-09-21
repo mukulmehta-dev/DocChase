@@ -1,4 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
-  <rect width="48" height="48" rx="12" fill="#1d4ed8"/>
-  <path d="M14 24h20M26 16l8 8-8 8" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect width="48" height="48" rx="12" fill="#09090b"/>
+  <rect width="48" height="48" rx="12" fill="none" stroke="#27272a" stroke-width="1.5"/>
+  <!-- Document silhouette with folded top-right corner -->
+  <path d="M15 9h13l8 8v20a2 2 0 0 1-2 2H15a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2z" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Fold corner crease -->
+  <path d="M28 9v8h8" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Minimalist document horizontal bars -->
+  <path d="M19 24h10M19 30h6" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
 </svg>

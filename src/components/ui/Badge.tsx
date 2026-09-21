@@ -1,6 +1,26 @@
 import React from 'react';
 import { clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { extendTailwindMerge } from 'tailwind-merge';
+
+const customTwMerge = extendTailwindMerge({
+  extend: {
+    classGroups: {
+      'font-size': [
+        'text-display',
+        'text-display-mobile',
+        'text-headline-lg',
+        'text-headline-md',
+        'text-headline-sm',
+        'text-body-lg',
+        'text-body-md',
+        'text-body-sm',
+        'text-label-md',
+        'text-label-sm',
+        'text-tabular-numeric',
+      ],
+    },
+  },
+});
 
 export type BadgeVariant =
   | 'ready'
@@ -54,7 +74,7 @@ export const Badge: React.FC<BadgeProps> = ({
         };
       case 'uploaded':
         return {
-          classes: 'bg-blue-50 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800/60',
+          classes: 'bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 border-neutral-300 dark:border-neutral-700',
           defaultIcon: 'upload_file',
         };
       case 'overdue':
@@ -67,13 +87,13 @@ export const Badge: React.FC<BadgeProps> = ({
         };
       case 'draft':
         return {
-          classes: 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700',
+          classes: 'bg-neutral-100 dark:bg-neutral-800/60 text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-neutral-700',
           defaultIcon: 'edit_note',
         };
       case 'neutral':
       default:
         return {
-          classes: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700',
+          classes: 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700',
           defaultIcon: '',
         };
     }
@@ -84,7 +104,7 @@ export const Badge: React.FC<BadgeProps> = ({
 
   return (
     <span
-      className={twMerge(
+      className={customTwMerge(
         clsx(
           'inline-flex items-center font-medium border select-none transition-colors rounded-md',
           size === 'sm' ? 'px-2 py-0.5 text-label-sm gap-1' : 'px-2.5 py-1 text-label-md gap-1.5',

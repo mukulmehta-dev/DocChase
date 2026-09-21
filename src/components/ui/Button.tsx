@@ -1,6 +1,26 @@
 import React from 'react';
 import { clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { extendTailwindMerge } from 'tailwind-merge';
+
+const customTwMerge = extendTailwindMerge({
+  extend: {
+    classGroups: {
+      'font-size': [
+        'text-display',
+        'text-display-mobile',
+        'text-headline-lg',
+        'text-headline-md',
+        'text-headline-sm',
+        'text-body-lg',
+        'text-body-md',
+        'text-body-sm',
+        'text-label-md',
+        'text-label-sm',
+        'text-tabular-numeric',
+      ],
+    },
+  },
+});
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'destructive' | 'ghost' | 'outline' | 'secondary-dark' | 'outline-dark';
@@ -28,23 +48,23 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-medium transition-all duration-150 select-none rounded-lg disabled:opacity-50 disabled:pointer-events-none active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#070B14]';
+      'inline-flex items-center justify-center font-medium transition-all duration-150 select-none rounded-lg disabled:opacity-50 disabled:pointer-events-none active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 dark:focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-black';
 
     const variantStyles = {
       primary:
-        'bg-sky-500 text-white border border-sky-400 shadow-[0_1px_2px_rgba(14,165,233,0.25)] hover:bg-sky-400 hover:border-sky-300 hover:shadow-[0_0_20px_rgba(14,165,233,0.30)] active:bg-sky-600 tactile-rim',
+        'bg-neutral-900 dark:bg-white text-white dark:text-neutral-950 border border-neutral-800 dark:border-neutral-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.06),0_0_20px_rgba(255,255,255,0.18)] hover:bg-neutral-800 dark:hover:bg-neutral-100 hover:border-neutral-700 dark:hover:border-neutral-300 active:bg-neutral-950 dark:active:bg-neutral-200 tactile-rim',
       secondary:
-        'bg-white dark:bg-slate-800 text-on-surface dark:text-slate-100 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600 shadow-sm tactile-rim-white',
+        'bg-neutral-100 dark:bg-neutral-800/80 text-neutral-900 dark:text-neutral-100 border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600 shadow-sm tactile-rim-white',
       destructive:
-        'bg-white dark:bg-slate-800 text-error dark:text-rose-400 border border-error-container dark:border-rose-900/50 hover:bg-error-container/20 dark:hover:bg-rose-950/40 shadow-sm',
+        'bg-white dark:bg-neutral-900 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/40 shadow-sm',
       ghost:
-        'bg-transparent text-on-surface-variant dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-on-surface dark:hover:text-slate-100',
+        'bg-transparent text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-neutral-100',
       outline:
-        'bg-transparent text-sky-600 dark:text-sky-400 border border-sky-400 dark:border-sky-500/50 hover:bg-sky-50 dark:hover:bg-sky-950/40 active:bg-sky-100 dark:active:bg-sky-900/50',
+        'bg-transparent text-neutral-900 dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 active:bg-neutral-200 dark:active:bg-neutral-700',
       'secondary-dark':
-        'bg-white/[0.05] text-slate-200 border border-white/[0.12] hover:bg-slate-800/80 hover:border-sky-500/50 hover:text-white hover:shadow-[0_0_16px_rgba(14,165,233,0.18)] active:bg-white/[0.08]',
+        'bg-black dark:bg-[#121215] text-white border border-white/[0.16] hover:bg-neutral-900 dark:hover:bg-[#18181b] hover:border-white/35 hover:shadow-[0_0_16px_rgba(255,255,255,0.08)] active:bg-neutral-950',
       'outline-dark':
-        'bg-transparent text-slate-300 border border-white/[0.12] hover:bg-slate-800/70 hover:border-sky-400/60 hover:text-white hover:shadow-[0_0_16px_rgba(14,165,233,0.18)] active:bg-white/[0.05]',
+        'bg-transparent text-neutral-200 border border-white/[0.16] hover:bg-white/[0.06] hover:border-white/40 hover:text-white hover:shadow-[0_0_16px_rgba(255,255,255,0.08)] active:bg-white/[0.04]',
     };
 
     const sizeStyles = {
@@ -63,7 +83,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         disabled={disabled || isLoading}
-        className={twMerge(
+        className={customTwMerge(
           clsx(
             baseStyles,
             variantStyles[variant],

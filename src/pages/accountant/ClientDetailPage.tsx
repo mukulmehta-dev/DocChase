@@ -68,10 +68,10 @@ export const ClientDetailPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <span className="material-symbols-outlined text-[32px] text-primary-container animate-spin mb-2">
+        <span className="material-symbols-outlined text-[32px] text-neutral-900 dark:text-white animate-spin mb-2">
           progress_activity
         </span>
-        <p className="text-xs text-slate-500">Loading client profile...</p>
+        <p className="text-xs text-neutral-500">Loading client profile...</p>
       </div>
     );
   }
@@ -79,7 +79,7 @@ export const ClientDetailPage: React.FC = () => {
   if (!client) {
     return (
       <div className="text-center py-16">
-        <h2 className="text-lg font-bold text-slate-900">Client not found</h2>
+        <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Client not found</h2>
         <Button variant="secondary" size="sm" onClick={() => navigate('/clients')} className="mt-4">
           Return to Clients Directory
         </Button>
@@ -94,20 +94,20 @@ export const ClientDetailPage: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate('/clients')}
-            className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-neutral-400 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
           >
             <span className="material-symbols-outlined text-[20px]">arrow_back</span>
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+              <h1 className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
                 {client.company_name || client.name}
               </h1>
               <Badge variant={client.status === 'active' ? 'ready' : 'neutral'}>
                 {client.status === 'active' ? 'Active Client' : 'Archived Client'}
               </Badge>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
               Primary Contact: {client.name} • Email: {client.email}
             </p>
           </div>
@@ -142,7 +142,7 @@ export const ClientDetailPage: React.FC = () => {
               Create Request
             </Button>
           ) : (
-            <div className="text-[11px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg flex items-center gap-1">
+            <div className="text-[11px] text-neutral-500 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 rounded-lg flex items-center gap-1">
               <span className="material-symbols-outlined text-[14px]">info</span>
               <span>Reactivate client to create new requests</span>
             </div>
@@ -153,21 +153,21 @@ export const ClientDetailPage: React.FC = () => {
       {/* Client Overview Card */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card elevation="low" className="p-4">
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Contact Details</span>
-          <div className="mt-2 text-xs flex flex-col gap-1.5 text-slate-700 dark:text-slate-300">
+          <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Contact Details</span>
+          <div className="mt-2 text-xs flex flex-col gap-1.5 text-neutral-700 dark:text-neutral-300">
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[15px] text-slate-400 dark:text-slate-500">mail</span>
+              <span className="material-symbols-outlined text-[15px] text-neutral-400 dark:text-neutral-500">mail</span>
               <span>{client.email}</span>
             </div>
             {client.phone && (
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[15px] text-slate-400 dark:text-slate-500">call</span>
+                <span className="material-symbols-outlined text-[15px] text-neutral-400 dark:text-neutral-500">call</span>
                 <span>{client.phone}</span>
               </div>
             )}
             {client.notes && (
-              <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400">
-                <span className="text-[11px] text-slate-400 dark:text-slate-500 block font-medium">Notes:</span>
+              <div className="mt-2 pt-2 border-t border-neutral-100 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400">
+                <span className="text-[11px] text-neutral-400 dark:text-neutral-500 block font-medium">Notes:</span>
                 <p className="text-xs mt-0.5 whitespace-pre-wrap">{client.notes}</p>
               </div>
             )}
@@ -175,14 +175,14 @@ export const ClientDetailPage: React.FC = () => {
         </Card>
 
         <Card elevation="low" className="p-4">
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Active Document Cycles</span>
-          <div className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100 tabular-nums">
-            {requests.length} <span className="text-xs font-normal text-slate-500 dark:text-slate-400">cycles</span>
+          <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Active Document Cycles</span>
+          <div className="mt-2 text-2xl font-bold text-neutral-900 dark:text-neutral-100 tabular-nums">
+            {requests.length} <span className="text-xs font-normal text-neutral-500 dark:text-neutral-400">cycles</span>
           </div>
         </Card>
 
         <Card elevation="low" className="p-4">
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Audit Trail Status</span>
+          <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Audit Trail Status</span>
           <div className="mt-2 flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-400 font-medium">
             <span className="material-symbols-outlined text-[16px] text-emerald-600 dark:text-emerald-400">verified</span>
             <span>All document uploads logged & verified</span>
@@ -192,13 +192,13 @@ export const ClientDetailPage: React.FC = () => {
 
       {/* Requests Section */}
       <div className="flex flex-col gap-4">
-        <h2 className="font-bold text-base text-slate-900 dark:text-slate-100">Document Requests for this Client</h2>
+        <h2 className="font-bold text-base text-neutral-900 dark:text-neutral-100">Document Requests for this Client</h2>
 
         {requests.length === 0 ? (
           <Card elevation="low" className="p-8 text-center flex flex-col items-center">
-            <span className="material-symbols-outlined text-[32px] text-slate-400 dark:text-slate-500 mb-2">autorenew</span>
-            <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">No requests dispatched yet</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mt-1 mb-4">
+            <span className="material-symbols-outlined text-[32px] text-neutral-400 dark:text-neutral-500 mb-2">autorenew</span>
+            <h3 className="font-semibold text-sm text-neutral-900 dark:text-neutral-100">No requests dispatched yet</h3>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 max-w-sm mt-1 mb-4">
               Send your first recurring or one-time document request to {client.company_name || client.name}.
             </p>
             <Button
@@ -222,10 +222,10 @@ export const ClientDetailPage: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">{r.title}</span>
+                      <span className="font-semibold text-sm text-neutral-900 dark:text-neutral-100">{r.title}</span>
                       <Badge variant={r.status}>{r.status?.toUpperCase()}</Badge>
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
                       Period: {r.period} • Due Date: {r.due_date}
                     </p>
                   </div>
@@ -256,7 +256,7 @@ export const ClientDetailPage: React.FC = () => {
         title={client.status === 'active' ? 'Archive Client' : 'Reactivate Client'}
       >
         <div className="flex flex-col gap-4">
-          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+          <p className="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed">
             {client.status === 'active' ? (
               <>
                 Are you sure you want to archive <strong>{client.company_name || client.name}</strong>?
@@ -273,7 +273,7 @@ export const ClientDetailPage: React.FC = () => {
             )}
           </p>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100 dark:border-neutral-800">
             <Button
               variant="secondary"
               size="md"

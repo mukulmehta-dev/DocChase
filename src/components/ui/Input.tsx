@@ -17,13 +17,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="flex flex-col gap-1 w-full">
         {label && (
-          <label htmlFor={inputId} className="font-medium text-xs text-slate-700 dark:text-slate-300 select-none">
+          <label htmlFor={inputId} className="font-medium text-xs text-neutral-700 dark:text-neutral-300 select-none">
             {label}
           </label>
         )}
         <div className="relative flex items-center w-full">
           {leftIcon && (
-            <span className="material-symbols-outlined text-[18px] text-slate-400 dark:text-slate-500 absolute left-3 pointer-events-none select-none">
+            <span className="material-symbols-outlined text-[18px] text-neutral-400 dark:text-neutral-500 absolute left-3 pointer-events-none select-none">
               {leftIcon}
             </span>
           )}
@@ -32,12 +32,12 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             className={twMerge(
               clsx(
-                'w-full h-10 rounded-lg font-normal text-sm text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none transition-all duration-150',
-                'focus:border-primary-container focus:ring-2 focus:ring-primary-container/15 dark:focus:border-sky-500 dark:focus:ring-sky-500/20',
+                'w-full h-10 rounded-lg font-normal text-sm text-neutral-900 dark:text-neutral-100 bg-white dark:bg-[#121215] border border-neutral-300 dark:border-neutral-800 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 outline-none transition-all duration-150',
+                'focus:border-neutral-900 focus:ring-2 focus:ring-neutral-900/10 dark:focus:border-white dark:focus:ring-white/15',
                 leftIcon ? 'pl-9' : 'px-3.5',
                 rightElement ? 'pr-10' : 'pr-3.5',
                 error && 'border-error dark:border-rose-500 focus:border-error dark:focus:border-rose-500 focus:ring-error/15',
-                props.disabled && 'bg-slate-100 dark:bg-slate-800/60 text-slate-400 dark:text-slate-500 cursor-not-allowed border-slate-200 dark:border-slate-800',
+                props.disabled && 'bg-neutral-100 dark:bg-neutral-900 text-neutral-400 dark:text-neutral-500 cursor-not-allowed border-neutral-200 dark:border-neutral-800',
                 className
               )
             )}
@@ -50,7 +50,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {error ? (
           <p className="text-xs text-error dark:text-rose-400 mt-0.5">{error}</p>
         ) : helperText ? (
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{helperText}</p>
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">{helperText}</p>
         ) : null}
       </div>
     );

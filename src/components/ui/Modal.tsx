@@ -44,7 +44,7 @@ export const Modal: React.FC<ModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-900/40 dark:bg-black/70 backdrop-blur-sm transition-opacity animate-fade-in"
+        className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm transition-opacity animate-fade-in"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -53,7 +53,7 @@ export const Modal: React.FC<ModalProps> = ({
       <div
         className={twMerge(
           clsx(
-            'relative w-full bg-white dark:bg-[#111827] rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 overflow-hidden z-10 flex flex-col',
+            'relative w-full bg-white dark:bg-[#121215] rounded-xl shadow-2xl border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 overflow-hidden z-10 flex flex-col',
             maxWidthStyles[maxWidth]
           )
         )}
@@ -62,14 +62,14 @@ export const Modal: React.FC<ModalProps> = ({
       >
         {/* Header */}
         {(title || description) && (
-          <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between">
+          <div className="px-5 py-4 border-b border-neutral-100 dark:border-neutral-800 flex items-start justify-between">
             <div>
-              {title && <h3 className="font-semibold text-base text-slate-900 dark:text-slate-100">{title}</h3>}
-              {description && <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{description}</p>}
+              {title && <h3 className="font-semibold text-base text-neutral-900 dark:text-neutral-100">{title}</h3>}
+              {description && <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">{description}</p>}
             </div>
             <button
               onClick={onClose}
-              className="p-1 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="p-1 rounded-lg text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
               aria-label="Close"
             >
               <span className="material-symbols-outlined text-[20px]">close</span>
@@ -78,11 +78,11 @@ export const Modal: React.FC<ModalProps> = ({
         )}
 
         {/* Content */}
-        <div className="p-5 flex-1 overflow-y-auto max-h-[calc(85vh-120px)] text-slate-900 dark:text-slate-100">{children}</div>
+        <div className="p-5 flex-1 overflow-y-auto max-h-[calc(85vh-120px)] text-neutral-900 dark:text-neutral-100">{children}</div>
 
         {/* Footer */}
         {footer && (
-          <div className="px-5 py-3.5 bg-slate-50 dark:bg-[#0E1526] border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2">
+          <div className="px-5 py-3.5 bg-neutral-50 dark:bg-[#18181b] border-t border-neutral-100 dark:border-neutral-800 flex items-center justify-end gap-2">
             {footer}
           </div>
         )}

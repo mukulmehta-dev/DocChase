@@ -63,8 +63,8 @@ export const BillingPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Subscription & Billing</h1>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Manage your firm's plan, usage quotas, and Stripe billing.</p>
+        <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight">Subscription & Billing</h1>
+        <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Manage your firm's plan, usage quotas, and Stripe billing.</p>
       </div>
 
       {isCheckoutSuccess && (
@@ -74,7 +74,7 @@ export const BillingPage: React.FC = () => {
       )}
 
       {isCheckoutCanceled && (
-        <div className="p-4 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-600 dark:text-slate-400">
+        <div className="p-4 bg-neutral-50 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-lg text-xs text-neutral-600 dark:text-neutral-400">
           Stripe checkout was canceled. No charges were made.
         </div>
       )}
@@ -88,9 +88,9 @@ export const BillingPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <Card elevation="low" className="p-5 flex flex-col justify-between">
           <div>
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Current Plan</span>
+            <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Current Plan</span>
             <div className="mt-2 flex items-center gap-2">
-              <span className="text-xl font-bold text-slate-900 dark:text-slate-100">{currentPlan}</span>
+              <span className="text-xl font-bold text-neutral-900 dark:text-neutral-100">{currentPlan}</span>
               {status === 'active' ? (
                 <Badge variant="ready">Active</Badge>
               ) : status === 'past_due' ? (
@@ -99,7 +99,7 @@ export const BillingPage: React.FC = () => {
                 <Badge variant="error">{status.toUpperCase()}</Badge>
               )}
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
               {currentPlan === 'FREE' && 'Free tier: 3 clients, 1 active request.'}
               {currentPlan === 'STARTER' && 'Starter: 15 clients, 50 active cycles, AI checklist.'}
               {currentPlan === 'PRO' && 'Pro: 100 clients, 500 active cycles, AI Suite.'}
@@ -151,17 +151,17 @@ export const BillingPage: React.FC = () => {
 
         <Card elevation="low" className="p-5 flex flex-col justify-between">
           <div>
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Client Quota</span>
-            <div className="mt-2 text-xl font-bold text-slate-900 dark:text-slate-100">
-              {clientsCount} / {clientLimit} <span className="text-xs font-normal text-slate-400 dark:text-slate-500">clients</span>
+            <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Client Quota</span>
+            <div className="mt-2 text-xl font-bold text-neutral-900 dark:text-neutral-100">
+              {clientsCount} / {clientLimit} <span className="text-xs font-normal text-neutral-400 dark:text-neutral-500">clients</span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
               {clientsCount >= clientLimit ? 'Quota reached. Upgrade to add more.' : `${clientLimit - clientsCount} client slot(s) available.`}
             </p>
           </div>
-          <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full mt-4 overflow-hidden">
+          <div className="w-full bg-neutral-100 dark:bg-neutral-800 h-2 rounded-full mt-4 overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all ${clientPercent >= 100 ? 'bg-rose-500' : 'bg-primary-container'}`}
+              className={`h-full rounded-full transition-all ${clientPercent >= 100 ? 'bg-rose-500' : 'bg-neutral-900 dark:bg-white'}`}
               style={{ width: `${clientPercent}%` }}
             />
           </div>
@@ -169,15 +169,15 @@ export const BillingPage: React.FC = () => {
 
         <Card elevation="low" className="p-5 flex flex-col justify-between">
           <div>
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Active Request Cycles</span>
-            <div className="mt-2 text-xl font-bold text-slate-900 dark:text-slate-100">
-              {requestsCount} / {requestLimit} <span className="text-xs font-normal text-slate-400 dark:text-slate-500">active</span>
+            <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Active Request Cycles</span>
+            <div className="mt-2 text-xl font-bold text-neutral-900 dark:text-neutral-100">
+              {requestsCount} / {requestLimit} <span className="text-xs font-normal text-neutral-400 dark:text-neutral-500">active</span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
               {requestsCount >= requestLimit ? 'Active cycle quota reached.' : `${requestLimit - requestsCount} request slot(s) available.`}
             </p>
           </div>
-          <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full mt-4 overflow-hidden">
+          <div className="w-full bg-neutral-100 dark:bg-neutral-800 h-2 rounded-full mt-4 overflow-hidden">
             <div
               className={`h-full rounded-full transition-all ${requestPercent >= 100 ? 'bg-amber-500' : 'bg-emerald-500'}`}
               style={{ width: `${requestPercent}%` }}
@@ -187,13 +187,13 @@ export const BillingPage: React.FC = () => {
       </div>
 
       <Card elevation="low" className="p-6">
-        <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 mb-1">Stripe Test Mode Billing</h3>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+        <h3 className="font-semibold text-sm text-neutral-900 dark:text-neutral-100 mb-1">Stripe Test Mode Billing</h3>
+        <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-4">
           All checkout and subscription actions run in Stripe TEST MODE. Invoices and payment methods are securely managed through Stripe.
         </p>
         <div className="flex items-center gap-3">
           <Badge variant="neutral">TEST MODE</Badge>
-          <span className="text-xs text-slate-400 dark:text-slate-500">Zero live card charges</span>
+          <span className="text-xs text-neutral-400 dark:text-neutral-500">Zero live card charges</span>
         </div>
       </Card>
     </div>

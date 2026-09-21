@@ -149,18 +149,18 @@ export const EditClientModal: React.FC<EditClientModalProps> = ({
         />
 
         <div>
-          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Internal Notes (Optional)</label>
+          <label className="text-xs font-semibold text-neutral-700 dark:text-neutral-300 block mb-1">Internal Notes (Optional)</label>
           <textarea
             rows={3}
             placeholder="Key client details, account preferences, or tax year notes..."
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             disabled={isSubmitting}
-            className="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 focus:border-primary-container dark:focus:border-sky-500 outline-none text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 placeholder:text-slate-400 dark:placeholder:text-slate-500 resize-none"
+            className="w-full px-3 py-2 text-xs rounded-lg border border-neutral-300 dark:border-neutral-700 focus:border-neutral-900 dark:focus:border-white focus:ring-1 focus:ring-neutral-900/15 dark:focus:ring-white/20 outline-none text-neutral-900 dark:text-neutral-100 bg-white dark:bg-neutral-900 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 resize-none"
           />
         </div>
 
-        <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 mt-2">
+        <div className="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100 dark:border-neutral-800 mt-2">
           <Button variant="secondary" size="md" type="button" onClick={onClose} disabled={isSubmitting}>
             Cancel
           </Button>

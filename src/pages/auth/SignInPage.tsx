@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { Logo } from '../../components/ui/Logo';
 import { isProduction } from '../../lib/supabase';
 import { getFriendlyAuthErrorMessage } from '../../services/auth';
 
@@ -115,7 +116,7 @@ export const SignInPage: React.FC = () => {
   const isFormDisabled = isLoading || oauthLoading !== null;
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-4 py-16 relative bg-[#070B14]">
+    <div className="flex-1 flex flex-col items-center justify-center px-4 py-16 relative bg-[#09090b]">
       {/* Atmospheric background */}
       <div className="absolute inset-0 bg-dot-dark opacity-30 pointer-events-none" aria-hidden="true" />
       <div className="absolute inset-0 bg-dc-center-glow opacity-60 pointer-events-none" aria-hidden="true" />
@@ -123,28 +124,20 @@ export const SignInPage: React.FC = () => {
       <div className="relative w-full max-w-[420px] flex flex-col items-center">
 
         {/* Brand mark */}
-        <Link to="/" className="flex items-center gap-2.5 mb-8 group" aria-label="DocChase Home">
-          <div className="w-10 h-10 rounded-xl bg-sky-500 flex items-center justify-center shadow-[0_0_20px_rgba(14,165,233,0.3)] group-hover:bg-sky-400 transition-colors">
-            <span
-              className="material-symbols-outlined text-[22px] text-white"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >fact_check</span>
-          </div>
-          <span className="font-bold text-lg tracking-tight text-white">
-            Doc<span className="text-sky-400">Chase</span>
-          </span>
+        <Link to="/" className="mb-8 group" aria-label="DocChase Home">
+          <Logo size="lg" />
         </Link>
 
         {/* Heading */}
         <h1 className="font-bold text-2xl text-white text-center tracking-tight mb-1.5">
           Sign in to your account
         </h1>
-        <p className="text-sm text-slate-400 text-center mb-8">
+        <p className="text-sm text-neutral-400 text-center mb-8">
           Enter your firm credentials to access your client dashboard.
         </p>
 
         {/* Card */}
-        <div className="w-full bg-[#0B1120] rounded-2xl border border-white/[0.09] shadow-[0_24px_60px_rgba(0,0,0,0.6)] p-7 flex flex-col">
+        <div className="w-full bg-[#121215] rounded-2xl border border-white/[0.09] shadow-[0_24px_60px_rgba(0,0,0,0.6)] p-7 flex flex-col">
 
           {/* Info banner */}
           {infoMessage && !error && (
@@ -166,7 +159,7 @@ export const SignInPage: React.FC = () => {
                   type="button"
                   onClick={handleResend}
                   disabled={isResending}
-                  className="self-start text-xs font-semibold text-sky-400 hover:underline disabled:opacity-50 mt-1 flex items-center gap-1 cursor-pointer"
+                  className="self-start text-xs font-semibold text-white hover:underline disabled:opacity-50 mt-1 flex items-center gap-1 cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[14px]">forward_to_inbox</span>
                   {isResending ? 'Sending...' : 'Resend confirmation email'}
@@ -198,10 +191,10 @@ export const SignInPage: React.FC = () => {
               id="google-signin-btn"
               onClick={() => handleOAuth('google')}
               disabled={isFormDisabled}
-              className="w-full h-10 px-4 rounded-lg border border-white/[0.10] bg-white/[0.04] hover:bg-slate-800/80 hover:border-sky-500/40 hover:text-white hover:shadow-[0_0_16px_rgba(14,165,233,0.12)] text-slate-200 text-xs font-semibold flex items-center justify-center gap-2.5 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50"
+              className="w-full h-10 px-4 rounded-lg border border-white/[0.10] bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/30 hover:text-white hover:shadow-[0_0_16px_rgba(255,255,255,0.06)] text-neutral-200 text-xs font-semibold flex items-center justify-center gap-2.5 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
             >
               {oauthLoading === 'google' ? (
-                <span className="material-symbols-outlined text-[18px] animate-spin text-slate-400">progress_activity</span>
+                <span className="material-symbols-outlined text-[18px] animate-spin text-neutral-400">progress_activity</span>
               ) : (
                 <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -218,10 +211,10 @@ export const SignInPage: React.FC = () => {
               id="github-signin-btn"
               onClick={() => handleOAuth('github')}
               disabled={isFormDisabled}
-              className="w-full h-10 px-4 rounded-lg border border-white/[0.10] bg-white/[0.04] hover:bg-slate-800/80 hover:border-sky-500/40 hover:text-white hover:shadow-[0_0_16px_rgba(14,165,233,0.12)] text-slate-200 text-xs font-semibold flex items-center justify-center gap-2.5 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50"
+              className="w-full h-10 px-4 rounded-lg border border-white/[0.10] bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/30 hover:text-white hover:shadow-[0_0_16px_rgba(255,255,255,0.06)] text-neutral-200 text-xs font-semibold flex items-center justify-center gap-2.5 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
             >
               {oauthLoading === 'github' ? (
-                <span className="material-symbols-outlined text-[18px] animate-spin text-slate-400">progress_activity</span>
+                <span className="material-symbols-outlined text-[18px] animate-spin text-neutral-400">progress_activity</span>
               ) : (
                 <svg className="w-4 h-4 shrink-0 fill-current text-white" viewBox="0 0 24 24">
                   <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
@@ -236,7 +229,7 @@ export const SignInPage: React.FC = () => {
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-white/[0.07]" />
             </div>
-            <span className="relative bg-[#0B1120] px-3 text-[11px] font-medium uppercase tracking-wider text-slate-600">
+            <span className="relative bg-[#121215] px-3 text-[11px] font-medium uppercase tracking-wider text-neutral-500">
               OR
             </span>
           </div>
@@ -273,7 +266,7 @@ export const SignInPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="p-1 text-slate-500 hover:text-slate-300 focus:outline-none"
+                  className="p-1 text-neutral-500 hover:text-neutral-300 focus:outline-none"
                   aria-label="Toggle password visibility"
                   disabled={isFormDisabled}
                 >
@@ -289,15 +282,15 @@ export const SignInPage: React.FC = () => {
                 <input
                   type="checkbox"
                   defaultChecked
-                  className="w-3.5 h-3.5 rounded border-slate-600 accent-sky-500 cursor-pointer"
+                  className="w-3.5 h-3.5 rounded border-neutral-700 accent-white cursor-pointer"
                   disabled={isFormDisabled}
                 />
-                <span className="text-xs text-slate-400">Remember 30 days</span>
+                <span className="text-xs text-neutral-400">Remember 30 days</span>
               </label>
 
               <Link
                 to="/forgot-password"
-                className="text-xs font-medium text-sky-400 hover:text-sky-300 hover:underline transition-colors"
+                className="text-xs font-medium text-neutral-300 hover:text-white hover:underline transition-colors"
               >
                 Forgot Password?
               </Link>
@@ -322,15 +315,15 @@ export const SignInPage: React.FC = () => {
         {/* Security trust badge */}
         <div className="mt-5 flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.07]">
           <span className="material-symbols-outlined text-[13px] text-emerald-400">shield_lock</span>
-          <span className="text-[11px] font-medium text-slate-500">
+          <span className="text-[11px] font-medium text-neutral-400">
             256-bit encrypted • TLS-secured connections
           </span>
         </div>
 
         {/* Registration link */}
-        <div className="mt-5 flex items-center justify-center gap-1.5 text-xs text-slate-500">
+        <div className="mt-5 flex items-center justify-center gap-1.5 text-xs text-neutral-400">
           <span>Don't have an account?</span>
-          <Link to="/sign-up" className="font-semibold text-sky-400 hover:text-sky-300 hover:underline transition-colors">
+          <Link to="/sign-up" className="font-semibold text-white hover:underline transition-colors">
             Create Account
           </Link>
         </div>

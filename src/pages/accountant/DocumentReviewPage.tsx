@@ -122,10 +122,10 @@ export const DocumentReviewPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <span className="material-symbols-outlined text-[32px] text-primary-container animate-spin mb-2">
+        <span className="material-symbols-outlined text-[32px] text-neutral-900 dark:text-white animate-spin mb-2">
           progress_activity
         </span>
-        <p className="text-xs text-slate-500">Loading document review pane...</p>
+        <p className="text-xs text-neutral-500 dark:text-neutral-400">Loading document review pane...</p>
       </div>
     );
   }
@@ -133,7 +133,7 @@ export const DocumentReviewPage: React.FC = () => {
   if (!request) {
     return (
       <div className="text-center py-16">
-        <h2 className="text-lg font-bold text-slate-900">Request not found</h2>
+        <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Request not found</h2>
         <Button variant="secondary" size="sm" onClick={() => navigate('/documents')} className="mt-4">
           Return to Documents
         </Button>
@@ -172,13 +172,13 @@ export const DocumentReviewPage: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate(`/requests/${request.id}`)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
           >
             <span className="material-symbols-outlined text-[20px]">arrow_back</span>
           </button>
           <div>
-            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Document Review: {request.title}</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">Document Review: {request.title}</h1>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
               Client: {(request as any).client_name || request.client?.name} • Period: {request.period}
             </p>
           </div>
@@ -201,8 +201,8 @@ export const DocumentReviewPage: React.FC = () => {
                 onClick={() => handleSelectItem(item)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 border ${
                   selectedItem?.id === item.id
-                    ? 'bg-blue-50 dark:bg-blue-950/40 text-primary-container dark:text-sky-400 border-blue-200 dark:border-blue-800 shadow-sm'
-                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60'
+                    ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-semibold border-neutral-900 dark:border-white shadow-sm'
+                    : 'bg-white dark:bg-[#121215] text-neutral-600 dark:text-neutral-300 border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800/60'
                 }`}
               >
                 <span>{item.name}</span>
@@ -213,8 +213,8 @@ export const DocumentReviewPage: React.FC = () => {
                       : item.status === 'rejected'
                       ? 'bg-rose-500'
                       : item.status === 'uploaded'
-                      ? 'bg-blue-500'
-                      : 'bg-slate-300 dark:bg-slate-600'
+                      ? 'bg-neutral-400 dark:bg-neutral-300'
+                      : 'bg-neutral-300 dark:bg-neutral-600'
                   }`}
                 />
               </button>
@@ -222,12 +222,12 @@ export const DocumentReviewPage: React.FC = () => {
           </div>
 
           {/* Document Preview Canvas */}
-          <Card elevation="low" className="p-0 overflow-hidden min-h-[480px] flex flex-col bg-slate-900 text-white">
-            <div className="px-4 py-2.5 bg-slate-800 border-b border-slate-700 flex items-center justify-between text-xs">
-              <span className="font-mono text-slate-300 truncate">
+          <Card elevation="low" className="p-0 overflow-hidden min-h-[480px] flex flex-col bg-[#121215] text-white border-neutral-800">
+            <div className="px-4 py-2.5 bg-[#18181b] border-b border-neutral-800 flex items-center justify-between text-xs">
+              <span className="font-mono text-neutral-300 truncate">
                 {(selectedItem as any)?.file_name || `${selectedItem?.name}.pdf`}
               </span>
-              <div className="flex items-center gap-2 text-slate-400">
+              <div className="flex items-center gap-2 text-neutral-400">
                 <span className="material-symbols-outlined text-[16px] cursor-pointer hover:text-white">zoom_in</span>
                 <span className="material-symbols-outlined text-[16px] cursor-pointer hover:text-white">zoom_out</span>
                 <span className="material-symbols-outlined text-[16px] cursor-pointer hover:text-white">download</span>
@@ -235,16 +235,16 @@ export const DocumentReviewPage: React.FC = () => {
             </div>
 
             {/* Document Render Body */}
-            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-950/60">
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-[#09090b]/80">
               <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-3">
-                <span className="material-symbols-outlined text-[36px] text-white/70">picture_as_pdf</span>
+                <span className="material-symbols-outlined text-[36px] text-white/80">picture_as_pdf</span>
               </div>
               <h4 className="font-semibold text-sm text-white">{selectedItem?.name}</h4>
-              <p className="text-xs text-white/50 max-w-sm mt-1 mb-4">
+              <p className="text-xs text-neutral-400 max-w-sm mt-1 mb-4">
                 256-bit encrypted preview. Uploaded by client for {request.period} bookkeeping cycle.
               </p>
               <Button
-                variant="secondary"
+                variant="secondary-dark"
                 size="sm"
                 icon="open_in_new"
                 onClick={handleOpenOriginal}
@@ -258,29 +258,29 @@ export const DocumentReviewPage: React.FC = () => {
         {/* Right Column: AI Document Assistance & Review Action (5 cols) */}
         <div className="lg:col-span-5 flex flex-col gap-4">
           {/* AI Intelligence Card */}
-          <Card elevation="low" className="p-5 flex flex-col gap-3 bg-blue-50/30 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900/50">
+          <Card elevation="low" className="p-5 flex flex-col gap-3 bg-neutral-50 dark:bg-[#121215] border-neutral-200 dark:border-neutral-800">
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary-container dark:text-sky-400 text-[20px]">psychology</span>
-              <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">DocChase AI Document Intelligence</h3>
+              <span className="material-symbols-outlined text-neutral-900 dark:text-white text-[20px]">psychology</span>
+              <h3 className="font-bold text-sm text-neutral-900 dark:text-neutral-100">DocChase AI Document Intelligence</h3>
             </div>
-            <p className="text-xs text-slate-600 dark:text-slate-400">
+            <p className="text-xs text-neutral-600 dark:text-neutral-400">
               Heuristic & Gemini assistant scan. AI does <strong>not</strong> auto-approve documents.
             </p>
 
             {aiAnalysis && (
               <div className="mt-2 flex flex-col gap-2.5 text-xs">
-                <div className="flex items-center justify-between p-2 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                  <span className="text-slate-500 dark:text-slate-400">Likely Document Type:</span>
-                  <strong className="text-slate-800 dark:text-slate-200">{aiAnalysis.detected_type}</strong>
+                <div className="flex items-center justify-between p-2 rounded bg-white dark:bg-[#121215] border border-neutral-200 dark:border-neutral-800">
+                  <span className="text-neutral-500 dark:text-neutral-400">Likely Document Type:</span>
+                  <strong className="text-neutral-800 dark:text-neutral-200">{aiAnalysis.detected_type}</strong>
                 </div>
 
-                <div className="flex items-center justify-between p-2 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                  <span className="text-slate-500 dark:text-slate-400">Detected Period / Month:</span>
-                  <strong className="text-slate-800 dark:text-slate-200">{aiAnalysis.detected_period || 'Not explicitly stated'}</strong>
+                <div className="flex items-center justify-between p-2 rounded bg-white dark:bg-[#121215] border border-neutral-200 dark:border-neutral-800">
+                  <span className="text-neutral-500 dark:text-neutral-400">Detected Period / Month:</span>
+                  <strong className="text-neutral-800 dark:text-neutral-200">{aiAnalysis.detected_period || 'Not explicitly stated'}</strong>
                 </div>
 
-                <div className="flex items-center justify-between p-2 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                  <span className="text-slate-500 dark:text-slate-400">Legibility / Quality:</span>
+                <div className="flex items-center justify-between p-2 rounded bg-white dark:bg-[#121215] border border-neutral-200 dark:border-neutral-800">
+                  <span className="text-neutral-500 dark:text-neutral-400">Legibility / Quality:</span>
                   <span className="font-semibold text-emerald-700 dark:text-emerald-400 capitalize">{aiAnalysis.readability_indicator}</span>
                 </div>
 
@@ -298,13 +298,13 @@ export const DocumentReviewPage: React.FC = () => {
 
           {/* Review Decision Panel */}
           <Card elevation="low" className="p-5 flex flex-col gap-3">
-            <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">Accountant Review Decision</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <h3 className="font-bold text-sm text-neutral-900 dark:text-neutral-100">Accountant Review Decision</h3>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
               Once approved, this item will no longer be targeted by reminders. If all required items are approved,
               the request cycle will become <strong>Ready</strong>.
             </p>
 
-            <div className="flex items-center gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-3 pt-3 border-t border-neutral-100 dark:border-neutral-800">
               <Button
                 variant="destructive"
                 size="md"
@@ -345,7 +345,7 @@ export const DocumentReviewPage: React.FC = () => {
             onChange={(e) => setRejectionReason(e.target.value)}
           />
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 mt-2">
+          <div className="flex justify-end gap-2 pt-3 border-t border-neutral-100 dark:border-neutral-800 mt-2">
             <Button variant="secondary" size="md" type="button" onClick={() => setIsRejectModalOpen(false)}>
               Cancel
             </Button>

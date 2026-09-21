@@ -63,16 +63,16 @@ export const PricingPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#070B14] relative overflow-hidden">
+    <div className="min-h-screen bg-[#09090b] relative overflow-hidden">
       {/* Atmospheric background */}
       <div className="absolute inset-0 bg-dot-dark opacity-30 pointer-events-none" aria-hidden="true" />
-      <div className="absolute inset-0 bg-dc-center-glow opacity-60 pointer-events-none" aria-hidden="true" />
+      <div className="absolute inset-0 bg-dc-hero-glow opacity-60 pointer-events-none" aria-hidden="true" />
 
       <div className="relative py-20 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
 
         {/* ── Page Header ── */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.05] border border-white/[0.08] text-xs font-semibold text-sky-400 mb-6">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.05] border border-white/[0.12] text-xs font-semibold text-neutral-200 mb-6">
             <span
               className="material-symbols-outlined text-[14px]"
               style={{ fontVariationSettings: "'FILL' 1" }}
@@ -82,7 +82,7 @@ export const PricingPage: React.FC = () => {
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white mb-4">
             Save 10+ hours every month chasing clients.
           </h1>
-          <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
+          <p className="text-neutral-400 text-sm sm:text-base leading-relaxed">
             Every plan includes 256-bit encrypted storage, secure client link generation, and automatic reminder cutoff.
           </p>
         </div>
@@ -94,20 +94,20 @@ export const PricingPage: React.FC = () => {
               key={p.name}
               className={`relative rounded-2xl flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 ${
                 p.popular
-                  ? 'bg-[#111827] border-2 border-sky-400/70 shadow-[0_0_48px_rgba(14,165,233,0.15),0_8px_32px_rgba(0,0,0,0.5)]'
-                  : 'bg-[#0B1120] border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:border-white/[0.13] hover:shadow-[0_16px_40px_rgba(0,0,0,0.5)]'
+                  ? 'bg-[#121215] border-2 border-white/80 shadow-[0_0_40px_rgba(255,255,255,0.08),0_8px_32px_rgba(0,0,0,0.6)]'
+                  : 'bg-[#121215] border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:border-white/[0.16] hover:shadow-[0_16px_40px_rgba(0,0,0,0.5)]'
               }`}
             >
               {/* Popular ribbon */}
               {p.popular && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-0.5 rounded-full bg-sky-500 text-white text-[10px] font-bold uppercase tracking-wider shadow-[0_0_16px_rgba(14,165,233,0.4)]">
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-0.5 rounded-full bg-white text-neutral-950 text-[10px] font-bold uppercase tracking-wider shadow-[0_0_16px_rgba(255,255,255,0.3)]">
                   Recommended
                 </div>
               )}
 
-              {/* Sky accent line on popular */}
+              {/* White accent line on popular */}
               {p.popular && (
-                <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-sky-400/50 to-transparent rounded-full" aria-hidden="true" />
+                <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent rounded-full" aria-hidden="true" />
               )}
 
               <div className="p-6 sm:p-7">
@@ -117,8 +117,8 @@ export const PricingPage: React.FC = () => {
                   <span
                     className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border ${
                       p.popular
-                        ? 'bg-sky-500/15 text-sky-400 border-sky-500/30'
-                        : 'bg-white/[0.05] text-slate-400 border-white/[0.09]'
+                        ? 'bg-white/10 text-white border-white/25'
+                        : 'bg-white/[0.05] text-neutral-400 border-white/[0.09]'
                     }`}
                   >
                     {p.badge}
@@ -127,23 +127,23 @@ export const PricingPage: React.FC = () => {
 
                 {/* Price */}
                 <div className="flex items-baseline gap-1 mb-3">
-                  <span className={`text-4xl font-extrabold tracking-tight ${p.popular ? 'text-white' : 'text-slate-100'}`}>
+                  <span className={`text-4xl font-extrabold tracking-tight ${p.popular ? 'text-white' : 'text-neutral-100'}`}>
                     {p.price}
                   </span>
-                  <span className="text-xs text-slate-500 font-medium">{p.period}</span>
+                  <span className="text-xs text-neutral-500 font-medium">{p.period}</span>
                 </div>
 
-                <p className="text-xs text-slate-400 leading-relaxed mb-6">{p.description}</p>
+                <p className="text-xs text-neutral-400 leading-relaxed mb-6">{p.description}</p>
 
                 <div className="h-px bg-white/[0.06] mb-6" />
 
                 {/* Features */}
                 <div className="flex flex-col gap-2.5">
-                  <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">
+                  <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
                     Features Included
                   </span>
                   {p.features.map((feat) => (
-                    <div key={feat} className="flex items-start gap-2 text-xs text-slate-300">
+                    <div key={feat} className="flex items-start gap-2 text-xs text-neutral-300">
                       <span
                         className="material-symbols-outlined text-emerald-400 text-[15px] flex-shrink-0 mt-0.5"
                         style={{ fontVariationSettings: "'FILL' 1" }}
@@ -170,9 +170,9 @@ export const PricingPage: React.FC = () => {
 
         {/* ── Footer note ── */}
         <div className="mt-14 text-center">
-          <p className="text-xs text-slate-500 leading-relaxed">
+          <p className="text-xs text-neutral-500 leading-relaxed">
             All plans are transmitted over industry-standard TLS encryption. Need an enterprise setup with &gt; 500 clients?{' '}
-            <a href="mailto:support@docchase.com" className="text-sky-400 underline font-medium hover:text-sky-300">
+            <a href="mailto:support@docchase.com" className="text-white underline font-medium hover:text-neutral-300">
               Contact our team
             </a>
           </p>
@@ -184,9 +184,9 @@ export const PricingPage: React.FC = () => {
               { icon: 'credit_card_off', label: 'No Credit Card Required' },
               { icon: 'cancel', label: 'Cancel Anytime' },
             ].map(({ icon, label }) => (
-              <div key={label} className="flex items-center gap-1.5 text-xs text-slate-400">
+              <div key={label} className="flex items-center gap-1.5 text-xs text-neutral-400">
                 <span
-                  className="material-symbols-outlined text-[16px] text-sky-400"
+                  className="material-symbols-outlined text-[16px] text-neutral-300"
                   style={{ fontVariationSettings: "'FILL' 1" }}
                 >
                   {icon}

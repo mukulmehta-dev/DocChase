@@ -91,11 +91,11 @@ export const AiChecklistModal: React.FC<AiChecklistModalProps> = ({
         )}
 
         <div>
-          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+          <label className="text-xs font-semibold text-neutral-700 dark:text-neutral-300 block mb-1">
             Describe the Client & Engagement:
           </label>
           <textarea
-            className="w-full h-20 p-3 rounded-lg border border-slate-300 dark:border-slate-700 text-xs bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:border-primary-container dark:focus:border-sky-500 focus:ring-2 focus:ring-primary-container/15 dark:focus:ring-sky-500/20 outline-none resize-none"
+            className="w-full h-20 p-3 rounded-lg border border-neutral-300 dark:border-neutral-800 text-xs bg-white dark:bg-[#121215] text-neutral-800 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:border-neutral-900 dark:focus:border-white focus:ring-1 focus:ring-neutral-900/15 dark:focus:ring-white/20 outline-none resize-none"
             placeholder="e.g. Quarterly GST and payroll filings for a logistics firm with 15 contracted drivers."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
@@ -103,7 +103,7 @@ export const AiChecklistModal: React.FC<AiChecklistModalProps> = ({
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-[11px] text-slate-500 dark:text-slate-400">
+          <span className="text-[11px] text-neutral-500 dark:text-neutral-400">
             Accountant review is mandatory before saving. AI suggestions are non-binding.
           </span>
           <Button
@@ -119,50 +119,50 @@ export const AiChecklistModal: React.FC<AiChecklistModalProps> = ({
 
         {/* Generated Preview */}
         {generated && (
-          <div className="mt-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex flex-col gap-3 animate-fade-in">
+          <div className="mt-4 p-4 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 flex flex-col gap-3 animate-fade-in">
             <div className="flex items-center justify-between">
               <Input
                 label="Template Name"
                 value={generated.template_name}
                 onChange={(e) => setGenerated({ ...generated, template_name: e.target.value })}
               />
-              <span className="text-xs font-semibold text-primary-container dark:text-sky-400 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-900/50 px-2 py-1 rounded ml-3 self-end mb-1">
+              <span className="text-xs font-semibold text-neutral-900 dark:text-white bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 px-2 py-1 rounded ml-3 self-end mb-1">
                 {generated.frequency.toUpperCase()}
               </span>
             </div>
 
             <div className="flex flex-col gap-2 mt-2">
-              <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+              <span className="text-xs font-bold text-neutral-600 dark:text-neutral-400 uppercase tracking-wider">
                 Proposed Document Requirements ({generated.items.length})
               </span>
 
               {generated.items.map((item, idx) => (
                 <div
                   key={idx}
-                  className="flex items-start justify-between gap-3 p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-xs"
+                  className="flex items-start justify-between gap-3 p-3 bg-white dark:bg-[#121215] rounded-lg border border-neutral-200 dark:border-neutral-800 text-xs"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-slate-900 dark:text-slate-100">{item.name}</span>
+                      <span className="font-semibold text-neutral-900 dark:text-neutral-100">{item.name}</span>
                       <button
                         type="button"
                         onClick={() => toggleItemRequired(idx)}
                         className={`text-[10px] font-bold px-1.5 py-0.5 rounded transition-colors ${
                           item.required
                             ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                            : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400'
                         }`}
                       >
                         {item.required ? 'REQUIRED' : 'OPTIONAL'}
                       </button>
                     </div>
-                    <p className="text-slate-500 dark:text-slate-400 mt-0.5">{item.description}</p>
+                    <p className="text-neutral-500 dark:text-neutral-400 mt-0.5">{item.description}</p>
                   </div>
 
                   <button
                     type="button"
                     onClick={() => removeItem(idx)}
-                    className="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 p-1 rounded transition-colors"
+                    className="text-neutral-400 hover:text-rose-600 dark:hover:text-rose-400 p-1 rounded transition-colors"
                     title="Remove item"
                   >
                     <span className="material-symbols-outlined text-[16px]">close</span>
@@ -171,7 +171,7 @@ export const AiChecklistModal: React.FC<AiChecklistModalProps> = ({
               ))}
             </div>
 
-            <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-neutral-200 dark:border-neutral-800">
               <Button variant="secondary" size="sm" onClick={() => setGenerated(null)}>
                 Discard
               </Button>
