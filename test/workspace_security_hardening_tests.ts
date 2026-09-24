@@ -269,14 +269,20 @@ async function run() {
       clientA.from('workspace_members').delete().eq('id', concMemB.id),
     ]);
 
-    // Check remaining owners in wsConcId using service or owner query
-    const { data: remainingOwnersConc } = await clientA
+    // Check remaining owners in wsConcId using surviving client
+    const { data: ownersFromB } = await clientB
       .from('workspace_members')
       .select('*')
       .eq('workspace_id', wsConcId)
       .eq('role', 'owner');
 
-    const count = remainingOwnersConc?.length || 0;
+    const { data: ownersFromA } = await clientA
+      .from('workspace_members')
+      .select('*')
+      .eq('workspace_id', wsConcId)
+      .eq('role', 'owner');
+
+    const count = (ownersFromB?.length || 0) + (ownersFromA?.length || 0);
     if (count === 1) {
       pass('Concurrent owner deletion serialized safely: exactly 1 owner remains', `remaining_count=${count}`);
     } else if (count === 0) {

@@ -102,8 +102,14 @@ export const billingService = {
       throw new Error('You must be logged in to initiate checkout.');
     }
 
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const finalSuccessUrl =
+      successUrl || (origin ? `${origin}/billing?session_id={CHECKOUT_SESSION_ID}&success=true` : undefined);
+    const finalCancelUrl =
+      cancelUrl || (origin ? `${origin}/billing?canceled=true` : undefined);
+
     const { data, error } = await supabase.functions.invoke('stripe-checkout', {
-      body: { workspaceId, plan, successUrl, cancelUrl },
+      body: { workspaceId, plan, successUrl: finalSuccessUrl, cancelUrl: finalCancelUrl },
       headers: {
         Authorization: `Bearer ${token}`,
       },

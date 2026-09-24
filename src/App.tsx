@@ -143,6 +143,7 @@ export const App: React.FC = () => {
           <Route path="/requests/:id/review" element={<DocumentReviewPage />} />
           <Route path="/reminders" element={<RemindersPage />} />
           <Route path="/billing" element={<BillingPage />} />
+          <Route path="/accountant/billing" element={<Navigate to="/billing" replace />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
 

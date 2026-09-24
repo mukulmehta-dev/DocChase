@@ -282,9 +282,9 @@ serve(async (req) => {
     }
 
     // 7. Create Stripe Checkout Session (Test Mode)
-    const appBaseUrl = Deno.env.get('APP_URL') || 'http://localhost:5173';
-    const finalSuccessUrl = successUrl || `${appBaseUrl}/accountant/billing?session_id={CHECKOUT_SESSION_ID}&success=true`;
-    const finalCancelUrl = cancelUrl || `${appBaseUrl}/accountant/billing?canceled=true`;
+    const appBaseUrl = Deno.env.get('APP_URL') || 'https://doc-chase-omega.vercel.app';
+    const finalSuccessUrl = successUrl || `${appBaseUrl}/billing?session_id={CHECKOUT_SESSION_ID}&success=true`;
+    const finalCancelUrl = cancelUrl || `${appBaseUrl}/billing?canceled=true`;
 
     const sessionParams = new URLSearchParams();
     sessionParams.append('mode', 'subscription');
