@@ -28,7 +28,7 @@ export const auditService = {
       }
     }
 
-    // Always append to local activity for instant UI updates
+    // Always append to local activity and audit logs for instant UI updates
     try {
       const key = `docchase_activity_${workspaceId}`;
       const existing = JSON.parse(localStorage.getItem(key) || '[]');
@@ -41,6 +41,15 @@ export const auditService = {
       };
       existing.unshift(newActivity);
       localStorage.setItem(key, JSON.stringify(existing.slice(0, 30)));
+
+      // Also store full audit record in local fallback store
+      const auditLogKey = `docchase_audit_logs_${workspaceId}`;
+      const existingLogs = JSON.parse(localStorage.getItem(auditLogKey) || '[]');
+      existingLogs.unshift({
+        id: 'log_' + Math.random().toString(36).substring(2, 9),
+        ...record,
+      });
+      localStorage.setItem(auditLogKey, JSON.stringify(existingLogs.slice(0, 50)));
     } catch (e) {
       console.error('Local audit log write failed', e);
     }

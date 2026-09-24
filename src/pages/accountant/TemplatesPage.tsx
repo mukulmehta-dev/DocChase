@@ -19,6 +19,16 @@ export const TemplatesPage: React.FC = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
+  // Edit template state
+  const [templateToEdit, setTemplateToEdit] = useState<TemplateWithItems | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editFrequency, setEditFrequency] = useState<'monthly' | 'quarterly' | 'yearly' | 'custom'>('monthly');
+  const [editItems, setEditItems] = useState<Array<{ name: string; description: string; required: boolean }>>([]);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+
   // New manual template form state
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -51,6 +61,69 @@ export const TemplatesPage: React.FC = () => {
 
   const handleRemoveItemSlot = (idx: number) => {
     setItems(items.filter((_, i) => i !== idx));
+  };
+
+  const handleOpenEditModal = (tpl: TemplateWithItems) => {
+    setTemplateToEdit(tpl);
+    setEditName(tpl.name);
+    setEditDescription(tpl.description || '');
+    setEditFrequency(tpl.frequency || 'monthly');
+    setEditItems(
+      (tpl.items || []).map((it) => ({
+        name: it.name,
+        description: it.description || '',
+        required: it.required,
+      }))
+    );
+    setEditError(null);
+    setIsEditModalOpen(true);
+  };
+
+  const handleAddEditItemSlot = () => {
+    setEditItems([...editItems, { name: '', description: '', required: true }]);
+  };
+
+  const handleRemoveEditItemSlot = (idx: number) => {
+    setEditItems(editItems.filter((_, i) => i !== idx));
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentWorkspace?.id || !templateToEdit) return;
+
+    const trimmedName = editName.trim();
+    if (!trimmedName) {
+      setEditError('Template title is required.');
+      return;
+    }
+
+    const validItems = editItems.filter((i) => i.name.trim() !== '');
+    if (validItems.length === 0) {
+      setEditError('Please include at least one document requirement.');
+      return;
+    }
+
+    setIsSavingEdit(true);
+    setEditError(null);
+    try {
+      await templateService.updateTemplate(
+        currentWorkspace.id,
+        templateToEdit.id,
+        {
+          name: trimmedName,
+          description: editDescription.trim() || undefined,
+          frequency: editFrequency,
+        },
+        validItems
+      );
+      setIsEditModalOpen(false);
+      setTemplateToEdit(null);
+      await loadTemplates();
+    } catch (err: any) {
+      setEditError(err.message || 'Failed to update template');
+    } finally {
+      setIsSavingEdit(false);
+    }
   };
 
   const handleCreateTemplate = async (e: React.FormEvent) => {
@@ -141,6 +214,14 @@ export const TemplatesPage: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <Badge variant="neutral">{tpl.frequency?.toUpperCase()}</Badge>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEditModal(tpl)}
+                      className="p-1 rounded text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                      title="Edit template"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">edit</span>
+                    </button>
                     <button
                       type="button"
                       onClick={() => setTemplateToDelete(tpl)}
@@ -347,6 +428,147 @@ export const TemplatesPage: React.FC = () => {
             </Button>
           </div>
         </div>
+      </Modal>
+
+      {/* Edit Template Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          if (!isSavingEdit) {
+            setIsEditModalOpen(false);
+            setTemplateToEdit(null);
+            setEditError(null);
+          }
+        }}
+        title="Edit Recurring Template"
+        description="Update checklist blueprint for future document requests. Existing requests remain unaffected."
+        maxWidth="lg"
+      >
+        <form onSubmit={handleSaveEdit} className="flex flex-col gap-4">
+          {editError && (
+            <div className="p-2.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 rounded-lg text-xs text-rose-800 dark:text-rose-300 flex items-center gap-2">
+              <span className="material-symbols-outlined text-[16px] text-rose-600 dark:text-rose-400">error</span>
+              <span>{editError}</span>
+            </div>
+          )}
+
+          <Input
+            label="Template Title"
+            required
+            placeholder="e.g. Monthly Payroll Documents"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+          />
+
+          <Input
+            label="Description"
+            placeholder="e.g. Collection checklist for monthly payroll client filings."
+            value={editDescription}
+            onChange={(e) => setEditDescription(e.target.value)}
+          />
+
+          <div>
+            <label className="text-xs font-semibold text-neutral-700 dark:text-neutral-300 block mb-1">Cadence / Frequency</label>
+            <select
+              value={editFrequency}
+              onChange={(e) => setEditFrequency(e.target.value as any)}
+              className="w-full h-10 px-3 rounded-lg border border-neutral-300 dark:border-neutral-800 text-xs bg-white dark:bg-[#121215] text-neutral-800 dark:text-neutral-100 focus:border-neutral-900 dark:focus:border-white focus:ring-1 focus:ring-neutral-900/15 dark:focus:ring-white/20 outline-none"
+            >
+              <option value="monthly">Monthly</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="yearly">Yearly</option>
+              <option value="custom">Custom / One-Time</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-2 mt-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-neutral-700 dark:text-neutral-300">Document Requirement Slots</span>
+              <button
+                type="button"
+                onClick={handleAddEditItemSlot}
+                className="text-xs font-semibold text-neutral-900 dark:text-white hover:underline flex items-center gap-1"
+              >
+                <span className="material-symbols-outlined text-[15px]">add</span> Add Slot
+              </button>
+            </div>
+
+            {editItems.map((it, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="Document Name (e.g. Bank Statement)"
+                  value={it.name}
+                  onChange={(e) => {
+                    const copy = [...editItems];
+                    copy[idx].name = e.target.value;
+                    setEditItems(copy);
+                  }}
+                  className="flex-1 h-9 px-3 rounded-md border border-neutral-300 dark:border-neutral-800 text-xs bg-white dark:bg-[#121215] text-neutral-800 dark:text-neutral-100 placeholder:text-neutral-400 focus:border-neutral-900 dark:focus:border-white outline-none"
+                />
+                <input
+                  type="text"
+                  placeholder="Guidance / notes"
+                  value={it.description}
+                  onChange={(e) => {
+                    const copy = [...editItems];
+                    copy[idx].description = e.target.value;
+                    setEditItems(copy);
+                  }}
+                  className="w-1/3 h-9 px-3 rounded-md border border-neutral-300 dark:border-neutral-800 text-xs bg-white dark:bg-[#121215] text-neutral-800 dark:text-neutral-100 placeholder:text-neutral-400 focus:border-neutral-900 dark:focus:border-white outline-none"
+                />
+                <label className="flex items-center gap-1 text-[11px] text-neutral-600 dark:text-neutral-300 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={it.required}
+                    onChange={(e) => {
+                      const copy = [...editItems];
+                      copy[idx].required = e.target.checked;
+                      setEditItems(copy);
+                    }}
+                    className="rounded border-neutral-300 text-neutral-900 focus:ring-0"
+                  />
+                  Req
+                </label>
+                {editItems.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveEditItemSlot(idx)}
+                    className="p-1 text-neutral-400 hover:text-rose-500 rounded"
+                    title="Remove item slot"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">close</span>
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100 dark:border-neutral-800 mt-2">
+            <Button
+              variant="secondary"
+              size="md"
+              type="button"
+              onClick={() => {
+                setIsEditModalOpen(false);
+                setTemplateToEdit(null);
+                setEditError(null);
+              }}
+              disabled={isSavingEdit}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              type="submit"
+              isLoading={isSavingEdit}
+              icon="save"
+            >
+              Save Changes
+            </Button>
+          </div>
+        </form>
       </Modal>
     </div>
   );

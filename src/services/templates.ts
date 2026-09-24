@@ -141,6 +141,90 @@ export const templateService = {
     return newTemplate;
   },
 
+  async updateTemplate(
+    workspaceId: string,
+    templateId: string,
+    templateData: {
+      name: string;
+      description?: string;
+      frequency: TemplateFrequency;
+    },
+    items: Array<{ name: string; description?: string; required: boolean }>
+  ): Promise<TemplateWithItems> {
+    if (isSupabaseConfigured()) {
+      // 1. Update template row
+      const { data: template, error: tplError } = await supabase
+        .from('templates')
+        .update({
+          name: templateData.name,
+          description: templateData.description || null,
+          frequency: templateData.frequency,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', templateId)
+        .eq('workspace_id', workspaceId)
+        .select()
+        .single();
+
+      if (tplError || !template) throw tplError || new Error('Failed to update template');
+
+      // 2. Remove existing items and replace with updated set
+      const { error: delError } = await supabase
+        .from('template_items')
+        .delete()
+        .eq('template_id', templateId);
+
+      if (delError) throw delError;
+
+      const itemInserts = items.map((item, idx) => ({
+        template_id: template.id,
+        name: item.name,
+        description: item.description || null,
+        required: item.required,
+        sort_order: idx + 1,
+      }));
+
+      const { data: createdItems, error: itemsError } = await supabase
+        .from('template_items')
+        .insert(itemInserts)
+        .select();
+
+      if (itemsError) throw itemsError;
+
+      return {
+        ...template,
+        items: createdItems || [],
+      };
+    }
+
+    const templates = await this.getTemplates(workspaceId);
+    const idx = templates.findIndex((t) => t.id === templateId);
+    if (idx === -1) throw new Error('Template not found');
+
+    const now = new Date().toISOString();
+    const updatedItems: TemplateItem[] = items.map((item, i) => ({
+      id: 'ti_' + Math.random().toString(36).substring(2, 9),
+      template_id: templateId,
+      name: item.name,
+      description: item.description || null,
+      required: item.required,
+      sort_order: i + 1,
+      created_at: now,
+    }));
+
+    templates[idx] = {
+      ...templates[idx],
+      name: templateData.name,
+      description: templateData.description || null,
+      frequency: templateData.frequency,
+      updated_at: now,
+      items: updatedItems,
+    };
+
+    localStorage.setItem(`docchase_templates_${workspaceId}`, JSON.stringify(templates));
+    return templates[idx];
+  },
+
   async deleteTemplate(workspaceId: string, templateId: string): Promise<void> {
     if (isSupabaseConfigured()) {
       const { error } = await supabase
