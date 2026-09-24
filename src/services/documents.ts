@@ -19,6 +19,7 @@ export interface VaultItem {
   id: string;
   requestId: string;
   requestTitle: string;
+  clientId?: string;
   clientName: string;
   period: string;
   itemName: string;
@@ -39,8 +40,9 @@ export const documentService = {
           id,
           title,
           period,
+          client_id,
           created_at,
-          client:clients(name, company_name),
+          client:clients(id, name, company_name),
           items:request_items(
             id,
             name,
@@ -80,6 +82,7 @@ export const documentService = {
             id: it.id,
             requestId: req.id,
             requestTitle: req.title,
+            clientId: req.client_id || clientData?.id,
             clientName,
             period: req.period,
             itemName: it.name,
@@ -108,6 +111,7 @@ export const documentService = {
             id: it.id,
             requestId: req.id,
             requestTitle: req.title,
+            clientId: req.client_id || req.clientId,
             clientName: req.client_name || req.client?.name || 'Client',
             period: req.period,
             itemName: it.name,

@@ -152,6 +152,10 @@ export const RequestDetailPage: React.FC = () => {
 
   const handleSendReminder = async () => {
     if (!currentWorkspace?.id || !request) return;
+    if (request.status === 'ready') {
+      alert('This request is 100% verified and READY. All required items are approved — reminder dispatch is disabled.');
+      return;
+    }
     const missingOrRejected = request.items
       .filter((i) => i.status === 'missing' || i.status === 'rejected')
       .map((i) => i.name);
@@ -224,12 +228,35 @@ export const RequestDetailPage: React.FC = () => {
               <Badge variant={request.status}>{request.status?.toUpperCase()}</Badge>
             </div>
             <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
-              Client: <strong className="text-neutral-700 dark:text-neutral-200">{(request as any).client_name || request.client?.name}</strong> • Period: {request.period} • Due: {request.due_date}
+              Client:{' '}
+              {request.client_id || request.client?.id ? (
+                <button
+                  type="button"
+                  onClick={() => navigate(`/clients/${request.client_id || request.client?.id}`)}
+                  className="font-medium text-neutral-800 dark:text-neutral-200 hover:underline inline-flex items-center gap-0.5"
+                >
+                  {(request as any).client_name || request.client?.name}
+                  <span className="material-symbols-outlined text-[13px] text-neutral-400">open_in_new</span>
+                </button>
+              ) : (
+                <strong className="text-neutral-700 dark:text-neutral-200">
+                  {(request as any).client_name || request.client?.name}
+                </strong>
+              )}{' '}
+              • Period: {request.period} • Due: {request.due_date}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            variant="secondary"
+            size="sm"
+            icon="rate_review"
+            onClick={() => navigate(`/requests/${request.id}/review`)}
+          >
+            Review Documents
+          </Button>
           {!isReady && (
             <Button
               variant="primary"
@@ -334,10 +361,16 @@ export const RequestDetailPage: React.FC = () => {
 
               {/* Document metadata or rejection note */}
               {(item as any).file_name && (
-                <div className="mt-2 text-[11px] text-neutral-600 dark:text-neutral-300 flex items-center gap-1.5 bg-neutral-50 dark:bg-neutral-900 px-2 py-1 rounded border border-neutral-200 dark:border-neutral-800 w-fit">
+                <button
+                  type="button"
+                  onClick={() => navigate(`/requests/${request.id}/review`)}
+                  className="mt-2 text-[11px] text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white flex items-center gap-1.5 bg-neutral-50 dark:bg-neutral-900 px-2 py-1 rounded border border-neutral-200 dark:border-neutral-800 w-fit transition-colors hover:border-neutral-400"
+                  title="Click to review document"
+                >
                   <span className="material-symbols-outlined text-[14px]">description</span>
                   <span>Uploaded: {(item as any).file_name}</span>
-                </div>
+                  <span className="material-symbols-outlined text-[12px] text-neutral-400">rate_review</span>
+                </button>
               )}
 
               {item.status === 'rejected' && item.rejection_reason && (

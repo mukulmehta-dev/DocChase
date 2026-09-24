@@ -83,6 +83,18 @@ export const reminderService = {
     }
 
     // Local storage mock fallback
+    const requestsKey = `docchase_requests_${params.workspaceId}`;
+    const requests = JSON.parse(localStorage.getItem(requestsKey) || '[]');
+    const req = requests.find((r: any) => r.id === params.requestId);
+    if (req?.status === 'ready') {
+      return {
+        success: false,
+        stopped: true,
+        itemCount: 0,
+        message: 'Request is ready. Scheduled reminders have stopped.',
+      };
+    }
+
     await auditService.log(
       params.workspaceId,
       'reminder.sent',

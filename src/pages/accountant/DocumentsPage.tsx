@@ -178,7 +178,19 @@ export const DocumentsPage: React.FC = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 font-medium text-neutral-800 dark:text-neutral-200">{item.clientName}</td>
+                    <td className="px-4 py-3 font-medium text-neutral-800 dark:text-neutral-200">
+                      {item.clientId ? (
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/clients/${item.clientId}`)}
+                          className="hover:underline text-left font-medium text-neutral-900 dark:text-neutral-100"
+                        >
+                          {item.clientName}
+                        </button>
+                      ) : (
+                        item.clientName
+                      )}
+                    </td>
                     <td className="px-4 py-3 font-mono text-[11px] text-neutral-500 dark:text-neutral-400">{item.period}</td>
                     <td className="px-4 py-3">
                       <Badge variant={item.status}>{item.status.toUpperCase()}</Badge>

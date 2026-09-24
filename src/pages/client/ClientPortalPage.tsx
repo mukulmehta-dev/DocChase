@@ -123,7 +123,11 @@ export const ClientPortalPage: React.FC = () => {
   const approvedCount = items.filter((i) => i.status === 'approved').length;
   const requiredItems = items.filter((i) => i.required);
   const approvedRequiredCount = requiredItems.filter((i) => i.status === 'approved').length;
-  const isComplete = requiredItems.length > 0 && approvedRequiredCount === requiredItems.length;
+  const isComplete =
+    portalData.request.status === 'ready' ||
+    (requiredItems.length > 0
+      ? approvedRequiredCount === requiredItems.length
+      : items.length > 0 && approvedCount === items.length);
 
   return (
     <div className="min-h-screen bg-[#fafafa] flex flex-col items-center py-6 sm:py-10 px-4 sm:px-6">

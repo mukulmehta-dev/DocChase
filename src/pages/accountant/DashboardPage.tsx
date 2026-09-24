@@ -190,7 +190,12 @@ export const DashboardPage: React.FC = () => {
       {/* 4 Metric Cards (Stitch Key Performance Strip) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Total Clients */}
-        <Card padding="md" elevation="low" className="flex flex-col justify-between">
+        <Card
+          padding="md"
+          elevation="hover"
+          className="flex flex-col justify-between cursor-pointer transition-all"
+          onClick={() => navigate('/clients')}
+        >
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Clients</span>
             <span className="material-symbols-outlined text-[20px] text-neutral-400 dark:text-neutral-500">group</span>
@@ -204,7 +209,12 @@ export const DashboardPage: React.FC = () => {
         </Card>
 
         {/* Total Cycles */}
-        <Card padding="md" elevation="low" className="flex flex-col justify-between">
+        <Card
+          padding="md"
+          elevation="hover"
+          className="flex flex-col justify-between cursor-pointer transition-all"
+          onClick={() => navigate('/requests')}
+        >
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Total Cycles</span>
             <span className="material-symbols-outlined text-[20px] text-neutral-400 dark:text-neutral-500">domain</span>
@@ -290,7 +300,18 @@ export const DashboardPage: React.FC = () => {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-neutral-900 dark:text-neutral-100">{req.client_name || 'Client'}</span>
+                        {req.client_id ? (
+                          <button
+                            type="button"
+                            onClick={() => navigate(`/clients/${req.client_id}`)}
+                            className="font-semibold text-sm text-neutral-900 dark:text-neutral-100 hover:underline text-left inline-flex items-center gap-1"
+                          >
+                            <span>{req.client_name || 'Client'}</span>
+                            <span className="material-symbols-outlined text-[13px] text-neutral-400">open_in_new</span>
+                          </button>
+                        ) : (
+                          <span className="font-semibold text-sm text-neutral-900 dark:text-neutral-100">{req.client_name || 'Client'}</span>
+                        )}
                         <Badge variant={req.status as any}>{req.status?.toUpperCase()}</Badge>
                       </div>
                       <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">

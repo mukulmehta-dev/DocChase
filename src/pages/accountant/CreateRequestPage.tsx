@@ -358,7 +358,7 @@ export const CreateRequestPage: React.FC = () => {
               <Button variant="secondary" size="md" type="button" onClick={() => navigate(-1)}>
                 Cancel
               </Button>
-              <Button variant="primary" size="md" type="submit" isLoading={submitting} icon="send">
+              <Button variant="primary" size="md" type="submit" isLoading={submitting} disabled={submitting} icon="send">
                 Dispatch Request
               </Button>
             </div>

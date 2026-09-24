@@ -223,7 +223,22 @@ export const DocumentReviewPage: React.FC = () => {
           <div>
             <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">Document Review: {request.title}</h1>
             <p className="text-xs text-neutral-500 dark:text-neutral-400">
-              Client: {(request as any).client_name || request.client?.name} • Period: {request.period}
+              Client:{' '}
+              {request.client_id || request.client?.id ? (
+                <button
+                  type="button"
+                  onClick={() => navigate(`/clients/${request.client_id || request.client?.id}`)}
+                  className="font-medium text-neutral-800 dark:text-neutral-200 hover:underline inline-flex items-center gap-0.5"
+                >
+                  {(request as any).client_name || request.client?.name}
+                  <span className="material-symbols-outlined text-[13px] text-neutral-400">open_in_new</span>
+                </button>
+              ) : (
+                <span className="text-neutral-700 dark:text-neutral-200">
+                  {(request as any).client_name || request.client?.name}
+                </span>
+              )}{' '}
+              • Period: {request.period}
             </p>
           </div>
         </div>
