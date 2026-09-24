@@ -95,8 +95,8 @@ export const LandingPage: React.FC = () => {
         <div className="relative max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center pb-16 sm:pb-24">
 
-            {/* ── Text column ── */}
-            <div className="text-center lg:text-left">
+            {/* ── Text column (Desktop: Left, Mobile: Second after visual) ── */}
+            <div className="text-center lg:text-left order-2 lg:order-1">
               {/* Eyebrow pill */}
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.05] border border-white/[0.12] text-xs font-semibold text-white mb-8 shadow-sm">
                 <span className="w-1.5 h-1.5 rounded-full bg-white animate-dc-status" />
@@ -168,8 +168,8 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            {/* ── Central Document Visual ── */}
-            <div className="w-full max-w-lg mx-auto lg:mx-0 lg:max-w-none">
+            {/* ── Central Document Visual (Desktop: Right, Mobile: First) ── */}
+            <div className="w-full max-w-lg mx-auto lg:mx-0 lg:max-w-none order-1 lg:order-2 flex items-center justify-center">
               <HeroDocumentVisual />
             </div>
           </div>

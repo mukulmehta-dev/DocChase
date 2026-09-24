@@ -62,9 +62,10 @@ export const clientService = {
       }
     }
 
-    // 1. Enforce Plan Limits
+    // 1. Enforce Plan Limits based on active clients count
     const existing = await this.getClients(workspaceId);
-    const limitCheck = billingService.checkClientCreationAllowed(plan, existing.length);
+    const activeCount = existing.filter((c) => c.status === 'active').length;
+    const limitCheck = billingService.checkClientCreationAllowed(plan, activeCount);
     if (!limitCheck.allowed) {
       throw new Error(limitCheck.message);
     }
@@ -132,10 +133,24 @@ export const clientService = {
     workspaceId: string,
     clientId: string,
     updates: Partial<Client>,
-    userId?: string
+    userId?: string,
+    plan?: PlanType
   ): Promise<Client> {
     // Strictly prevent mutating immutable primary/foreign keys or timestamps
     const { id, workspace_id, created_at, ...safeUpdates } = updates as any;
+
+    // If reactivating client, check active quota limit
+    if (safeUpdates.status === 'active' && plan) {
+      const existing = await this.getClients(workspaceId);
+      const target = existing.find((c) => c.id === clientId);
+      if (target && target.status !== 'active') {
+        const activeCount = existing.filter((c) => c.status === 'active').length;
+        const limitCheck = billingService.checkClientCreationAllowed(plan, activeCount);
+        if (!limitCheck.allowed) {
+          throw new Error(`Cannot reactivate client: ${limitCheck.message}`);
+        }
+      }
+    }
 
     let updatedClient: Client;
     if (isSupabaseConfigured()) {

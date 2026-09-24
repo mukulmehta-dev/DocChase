@@ -89,6 +89,8 @@ export const PublicLayout: React.FC = () => {
     { label: 'Security', to: '/#security', onClick: () => handleAnchorClick('security'), id: 'nav-security' },
   ];
 
+  const isAuthPage = location.pathname === '/sign-in' || location.pathname === '/sign-up';
+
   return (
     <div className="dark min-h-screen bg-[#09090b] flex flex-col text-neutral-100">
       <PageTransitionBar />
@@ -223,8 +225,9 @@ export const PublicLayout: React.FC = () => {
         <Outlet />
       </main>
 
-      {/* ─── Public Footer ─── */}
-      <footer className="bg-[#0c0c0e] border-t border-white/[0.07] pt-12 pb-8 mt-auto">
+      {/* ─── Public Footer (Hidden on dedicated full-height auth viewports) ─── */}
+      {!isAuthPage && (
+        <footer className="bg-[#0c0c0e] border-t border-white/[0.07] pt-12 pb-8 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
           {/* Footer top: brand + link columns */}
@@ -274,6 +277,7 @@ export const PublicLayout: React.FC = () => {
           </div>
         </div>
       </footer>
+      )}
     </div>
   );
 };

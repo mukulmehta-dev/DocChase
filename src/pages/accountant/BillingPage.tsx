@@ -7,7 +7,8 @@ import { Button } from '../../components/ui/Button';
 import { billingService, type WorkspaceEntitlements } from '../../services/billing';
 
 export const BillingPage: React.FC = () => {
-  const { currentWorkspace } = useAuth();
+  const { currentWorkspace, workspaceRole } = useAuth();
+  const isOwnerOrAdmin = workspaceRole === 'owner' || workspaceRole === 'admin';
   const [searchParams] = useSearchParams();
   const [entitlements, setEntitlements] = useState<WorkspaceEntitlements | null>(null);
   const [upgradingPlan, setUpgradingPlan] = useState<'starter' | 'pro' | null>(null);
@@ -35,7 +36,7 @@ export const BillingPage: React.FC = () => {
   }, [currentWorkspace?.id]);
 
   const handleUpgrade = async (plan: 'starter' | 'pro') => {
-    if (!currentWorkspace?.id) return;
+    if (!currentWorkspace?.id || !isOwnerOrAdmin) return;
     try {
       setUpgradingPlan(plan);
       setErrorMessage(null);
@@ -111,40 +112,48 @@ export const BillingPage: React.FC = () => {
             )}
           </div>
           <div className="mt-4 flex flex-col gap-2">
-            {currentPlan === 'FREE' && (
+            {!isOwnerOrAdmin ? (
+              <div className="p-3 bg-neutral-50 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-lg text-xs text-neutral-500 dark:text-neutral-400">
+                Plan upgrades and billing management are restricted to Workspace Owners and Admins.
+              </div>
+            ) : (
               <>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  isLoading={upgradingPlan === 'starter'}
-                  onClick={() => handleUpgrade('starter')}
-                >
-                  Upgrade to Starter ($9/mo)
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  isLoading={upgradingPlan === 'pro'}
-                  onClick={() => handleUpgrade('pro')}
-                >
-                  Upgrade to Pro ($19/mo)
-                </Button>
+                {currentPlan === 'FREE' && (
+                  <>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      isLoading={upgradingPlan === 'starter'}
+                      onClick={() => handleUpgrade('starter')}
+                    >
+                      Upgrade to Starter ($9/mo)
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      isLoading={upgradingPlan === 'pro'}
+                      onClick={() => handleUpgrade('pro')}
+                    >
+                      Upgrade to Pro ($19/mo)
+                    </Button>
+                  </>
+                )}
+                {currentPlan === 'STARTER' && (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    isLoading={upgradingPlan === 'pro'}
+                    onClick={() => handleUpgrade('pro')}
+                  >
+                    Upgrade to Pro ($19/mo)
+                  </Button>
+                )}
+                {currentPlan === 'PRO' && (
+                  <Badge variant="ready" className="w-fit">
+                    Highest Plan Active
+                  </Badge>
+                )}
               </>
-            )}
-            {currentPlan === 'STARTER' && (
-              <Button
-                variant="primary"
-                size="sm"
-                isLoading={upgradingPlan === 'pro'}
-                onClick={() => handleUpgrade('pro')}
-              >
-                Upgrade to Pro ($19/mo)
-              </Button>
-            )}
-            {currentPlan === 'PRO' && (
-              <Badge variant="ready" className="w-fit">
-                Highest Plan Active
-              </Badge>
             )}
           </div>
         </Card>

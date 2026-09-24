@@ -34,6 +34,7 @@ export const RequestsPage: React.FC = () => {
 
   const filteredRequests = requests.filter((r) => {
     if (filter === 'all') return true;
+    if (filter === 'in_progress') return r.status === 'sent' || r.status === 'in_progress';
     return r.status === filter;
   });
 
@@ -67,7 +68,7 @@ export const RequestsPage: React.FC = () => {
             filter === 'in_progress' ? 'bg-white dark:bg-[#1f1f23] text-neutral-900 dark:text-white shadow-sm' : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100'
           }`}
         >
-          Waiting / In Progress ({requests.filter((r) => r.status !== 'ready' && r.status !== 'overdue').length})
+          Waiting / In Progress ({requests.filter((r) => r.status === 'sent' || r.status === 'in_progress').length})
         </button>
         <button
           onClick={() => setFilter('ready')}

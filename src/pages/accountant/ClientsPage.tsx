@@ -10,6 +10,7 @@ import { Modal } from '../../components/ui/Modal';
 import { Input } from '../../components/ui/Input';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { EditClientModal } from '../../components/clients/EditClientModal';
+import { AddClientModal } from '../../components/clients/AddClientModal';
 
 export const ClientsPage: React.FC = () => {
   const { currentWorkspace, user } = useAuth();
@@ -27,13 +28,6 @@ export const ClientsPage: React.FC = () => {
 
   // Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [name, setName] = useState('');
-  const [companyName, setCompanyName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [notes, setNotes] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [modalError, setModalError] = useState<string | null>(null);
 
   const fetchClients = async () => {
     if (!currentWorkspace?.id) return;
@@ -57,12 +51,14 @@ export const ClientsPage: React.FC = () => {
         currentWorkspace.id,
         clientToToggleStatus.id,
         { status: newStatus },
-        user?.id
+        user?.id,
+        currentWorkspace.plan
       );
       setClientToToggleStatus(null);
       await fetchClients();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to update client status', err);
+      alert(err.message || 'Failed to update client status');
     } finally {
       setIsUpdatingStatus(false);
     }
@@ -71,37 +67,6 @@ export const ClientsPage: React.FC = () => {
   useEffect(() => {
     fetchClients();
   }, [currentWorkspace?.id]);
-
-  const handleAddClient = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentWorkspace?.id) return;
-    setModalError(null);
-    setIsSubmitting(true);
-    try {
-      await clientService.createClient(
-        currentWorkspace.id,
-        currentWorkspace.plan,
-        {
-          name,
-          company_name: companyName || undefined,
-          email,
-          phone: phone || undefined,
-          notes: notes || undefined,
-        }
-      );
-      setIsAddModalOpen(false);
-      setName('');
-      setCompanyName('');
-      setEmail('');
-      setPhone('');
-      setNotes('');
-      await fetchClients();
-    } catch (err: any) {
-      setModalError(err.message || 'Failed to add client');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const filteredClients = clients.filter((c) => {
     const matchesSearch =
@@ -270,63 +235,13 @@ export const ClientsPage: React.FC = () => {
       )}
 
       {/* Add Client Modal */}
-      <Modal
+      <AddClientModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        title="Add New Client"
-        description="Onboard an accounting or bookkeeping client to DocChase."
-      >
-        <form onSubmit={handleAddClient} className="flex flex-col gap-4">
-          {modalError && (
-            <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-800 flex items-center gap-2">
-              <span className="material-symbols-outlined text-[16px] text-rose-600">error</span>
-              <span>{modalError}</span>
-            </div>
-          )}
-
-          <Input
-            label="Company / Legal Entity Name"
-            placeholder="e.g. Acme Retail Ltd"
-            value={companyName}
-            onChange={(e) => setCompanyName(e.target.value)}
-            helperText="The client's business or organization name."
-          />
-
-          <Input
-            label="Primary Contact Person"
-            required
-            placeholder="e.g. John Doe"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-
-          <Input
-            label="Client Notification Email"
-            type="email"
-            required
-            placeholder="john@acme.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            helperText="Secure links and smart reminders will be sent to this email."
-          />
-
-          <Input
-            label="Phone Number (Optional)"
-            placeholder="+1 (555) 019-2834"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
-
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100 dark:border-neutral-800 mt-2">
-            <Button variant="secondary" size="md" type="button" onClick={() => setIsAddModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="primary" size="md" type="submit" isLoading={isSubmitting} icon="check">
-              Create Client
-            </Button>
-          </div>
-        </form>
-      </Modal>
+        onSuccess={() => {
+          fetchClients();
+        }}
+      />
 
       {/* Edit Client Modal */}
       <EditClientModal

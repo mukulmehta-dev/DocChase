@@ -5,6 +5,7 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { AddClientModal } from '../../components/clients/AddClientModal';
 import { clientService } from '../../services/clients';
 import { requestService } from '../../services/requests';
 import { auditService } from '../../services/audit';
@@ -35,6 +36,7 @@ export const DashboardPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [sendingReminderId, setSendingReminderId] = useState<string | null>(null);
   const [reminderMessage, setReminderMessage] = useState<{ id: string; text: string; success: boolean } | null>(null);
+  const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false);
 
   const loadDashboard = useCallback(async () => {
     if (!currentWorkspace?.id) return;
@@ -170,7 +172,7 @@ export const DashboardPage: React.FC = () => {
             variant="secondary"
             size="sm"
             icon="person_add"
-            onClick={() => navigate('/clients/new')}
+            onClick={() => setIsAddClientModalOpen(true)}
           >
             Add Client
           </Button>
@@ -370,6 +372,15 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Add Client Modal */}
+      <AddClientModal
+        isOpen={isAddClientModalOpen}
+        onClose={() => setIsAddClientModalOpen(false)}
+        onSuccess={() => {
+          loadDashboard();
+        }}
+      />
     </div>
   );
 };

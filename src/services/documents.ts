@@ -288,6 +288,11 @@ export const documentService = {
         }
       );
 
+      // Invoke authoritative readiness recalculation after successful document persistence
+      await this.recalculateReadiness(params.workspaceId, params.requestId).catch((err) => {
+        console.warn('Readiness recalculation notice after direct upload:', err);
+      });
+
       return docRecord;
     }
 
@@ -327,6 +332,9 @@ export const documentService = {
         client_name: params.clientName,
       }
     );
+
+    // Invoke readiness recalculation after local mock persistence
+    await this.recalculateReadiness(params.workspaceId, params.requestId);
 
     return docRecord;
   },
@@ -459,11 +467,19 @@ export const documentService = {
     const req = requests.find((r: any) => r.id === requestId);
 
     if (req && req.items) {
+      const totalItems = req.items.length;
       const requiredItems = req.items.filter((i: any) => i.required);
       const approvedCount = req.items.filter((i: any) => i.status === 'approved').length;
       const approvedRequiredCount = requiredItems.filter((i: any) => i.status === 'approved').length;
 
-      const isReady = requiredItems.length > 0 && approvedRequiredCount === requiredItems.length;
+      let isReady = false;
+      if (requiredItems.length > 0) {
+        isReady = approvedRequiredCount === requiredItems.length;
+      } else if (totalItems > 0) {
+        isReady = approvedCount === totalItems;
+      } else {
+        isReady = false;
+      }
 
       req.approved_count = approvedCount;
       if (isReady) {

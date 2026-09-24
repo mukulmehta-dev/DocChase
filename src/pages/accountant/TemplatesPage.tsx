@@ -15,6 +15,9 @@ export const TemplatesPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+  const [templateToDelete, setTemplateToDelete] = useState<TemplateWithItems | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // New manual template form state
   const [name, setName] = useState('');
@@ -75,6 +78,21 @@ export const TemplatesPage: React.FC = () => {
     await loadTemplates();
   };
 
+  const handleConfirmDelete = async () => {
+    if (!currentWorkspace?.id || !templateToDelete) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await templateService.deleteTemplate(currentWorkspace.id, templateToDelete.id);
+      setTemplateToDelete(null);
+      await loadTemplates();
+    } catch (err: any) {
+      setDeleteError(err.message || 'Failed to delete template');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -121,7 +139,17 @@ export const TemplatesPage: React.FC = () => {
                     <h3 className="font-semibold text-base text-neutral-900 dark:text-neutral-100">{tpl.name}</h3>
                     <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">{tpl.description}</p>
                   </div>
-                  <Badge variant="neutral">{tpl.frequency?.toUpperCase()}</Badge>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Badge variant="neutral">{tpl.frequency?.toUpperCase()}</Badge>
+                    <button
+                      type="button"
+                      onClick={() => setTemplateToDelete(tpl)}
+                      className="p-1 rounded text-neutral-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                      title="Delete template"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">delete</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mt-4 flex flex-col gap-2">
@@ -268,6 +296,58 @@ export const TemplatesPage: React.FC = () => {
         onClose={() => setIsAiModalOpen(false)}
         onTemplateCreated={loadTemplates}
       />
+
+      {/* Delete Template Confirmation Modal */}
+      <Modal
+        isOpen={!!templateToDelete}
+        onClose={() => {
+          if (!isDeleting) {
+            setTemplateToDelete(null);
+            setDeleteError(null);
+          }
+        }}
+        title="Delete Template"
+      >
+        <div className="flex flex-col gap-4">
+          {deleteError && (
+            <div className="p-2.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 rounded-lg text-xs text-rose-800 dark:text-rose-300 flex items-center gap-2">
+              <span className="material-symbols-outlined text-[16px] text-rose-600 dark:text-rose-400">error</span>
+              <span>{deleteError}</span>
+            </div>
+          )}
+
+          <p className="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed">
+            Are you sure you want to permanently delete template <strong>"{templateToDelete?.name}"</strong>?
+            <br /><br />
+            This will remove the template from your firm's recurring library. Existing requests previously created with this template will remain unaffected.
+          </p>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100 dark:border-neutral-800 mt-2">
+            <Button
+              variant="secondary"
+              size="md"
+              type="button"
+              onClick={() => {
+                setTemplateToDelete(null);
+                setDeleteError(null);
+              }}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              size="md"
+              type="button"
+              isLoading={isDeleting}
+              onClick={handleConfirmDelete}
+              icon="delete"
+            >
+              Delete Template
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

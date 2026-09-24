@@ -4,6 +4,17 @@ import { generateSecureToken, hashToken } from '../utils/crypto';
 import { billingService } from './billing';
 import { auditService } from './audit';
 
+// Ephemeral in-memory token cache for securely retaining raw tokens in current session
+const inMemoryTokenCache = new Map<string, string>();
+
+export const getCachedPortalToken = (requestId: string): string | undefined => {
+  return inMemoryTokenCache.get(requestId);
+};
+
+export const setCachedPortalToken = (requestId: string, rawToken: string): void => {
+  inMemoryTokenCache.set(requestId, rawToken);
+};
+
 export const requestService = {
   async getRequests(workspaceId: string): Promise<any[]> {
     if (isSupabaseConfigured()) {
@@ -95,7 +106,35 @@ export const requestService = {
       throw new Error(limitCheck.message);
     }
 
-    // 2. Cryptographically generate unguessable secure token & hash
+    // 2. Defense-in-depth: Verify client exists, belongs to this workspace, and is active
+    if (isSupabaseConfigured()) {
+      const { data: clientRecord, error: clientErr } = await supabase
+        .from('clients')
+        .select('id, workspace_id, status')
+        .eq('id', data.clientId)
+        .eq('workspace_id', workspaceId)
+        .single();
+
+      if (clientErr || !clientRecord) {
+        throw new Error('Client not found or does not belong to this workspace.');
+      }
+      if (clientRecord.status !== 'active') {
+        throw new Error('Cannot create request: client is archived. Please reactivate the client first.');
+      }
+    } else {
+      const workspaceClients = JSON.parse(
+        localStorage.getItem(`docchase_clients_${workspaceId}`) || '[]'
+      );
+      const clientRecord = workspaceClients.find((c: any) => c.id === data.clientId);
+      if (!clientRecord) {
+        throw new Error('Client not found or does not belong to this workspace.');
+      }
+      if (clientRecord.status !== 'active') {
+        throw new Error('Cannot create request: client is archived. Please reactivate the client first.');
+      }
+    }
+
+    // 3. Cryptographically generate unguessable secure token & hash
     const rawToken = generateSecureToken();
     const tokenHash = await hashToken(rawToken);
 
@@ -110,7 +149,7 @@ export const requestService = {
           period: data.period,
           due_date: data.dueDate,
           status: 'sent',
-          access_token: rawToken,
+          access_token: null,
           access_token_hash: tokenHash,
           sent_at: new Date().toISOString(),
         })
@@ -118,6 +157,8 @@ export const requestService = {
         .single();
 
       if (reqError || !request) throw reqError || new Error('Failed to create request');
+
+      inMemoryTokenCache.set(request.id, rawToken);
 
       // 3. Snapshot template items directly into request_items
       const itemInserts = data.items.map((item) => ({
@@ -175,7 +216,7 @@ export const requestService = {
       period: data.period,
       due_date: data.dueDate,
       status: 'sent',
-      access_token: rawToken,
+      access_token: null,
       access_token_hash: tokenHash,
       sent_at: now,
       completed_at: null,
@@ -186,6 +227,8 @@ export const requestService = {
       approved_count: 0,
       required_count: requestItems.filter((i) => i.required).length,
     };
+
+    inMemoryTokenCache.set(reqId, rawToken);
 
     activeRequests.unshift(newRequest);
     localStorage.setItem(`docchase_requests_${workspaceId}`, JSON.stringify(activeRequests));
@@ -290,5 +333,61 @@ export const requestService = {
       target.status = 'cancelled';
       localStorage.setItem(`docchase_requests_${workspaceId}`, JSON.stringify(requests));
     }
+  },
+
+  async rotatePortalToken(
+    workspaceId: string,
+    requestId: string,
+    userId?: string
+  ): Promise<string> {
+    const rawToken = generateSecureToken();
+    const tokenHash = await hashToken(rawToken);
+
+    if (isSupabaseConfigured()) {
+      const { data, error } = await supabase
+        .from('requests')
+        .update({
+          access_token_hash: tokenHash,
+          access_token: null,
+        })
+        .eq('id', requestId)
+        .eq('workspace_id', workspaceId)
+        .select('id')
+        .single();
+
+      if (error || !data) throw error || new Error('Request not found or unauthorized');
+    } else {
+      const key = `docchase_requests_${workspaceId}`;
+      const requests = JSON.parse(localStorage.getItem(key) || '[]');
+      const target = requests.find((r: any) => r.id === requestId);
+      if (!target) {
+        throw new Error('Request not found or does not belong to this workspace');
+      }
+
+      target.access_token_hash = tokenHash;
+      target.access_token = null;
+      localStorage.setItem(key, JSON.stringify(requests));
+
+      const globalRequests = JSON.parse(localStorage.getItem('docchase_all_requests_global') || '[]');
+      const globalTarget = globalRequests.find((r: any) => r.id === requestId);
+      if (globalTarget) {
+        globalTarget.access_token_hash = tokenHash;
+        globalTarget.access_token = null;
+        localStorage.setItem('docchase_all_requests_global', JSON.stringify(globalRequests));
+      }
+    }
+
+    inMemoryTokenCache.set(requestId, rawToken);
+
+    await auditService.log(
+      workspaceId,
+      'request.token_rotated',
+      'request',
+      requestId,
+      { timestamp: new Date().toISOString() },
+      userId || null
+    );
+
+    return rawToken;
   },
 };

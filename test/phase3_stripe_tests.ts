@@ -93,24 +93,15 @@ async function runPhase3Tests() {
   // Create an isolated test workspace for this test run
   const testWorkspaceId = crypto.randomUUID();
   const testWorkspaceName = `Phase3-Test-Workspace-${Date.now()}`;
-  const { error: wsError } = await authedClient
-    .from('workspaces')
-    .insert({ id: testWorkspaceId, name: testWorkspaceName });
+  const { data: createdWs, error: wsError } = await authedClient.rpc('create_workspace', {
+    p_name: testWorkspaceName,
+  });
 
-  if (wsError) {
-    throw new Error(`Fatal: Could not create test workspace: ${wsError.message}`);
+  if (wsError || !createdWs) {
+    throw new Error(`Fatal: Could not create test workspace: ${wsError?.message}`);
   }
 
-  // Ensure user is owner of test workspace
-  const { error: memError } = await authedClient
-    .from('workspace_members')
-    .insert({ workspace_id: testWorkspaceId, user_id: userId, role: 'owner' });
-
-  if (memError) {
-    throw new Error(`Fatal: Could not assign owner role: ${memError.message}`);
-  }
-
-  const workspaceId = testWorkspaceId;
+  const workspaceId = createdWs.id;
   console.log(`ℹ️  Created controlled test workspace: ${workspaceId} (${testWorkspaceName})\n`);
 
   // -------------------------------------------------------------------------
@@ -522,18 +513,15 @@ async function runPhase3Tests() {
   console.log('\n--- Group 6: Concurrency & Race Condition Protection ---');
 
   // TEST 16: Concurrent Client Creation Cannot Exceed Limit
-  // Create another clean workspace for the concurrency test (explicit UUID required for RLS)
-  const raceWsId = crypto.randomUUID();
-  const { error: raceWsError } = await authedClient
-    .from('workspaces')
-    .insert({ id: raceWsId, name: `Race-Test-Workspace-${Date.now()}` });
+  // Create another clean workspace for the concurrency test
+  const { data: raceWs, error: raceWsError } = await authedClient.rpc('create_workspace', {
+    p_name: `Race-Test-Workspace-${Date.now()}`,
+  });
+  const raceWsId = raceWs?.id;
 
-  if (raceWsError) {
-    console.warn(`  ⚠️  Race workspace creation failed: ${raceWsError.message}`);
+  if (raceWsError || !raceWsId) {
+    console.warn(`  ⚠️  Race workspace creation failed: ${raceWsError?.message}`);
   }
-  await authedClient
-    .from('workspace_members')
-    .insert({ workspace_id: raceWsId, user_id: userId, role: 'owner' });
 
   // On Free plan (limit = 3). We launch 5 concurrent insertions at the exact same millisecond
   const concurrentPromises = [1, 2, 3, 4, 5].map((i) =>
@@ -753,6 +741,187 @@ async function runPhase3Tests() {
     !stripeInDist,
     'Vite production bundle completely free of Stripe secrets'
   );
+
+  // -------------------------------------------------------------------------
+  // GROUP 10: Atomic Stripe Webhook Event Ordering & Concurrency Safety
+  // -------------------------------------------------------------------------
+  console.log('\n--- Group 10: Atomic Stripe Webhook Event Ordering & Concurrency Safety ---');
+
+  // TEST 25: Newer Event After Older Event (A_100 -> B_200 -> State = B)
+  const { data: ordWs } = await authedClient.rpc('create_workspace', {
+    p_name: `Ordering-Test-Workspace-${Date.now()}`,
+  });
+  const orderingWsId = ordWs?.id;
+
+  // Event A: created=1700000100, plan=starter, status=active
+  const resA = await authedClient.rpc('apply_stripe_subscription_update_for_testing', {
+    p_workspace_id: orderingWsId,
+    p_stripe_customer_id: 'cus_test_100',
+    p_stripe_subscription_id: 'sub_test_100',
+    p_plan: 'starter',
+    p_status: 'active',
+    p_event_created: 1700000100,
+  });
+
+  // Event B: created=1700000200, plan=pro, status=active
+  const resB = await authedClient.rpc('apply_stripe_subscription_update_for_testing', {
+    p_workspace_id: orderingWsId,
+    p_stripe_customer_id: 'cus_test_100',
+    p_stripe_subscription_id: 'sub_test_100',
+    p_plan: 'pro',
+    p_status: 'active',
+    p_event_created: 1700000200,
+  });
+
+  const { data: subStateAfterB } = await authedClient
+    .from('subscriptions')
+    .select('plan, status, stripe_event_created')
+    .eq('workspace_id', orderingWsId)
+    .single();
+
+  record(
+    25,
+    'Newer Event After Older Event Ordering (A_100 -> B_200 -> Pro)',
+    resB.data?.applied === true &&
+      !resB.data?.ignored_older_event &&
+      subStateAfterB?.plan === 'pro' &&
+      Number(subStateAfterB?.stripe_event_created) === 1700000200,
+    `Applied newer event (ts: 1700000200); plan transitioned to 'pro'`
+  );
+
+  // TEST 26: Older Event After Newer Event (A_200 -> B_100 -> State remains A_200)
+  // Incoming stale event: created=1700000100, plan=starter, status=active
+  const resStale = await authedClient.rpc('apply_stripe_subscription_update_for_testing', {
+    p_workspace_id: orderingWsId,
+    p_stripe_customer_id: 'cus_test_100',
+    p_stripe_subscription_id: 'sub_test_100',
+    p_plan: 'starter',
+    p_status: 'active',
+    p_event_created: 1700000100,
+  });
+
+  const { data: subStateAfterStale } = await authedClient
+    .from('subscriptions')
+    .select('plan, status, stripe_event_created')
+    .eq('workspace_id', orderingWsId)
+    .single();
+
+  record(
+    26,
+    'Older Out-Of-Order Event Rejection Guard (A_200 -> B_100 -> State remains Pro)',
+    resStale.data?.applied === false &&
+      resStale.data?.ignored_older_event === true &&
+      subStateAfterStale?.plan === 'pro' &&
+      Number(subStateAfterStale?.stripe_event_created) === 1700000200,
+    `Stale event correctly rejected (ignored_older_event: true); DB state preserved at 'pro'`
+  );
+
+  // TEST 27: Equal Timestamp Handling (A_200 -> B_200 -> Accepted)
+  // Two distinct events arriving in the same second
+  const resEqualTs = await authedClient.rpc('apply_stripe_subscription_update_for_testing', {
+    p_workspace_id: orderingWsId,
+    p_stripe_customer_id: 'cus_test_100',
+    p_stripe_subscription_id: 'sub_test_100',
+    p_plan: 'starter',
+    p_status: 'active',
+    p_event_created: 1700000200,
+  });
+
+  const { data: subStateAfterEqual } = await authedClient
+    .from('subscriptions')
+    .select('plan, status, stripe_event_created')
+    .eq('workspace_id', orderingWsId)
+    .single();
+
+  record(
+    27,
+    'Equal Timestamp Event Handling (Same-Second Updates Accepted via >=)',
+    resEqualTs.data?.applied === true &&
+      !resEqualTs.data?.ignored_older_event &&
+      subStateAfterEqual?.plan === 'starter' &&
+      Number(subStateAfterEqual?.stripe_event_created) === 1700000200,
+    `Equal timestamp (1700000200 >= 1700000200) applied successfully without false rejection`
+  );
+
+  // TEST 28: Subscription Full Lifecycle with Stale Event Ingestion (Created -> Updated -> Deleted -> Stale Ignored)
+  // 1. Created (T=300)
+  await authedClient.rpc('apply_stripe_subscription_update_for_testing', {
+    p_workspace_id: orderingWsId,
+    p_plan: 'starter',
+    p_status: 'active',
+    p_event_created: 1700000300,
+  });
+  // 2. Updated (T=400)
+  await authedClient.rpc('apply_stripe_subscription_update_for_testing', {
+    p_workspace_id: orderingWsId,
+    p_plan: 'pro',
+    p_status: 'active',
+    p_event_created: 1700000400,
+  });
+  // 3. Deleted (T=500)
+  await authedClient.rpc('apply_stripe_subscription_update_for_testing', {
+    p_workspace_id: orderingWsId,
+    p_plan: 'free',
+    p_status: 'canceled',
+    p_cancel_at_period_end: true,
+    p_event_created: 1700000500,
+  });
+
+  // 4. Stale Updated event arriving out-of-order (T=400)
+  const staleAfterDelete = await authedClient.rpc('apply_stripe_subscription_update_for_testing', {
+    p_workspace_id: orderingWsId,
+    p_plan: 'pro',
+    p_status: 'active',
+    p_event_created: 1700000400,
+  });
+
+  const { data: finalLifecycleSub } = await authedClient
+    .from('subscriptions')
+    .select('plan, status, stripe_event_created')
+    .eq('workspace_id', orderingWsId)
+    .single();
+
+  record(
+    28,
+    'Full Subscription Lifecycle State Protection (Created -> Updated -> Deleted -> Stale Update Blocked)',
+    staleAfterDelete.data?.ignored_older_event === true &&
+      finalLifecycleSub?.status === 'canceled' &&
+      finalLifecycleSub?.plan === 'free' &&
+      Number(finalLifecycleSub?.stripe_event_created) === 1700000500,
+    `Canceled subscription remained canceled; stale update from T=400 ignored`
+  );
+
+  // TEST 29: Concurrent Webhook Row-Lock & Timestamp Serialization
+  // Fire 5 concurrent updates with scrambled timestamps: [1000, 5000, 3000, 2000, 4000]
+  const timestamps = [1700001000, 1700005000, 1700003000, 1700002000, 1700004000];
+  const plans = ['starter', 'pro', 'starter', 'starter', 'starter'];
+
+  await Promise.all(
+    timestamps.map((ts, idx) =>
+      authedClient.rpc('apply_stripe_subscription_update_for_testing', {
+        p_workspace_id: orderingWsId,
+        p_plan: plans[idx],
+        p_status: 'active',
+        p_event_created: ts,
+      })
+    )
+  );
+
+  const { data: concurrentFinalSub } = await authedClient
+    .from('subscriptions')
+    .select('plan, status, stripe_event_created')
+    .eq('workspace_id', orderingWsId)
+    .single();
+
+  record(
+    29,
+    'Concurrent Out-Of-Order Event Serialization (FOR UPDATE Lock)',
+    Number(concurrentFinalSub?.stripe_event_created) === 1700005000 && concurrentFinalSub?.plan === 'pro',
+    `Final stored timestamp is strictly the latest (${concurrentFinalSub?.stripe_event_created}) and final state is 'pro'`
+  );
+
+  // Clean up ordering workspace
+  await authedClient.from('workspaces').delete().eq('id', orderingWsId);
 
   // -------------------------------------------------------------------------
   // Clean up controlled test workspace

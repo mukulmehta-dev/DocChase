@@ -50,12 +50,14 @@ export const ClientDetailPage: React.FC = () => {
         currentWorkspace.id,
         client.id,
         { status: newStatus },
-        user?.id
+        user?.id,
+        currentWorkspace.plan
       );
       setClient(updated);
       setIsStatusModalOpen(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to update client status', err);
+      alert(err.message || 'Failed to update client status');
     } finally {
       setIsUpdatingStatus(false);
     }

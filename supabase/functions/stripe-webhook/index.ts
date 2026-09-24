@@ -191,35 +191,51 @@ serve(async (req) => {
       );
     }
 
-    // 6. Handle Supported Stripe Events
+    // 6. Handle Supported Stripe Events with Atomic Event-Ordering Guard
     const eventType: string = event.type;
     const obj = event.data?.object;
+    const eventCreated: number | null = typeof event.created === 'number' ? event.created : null;
 
     if (eventType === 'checkout.session.completed') {
-      const workspaceId = obj.metadata?.workspace_id;
+      const workspaceId = obj.metadata?.workspace_id || null;
       const plan = obj.metadata?.plan || 'starter';
-      const customerId = obj.customer;
-      const subscriptionId = obj.subscription;
+      const customerId = obj.customer || null;
+      const subscriptionId = obj.subscription || null;
+      const validPlan = ['starter', 'pro'].includes(plan) ? plan : 'starter';
 
-      if (workspaceId) {
-        await supabaseAdmin
-          .from('subscriptions')
-          .update({
-            stripe_customer_id: customerId || null,
-            stripe_subscription_id: subscriptionId || null,
-            plan: ['starter', 'pro'].includes(plan) ? plan : 'starter',
-            status: 'active',
-            cancel_at_period_end: false,
-          })
-          .eq('workspace_id', workspaceId);
+      const { data: updateResult, error: rpcErr } = await supabaseAdmin.rpc(
+        'apply_stripe_subscription_update',
+        {
+          p_workspace_id: workspaceId,
+          p_stripe_customer_id: customerId,
+          p_stripe_subscription_id: subscriptionId,
+          p_plan: validPlan,
+          p_status: 'active',
+          p_stripe_price_id: null,
+          p_cancel_at_period_end: false,
+          p_current_period_start: null,
+          p_current_period_end: null,
+          p_event_created: eventCreated,
+        }
+      );
+
+      if (rpcErr) {
+        console.error('Error applying checkout.session.completed update:', rpcErr);
+      }
+
+      if (updateResult?.ignored_older_event) {
+        return new Response(
+          JSON.stringify({ received: true, ignored_older_event: true, eventId: event.id }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
     } else if (
       eventType === 'customer.subscription.created' ||
       eventType === 'customer.subscription.updated'
     ) {
-      const subscriptionId = obj.id;
-      const customerId = obj.customer;
-      const status = obj.status; // active, past_due, unpaid, canceled, trialing, etc.
+      const subscriptionId = obj.id || null;
+      const customerId = obj.customer || null;
+      const status = obj.status || 'active'; // active, past_due, unpaid, canceled, trialing, etc.
       const cancelAtPeriodEnd = Boolean(obj.cancel_at_period_end);
       const periodStart = obj.current_period_start
         ? new Date(obj.current_period_start * 1000).toISOString()
@@ -227,93 +243,109 @@ serve(async (req) => {
       const periodEnd = obj.current_period_end
         ? new Date(obj.current_period_end * 1000).toISOString()
         : null;
-      const priceId = obj.items?.data?.[0]?.price?.id;
+      const priceId = obj.items?.data?.[0]?.price?.id || null;
       const unitAmount = obj.items?.data?.[0]?.price?.unit_amount;
+      const workspaceId = obj.metadata?.workspace_id || null;
 
       // Determine plan from metadata, price ID or amount
-      let plan: 'starter' | 'pro' = 'starter';
+      let plan: 'starter' | 'pro' | null = null;
       if (obj.metadata?.plan === 'pro' || unitAmount === 1900) {
         plan = 'pro';
       } else if (obj.metadata?.plan === 'starter' || unitAmount === 900) {
         plan = 'starter';
       }
 
-      const updateData: any = {
-        stripe_customer_id: customerId,
-        stripe_subscription_id: subscriptionId,
-        status: status || 'active',
-        cancel_at_period_end: cancelAtPeriodEnd,
-        current_period_start: periodStart,
-        current_period_end: periodEnd,
-      };
+      const { data: updateResult, error: rpcErr } = await supabaseAdmin.rpc(
+        'apply_stripe_subscription_update',
+        {
+          p_workspace_id: workspaceId,
+          p_stripe_customer_id: customerId,
+          p_stripe_subscription_id: subscriptionId,
+          p_plan: plan,
+          p_status: status,
+          p_stripe_price_id: priceId,
+          p_cancel_at_period_end: cancelAtPeriodEnd,
+          p_current_period_start: periodStart,
+          p_current_period_end: periodEnd,
+          p_event_created: eventCreated,
+        }
+      );
 
-      if (priceId) updateData.stripe_price_id = priceId;
-      if (status === 'active' || status === 'trialing') {
-        updateData.plan = plan;
+      if (rpcErr) {
+        console.error('Error applying subscription update:', rpcErr);
       }
 
-      // Try matching by workspace_id metadata first
-      let matched = false;
-      const workspaceId = obj.metadata?.workspace_id;
-      if (workspaceId) {
-        const { data: updated } = await supabaseAdmin
-          .from('subscriptions')
-          .update(updateData)
-          .eq('workspace_id', workspaceId)
-          .select('id');
-        if (updated && updated.length > 0) matched = true;
-      }
-
-      // If not matched, try matching by stripe_subscription_id
-      if (!matched && subscriptionId) {
-        const { data: updated } = await supabaseAdmin
-          .from('subscriptions')
-          .update(updateData)
-          .eq('stripe_subscription_id', subscriptionId)
-          .select('id');
-        if (updated && updated.length > 0) matched = true;
-      }
-
-      // If not matched, try matching by stripe_customer_id
-      if (!matched && customerId) {
-        await supabaseAdmin
-          .from('subscriptions')
-          .update(updateData)
-          .eq('stripe_customer_id', customerId);
+      if (updateResult?.ignored_older_event) {
+        return new Response(
+          JSON.stringify({ received: true, ignored_older_event: true, eventId: event.id }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
     } else if (eventType === 'customer.subscription.deleted') {
-      const subscriptionId = obj.id;
-      const customerId = obj.customer;
+      const subscriptionId = obj.id || null;
+      const customerId = obj.customer || null;
+      const workspaceId = obj.metadata?.workspace_id || null;
 
-      if (subscriptionId) {
-        await supabaseAdmin
-          .from('subscriptions')
-          .update({
-            status: 'canceled',
-            cancel_at_period_end: true,
-          })
-          .eq('stripe_subscription_id', subscriptionId);
-      } else if (customerId) {
-        await supabaseAdmin
-          .from('subscriptions')
-          .update({
-            status: 'canceled',
-            cancel_at_period_end: true,
-          })
-          .eq('stripe_customer_id', customerId);
+      const { data: updateResult, error: rpcErr } = await supabaseAdmin.rpc(
+        'apply_stripe_subscription_update',
+        {
+          p_workspace_id: workspaceId,
+          p_stripe_customer_id: customerId,
+          p_stripe_subscription_id: subscriptionId,
+          p_plan: 'free',
+          p_status: 'canceled',
+          p_stripe_price_id: null,
+          p_cancel_at_period_end: true,
+          p_current_period_start: null,
+          p_current_period_end: null,
+          p_event_created: eventCreated,
+        }
+      );
+
+      if (rpcErr) {
+        console.error('Error applying subscription.deleted update:', rpcErr);
+      }
+
+      if (updateResult?.ignored_older_event) {
+        return new Response(
+          JSON.stringify({ received: true, ignored_older_event: true, eventId: event.id }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
     } else if (eventType === 'invoice.payment_failed') {
-      const subscriptionId = obj.subscription;
-      if (subscriptionId) {
-        await supabaseAdmin
-          .from('subscriptions')
-          .update({ status: 'past_due' })
-          .eq('stripe_subscription_id', subscriptionId);
+      const subscriptionId = obj.subscription || null;
+      const customerId = obj.customer || null;
+
+      const { data: updateResult, error: rpcErr } = await supabaseAdmin.rpc(
+        'apply_stripe_subscription_update',
+        {
+          p_workspace_id: null,
+          p_stripe_customer_id: customerId,
+          p_stripe_subscription_id: subscriptionId,
+          p_plan: null,
+          p_status: 'past_due',
+          p_stripe_price_id: null,
+          p_cancel_at_period_end: null,
+          p_current_period_start: null,
+          p_current_period_end: null,
+          p_event_created: eventCreated,
+        }
+      );
+
+      if (rpcErr) {
+        console.error('Error applying invoice.payment_failed update:', rpcErr);
+      }
+
+      if (updateResult?.ignored_older_event) {
+        return new Response(
+          JSON.stringify({ received: true, ignored_older_event: true, eventId: event.id }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
     }
 
     return new Response(
-      JSON.stringify({ received: true, eventId: event.id, type: event.type }),
+      JSON.stringify({ received: true, applied: true, eventId: event.id, type: event.type }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (err: any) {

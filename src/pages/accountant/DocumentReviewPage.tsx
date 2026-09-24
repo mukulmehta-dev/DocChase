@@ -165,6 +165,50 @@ export const DocumentReviewPage: React.FC = () => {
     }
   };
 
+  const handleDownloadDocument = async () => {
+    const storagePath =
+      selectedItem?.current_document?.storage_path ||
+      (selectedItem as any)?.storage_path ||
+      (currentWorkspace?.id && request?.client_id && request?.id && selectedItem?.id
+        ? `${currentWorkspace.id}/${request.client_id}/${request.id}/${selectedItem.id}/${(selectedItem as any).file_name || 'document'}`
+        : null);
+
+    if (!storagePath) {
+      alert('No uploaded document file available to download.');
+      return;
+    }
+
+    try {
+      const signedUrl = await documentService.getSignedDocumentUrl(storagePath, 300);
+      const filename =
+        (selectedItem as any)?.file_name ||
+        selectedItem?.current_document?.original_filename ||
+        `${selectedItem?.name || 'document'}.pdf`;
+
+      const response = await fetch(signedUrl);
+      if (response.ok) {
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(blobUrl);
+      } else {
+        window.open(signedUrl, '_blank', 'noopener,noreferrer');
+      }
+    } catch (err: any) {
+      try {
+        const signedUrl = await documentService.getSignedDocumentUrl(storagePath, 300);
+        window.open(signedUrl, '_blank', 'noopener,noreferrer');
+      } catch (fallbackErr: any) {
+        alert(fallbackErr.message || 'Failed to download document.');
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col gap-5 animate-fade-in">
       {/* Top Bar */}
@@ -228,9 +272,15 @@ export const DocumentReviewPage: React.FC = () => {
                 {(selectedItem as any)?.file_name || `${selectedItem?.name}.pdf`}
               </span>
               <div className="flex items-center gap-2 text-neutral-400">
-                <span className="material-symbols-outlined text-[16px] cursor-pointer hover:text-white">zoom_in</span>
-                <span className="material-symbols-outlined text-[16px] cursor-pointer hover:text-white">zoom_out</span>
-                <span className="material-symbols-outlined text-[16px] cursor-pointer hover:text-white">download</span>
+                <button
+                  type="button"
+                  onClick={handleDownloadDocument}
+                  title="Download Document"
+                  className="flex items-center gap-1 text-xs text-neutral-400 hover:text-white transition-colors px-2 py-1 rounded hover:bg-white/10"
+                >
+                  <span className="material-symbols-outlined text-[16px]">download</span>
+                  <span className="text-[11px] font-medium">Download</span>
+                </button>
               </div>
             </div>
 

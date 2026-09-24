@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { requestService } from '../../services/requests';
+import { requestService, getCachedPortalToken } from '../../services/requests';
 import { documentService } from '../../services/documents';
 import { reminderService } from '../../services/reminders';
 import type { RequestDetail, RequestItemWithDoc } from '../../types';
@@ -13,13 +13,16 @@ import { Input } from '../../components/ui/Input';
 
 export const RequestDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { currentWorkspace } = useAuth();
+  const { currentWorkspace, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [request, setRequest] = useState<RequestDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [isReminding, setIsReminding] = useState(false);
+  const [rawToken, setRawToken] = useState<string | null>((location.state as any)?.rawToken || null);
+  const [isRotating, setIsRotating] = useState(false);
 
   // Reject Modal State
   const [rejectingItem, setRejectingItem] = useState<RequestItemWithDoc | null>(null);
@@ -32,6 +35,12 @@ export const RequestDetailPage: React.FC = () => {
     try {
       const data = await requestService.getRequestDetails(currentWorkspace.id, id);
       setRequest(data);
+      if (!rawToken) {
+        const cached = getCachedPortalToken(id);
+        if (cached) {
+          setRawToken(cached);
+        }
+      }
     } catch (err) {
       console.error('Failed to load request details', err);
     } finally {
@@ -43,14 +52,50 @@ export const RequestDetailPage: React.FC = () => {
     loadDetails();
   }, [currentWorkspace?.id, id]);
 
-  const clientPortalUrl = request
-    ? `${window.location.origin}/request/${(request as any).access_token || (request as any).access_token_hash?.slice(0, 16)}`
+  const clientPortalUrl = rawToken
+    ? `${window.location.origin}/request/${rawToken}`
     : '';
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(clientPortalUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopyLink = async () => {
+    if (!currentWorkspace?.id || !request) return;
+    try {
+      let tokenToCopy = rawToken;
+      if (!tokenToCopy) {
+        setIsRotating(true);
+        tokenToCopy = await requestService.rotatePortalToken(currentWorkspace.id, request.id, user?.id);
+        setRawToken(tokenToCopy);
+      }
+      const url = `${window.location.origin}/request/${tokenToCopy}`;
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err: any) {
+      alert(err.message || 'Failed to generate secure portal link.');
+    } finally {
+      setIsRotating(false);
+    }
+  };
+
+  const handleRotateLink = async () => {
+    if (!currentWorkspace?.id || !request) return;
+    const confirmed = rawToken
+      ? window.confirm('Regenerating will invalidate any previously shared portal links for this request. Continue?')
+      : true;
+    if (!confirmed) return;
+
+    setIsRotating(true);
+    try {
+      const newToken = await requestService.rotatePortalToken(currentWorkspace.id, request.id, user?.id);
+      setRawToken(newToken);
+      const url = `${window.location.origin}/request/${newToken}`;
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch (err: any) {
+      alert(err.message || 'Failed to regenerate portal link.');
+    } finally {
+      setIsRotating(false);
+    }
   };
 
   const handleApprove = async (item: RequestItemWithDoc) => {
@@ -206,22 +251,41 @@ export const RequestDetailPage: React.FC = () => {
             <span className="material-symbols-outlined text-[18px] text-neutral-900 dark:text-white">lock</span>
             <span className="font-semibold text-neutral-800 dark:text-neutral-200">Client Secure Upload Link:</span>
             <span className="font-mono text-[11px] text-neutral-600 dark:text-neutral-400 truncate max-w-xs sm:max-w-md">
-              {clientPortalUrl}
+              {clientPortalUrl || 'Click below to generate authenticated portal link'}
             </span>
           </div>
 
           <div className="flex items-center gap-2 self-end sm:self-auto">
-            <Button variant="secondary" size="sm" icon={copied ? 'done' : 'content_copy'} onClick={handleCopyLink}>
-              {copied ? 'Copied' : 'Copy Link'}
-            </Button>
             <Button
-              variant="ghost"
+              variant="secondary"
               size="sm"
-              icon="open_in_new"
-              onClick={() => window.open(clientPortalUrl, '_blank')}
+              icon={copied ? 'done' : isRotating ? 'progress_activity' : 'content_copy'}
+              isLoading={isRotating}
+              onClick={handleCopyLink}
             >
-              Preview
+              {copied ? 'Copied' : clientPortalUrl ? 'Copy Link' : 'Generate & Copy Link'}
             </Button>
+            {clientPortalUrl && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon="autorenew"
+                  title="Invalidate old link and regenerate fresh secure token"
+                  onClick={handleRotateLink}
+                >
+                  Regenerate
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon="open_in_new"
+                  onClick={() => window.open(clientPortalUrl, '_blank')}
+                >
+                  Preview
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </Card>

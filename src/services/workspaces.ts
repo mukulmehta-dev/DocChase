@@ -16,24 +16,12 @@ export const workspaceService = {
     return raw ? JSON.parse(raw) : [];
   },
 
-  async createWorkspace(userId: string, name: string): Promise<Workspace> {
+  async createWorkspace(_userId: string, name: string): Promise<Workspace> {
     const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
     if (isSupabaseConfigured()) {
-      const { data: workspace, error: wsError } = await supabase
-        .from('workspaces')
-        .insert({ name, slug, plan: 'free' })
-        .select()
-        .single();
-
-      if (wsError || !workspace) throw wsError || new Error('Failed to create workspace');
-
-      await supabase.from('workspace_members').insert({
-        workspace_id: workspace.id,
-        user_id: userId,
-        role: 'owner',
-      });
-
-      return workspace;
+      const { data, error } = await (supabase as any).rpc('create_workspace', { p_name: name });
+      if (error || !data) throw error || new Error('Failed to create workspace');
+      return data as Workspace;
     }
 
     const newWs: Workspace = {

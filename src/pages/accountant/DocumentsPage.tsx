@@ -16,19 +16,20 @@ export const DocumentsPage: React.FC = () => {
   const [filter, setFilter] = useState<'all' | 'uploaded' | 'approved' | 'rejected'>('all');
   const [search, setSearch] = useState('');
 
+  const loadVault = async () => {
+    if (!currentWorkspace?.id) return;
+    setLoading(true);
+    try {
+      const allItems = await documentService.getVaultItems(currentWorkspace.id);
+      setItems(allItems);
+    } catch (err) {
+      console.error('Failed to load document vault', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadVault = async () => {
-      if (!currentWorkspace?.id) return;
-      setLoading(true);
-      try {
-        const allItems = await documentService.getVaultItems(currentWorkspace.id);
-        setItems(allItems);
-      } catch (err) {
-        console.error('Failed to load document vault', err);
-      } finally {
-        setLoading(false);
-      }
-    };
     loadVault();
   }, [currentWorkspace?.id]);
 
@@ -66,7 +67,8 @@ export const DocumentsPage: React.FC = () => {
             variant="secondary"
             size="sm"
             icon="autorenew"
-            onClick={() => window.location.reload()}
+            isLoading={loading}
+            onClick={loadVault}
           >
             Refresh Vault
           </Button>
