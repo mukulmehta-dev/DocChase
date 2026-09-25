@@ -3,27 +3,17 @@ import React, { useEffect, useRef } from 'react';
 /**
  * AuthAuroraBackground
  * 
- * High-Density Underwater Sunlight & Caustic Light Field
+ * A full-viewport continuous volumetric light field:
+ * "Deep ocean + sunlight passing through water + aurora + futuristic dark SaaS"
  * 
- * Visual Architecture:
- * 1. Dual-Axis Motion:
- *    - Vertical Descent: Light streams enter from the TOP (water surface) and travel downward,
- *      stretching, bending, and progressively diffusing into deep abyssal dark water.
- *    - Lateral Wave Drift: An undulating horizontal swell (LEFT <-> RIGHT) combined with traveling
- *      wave packets causes the entire caustic structure and individual strands to continuously drift,
- *      sweep sideways, and shimmer organically.
- * 2. Light Structure:
- *    - 15–25 narrow, elongated primary and secondary light strands of varying widths, speeds, and intensities.
- *    - Multi-scale nonlinear wave distortion: strands bend in organic S-curves, widen, narrow, split, and merge.
- * 3. Caustic Shimmer & White Highlights:
- *    - High-order caustic lines that reach brilliant cool white / blue-white at their sharp focal peaks.
- *    - Shimmering transition: bright -> soft glow -> thin bright streak -> diffuse glow -> dark -> streak.
- * 4. Multi-Layer Depth:
- *    - Background: deep slow-moving oceanic haze and wide diffuse rays.
- *    - Midground: primary undulating caustic curtains and drifting strands.
- *    - Foreground: sharp, fast-shimmering white/cyan caustic filaments.
- * 5. Full viewport coverage, zero horizontal ribbons, zero floating blobs.
- * 6. 100% compliant with prefers-reduced-motion (renders a static balanced caustic composition).
+ * Implementation:
+ * - Pure native WebGL fragment shader with domain-warped fractional Brownian motion (fBm).
+ * - Continuous organic deformation where the light geometry itself folds, stretches, and morphs over time.
+ * - Layered volumetric depth: deep navy/blue-black abyss base (#02050A), slow indigo currents,
+ *   oceanic teal, cool blue ribbons, and volumetric sunlight shafts passing through water.
+ * - Restrained palette: strictly navy, teal, cyan, blue, indigo. Zero saturated neon or rainbow blobs.
+ * - Full `prefers-reduced-motion` compliance: renders a single balanced static atmospheric frame.
+ * - Robust Canvas2D fallback if WebGL is unavailable.
  */
 export const AuthAuroraBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -39,14 +29,14 @@ export const AuthAuroraBackground: React.FC = () => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     let prefersReducedMotion = mediaQuery.matches;
 
-    // Try WebGL
+    // Try WebGL first
     const gl =
       canvas.getContext('webgl', { alpha: false, depth: false, antialias: true }) ||
       (canvas.getContext('experimental-webgl', { alpha: false, depth: false }) as WebGLRenderingContext | null);
 
     if (gl) {
       // ════════════════════════════════════════════════════════════════════════
-      // WEBGL VOLUMETRIC HIGH-DENSITY UNDERWATER CAUSTIC SHADER
+      // WEBGL VOLUMETRIC DOMAIN-WARPED LIGHT FIELD SHADER
       // ════════════════════════════════════════════════════════════════════════
 
       const vsSource = `
@@ -61,14 +51,14 @@ export const AuthAuroraBackground: React.FC = () => {
         uniform vec2 u_resolution;
         uniform float u_time;
 
-        // Smooth procedural hash
+        // Fast procedural hash
         float hash(vec2 p) {
-          p = fract(p * vec2(127.1, 311.7));
+          p = fract(p * vec2(123.34, 456.21));
           p += dot(p, p + 45.32);
           return fract(p.x * p.y);
         }
 
-        // 2D Noise
+        // Smooth 2D noise
         float noise(vec2 p) {
           vec2 i = floor(p);
           vec2 f = fract(p);
@@ -80,152 +70,79 @@ export const AuthAuroraBackground: React.FC = () => {
           );
         }
 
-        // 4-octave Fractional Brownian Motion for fluid turbidity
+        // 4-octave Fractional Brownian Motion with rotation
         float fbm(vec2 p) {
           float v = 0.0;
           float a = 0.5;
-          mat2 rot = mat2(0.866, 0.500, -0.500, 0.866);
+          mat2 rot = mat2(0.877, 0.479, -0.479, 0.877);
           for (int i = 0; i < 4; i++) {
             v += a * noise(p);
-            p = rot * p * 2.04 + vec2(1.7, 0.9);
+            p = rot * p * 2.05 + vec2(1.2, 0.8);
             a *= 0.5;
           }
           return v;
         }
 
         void main() {
-          // Normalized UV: (0,0) bottom-left, (1,1) top-right
-          vec2 uv = gl_FragCoord.xy / u_resolution.xy;
-          float aspect = u_resolution.x / u_resolution.y;
+          vec2 st = gl_FragCoord.xy / u_resolution.xy;
+          // Normalized aspect-ratio coordinates
+          vec2 p = st;
+          p.x *= u_resolution.x / u_resolution.y;
 
-          // Normalized coordinates: x centered with aspect ratio, y: 0.0 (bottom abyss) -> 1.0 (top surface)
-          float x = (uv.x - 0.5) * aspect;
-          float y = uv.y;
-          float depth = 1.0 - y; // 0.0 at surface, 1.0 at deep bottom
+          // Ultra-slow, calm, hypnotic time progression
+          float t = u_time * 0.045;
 
-          // Organic time scales
-          float t = u_time * 0.075;
+          // ── Domain Warping Layer 1: broad oceanic currents ──
+          vec2 q = vec2(
+            fbm(p * 0.85 + vec2(0.0, t * 0.35)),
+            fbm(p * 0.85 + vec2(5.2, t * 0.28))
+          );
 
-          // ── 1. HORIZONTAL / LATERAL WAVE DRIFT (SWELL & TRAVEL) ──
-          // Broad horizontal swell oscillating left <-> right
-          float swell = sin(t * 0.35) * 0.28 + sin(t * 0.18 + 2.1) * 0.16;
+          // ── Domain Warping Layer 2: interacting flowing sheets / curtains ──
+          vec2 r = vec2(
+            fbm(p * 1.35 + 2.8 * q + vec2(1.7, 9.2) + vec2(t * 0.22, t * 0.18)),
+            fbm(p * 1.35 + 2.8 * q + vec2(8.3, 2.8) - vec2(t * 0.15, t * 0.25))
+          );
 
-          // Lateral wave drift traversing the scene
-          float driftA = t * 0.22;
-          float driftB = -t * 0.17;
-          float driftFast = t * 0.45;
+          // ── Final continuous light field value ──
+          float f = fbm(p * 1.1 + 3.2 * r + vec2(0.0, t * 0.12));
 
-          // ── 2. NONLINEAR SURFACE REFRACTION & DOWNWARD WARPING ──
-          // Moving water surface wave perturbation propagating downward with depth delay
-          float w1 = sin(x * 3.8 + t * 0.85 + depth * 1.6) * 0.075;
-          float w2 = cos(x * 7.5 - t * 0.65 + depth * 2.4) * 0.045;
-          float w3 = sin(x * 15.0 + t * 1.15 + depth * 4.2) * 0.022;
-          float surfDistort = w1 + w2 + w3;
+          // ── Volumetric underwater sunlight rays passing through surface ──
+          float shaftCoord = (st.x * 2.2 - st.y * 1.4 + q.x * 0.7);
+          float rays = sin(shaftCoord * 5.0 + t * 0.7) * 0.5 + 0.5;
+          rays = pow(rays, 3.5) * (1.0 - st.y * 0.65);
 
-          // Organic vertical fluid displacement stretching downward
-          vec2 flowUV = vec2(x * 1.6 + surfDistort + swell * 0.4, y * 0.6 - t * 0.25);
-          float turb = fbm(flowUV);
-          float warpX = surfDistort * 1.5 + (turb - 0.5) * 0.28 * (0.3 + 0.7 * y);
+          // ── Controlled cinematic color palette ──
+          // Deep abyss base: dark navy / almost-black
+          vec3 cBase = vec3(0.012, 0.024, 0.045);
+          vec3 cAbyss = vec3(0.008, 0.016, 0.032);
 
-          // ── 3. MULTI-LAYER LIGHT STRUCTURE (15-25 NARROW STRANDS) ──
-          // Ray coordinates with independent horizontal drift and depth-dependent bending
-          float rx1 = x + swell * 0.45 + warpX - (depth - 0.5) * 0.14 + driftA;
-          float rx2 = x - swell * 0.35 + warpX * 1.3 + (depth - 0.5) * 0.18 + driftB;
-          float rx3 = x + swell * 0.75 + warpX * 1.8 + driftFast;
+          // Atmospheric Aurora tones
+          vec3 cIndigo   = vec3(0.065, 0.050, 0.180);
+          vec3 cDeepTeal = vec3(0.025, 0.240, 0.280);
+          vec3 cCoolBlue = vec3(0.015, 0.280, 0.440);
+          vec3 cCyan     = vec3(0.060, 0.550, 0.580);
+          vec3 cSpecular = vec3(0.180, 0.780, 0.760);
 
-          // ── LAYER A: Mid-Density Primary Curtains (~7-8 narrow strands) ──
-          float strandsA = 0.0;
-          float sA1 = sin(rx1 * 9.5) * 0.5 + 0.5;
-          sA1 = pow(sA1, 4.5);
-          float sA2 = sin(rx1 * 13.5 + 1.7) * 0.5 + 0.5;
-          sA2 = pow(sA2, 5.0);
-          float sA3 = cos(rx1 * 7.0 - 0.9) * 0.5 + 0.5;
-          sA3 = pow(sA3, 3.8);
-          // Modulate with traveling lateral envelope to create grouping & separation
-          float envA = sin(x * 2.8 + driftA * 1.2) * 0.4 + 0.6;
-          strandsA = (sA1 * 0.45 + sA2 * 0.35 + sA3 * 0.30) * envA;
+          // Blend layers into ONE continuous light field
+          vec3 col = mix(cBase, cAbyss, st.y);
+          col = mix(col, cIndigo, clamp(length(q) * 0.65, 0.0, 1.0));
+          col = mix(col, cCoolBlue, clamp(r.x * 0.75, 0.0, 1.0));
+          col = mix(col, cDeepTeal, clamp(pow(f, 2.0) * 1.35, 0.0, 1.0));
+          col = mix(col, cCyan, clamp(pow(f, 3.4) * 1.7 * (1.0 - st.y * 0.35), 0.0, 1.0));
 
-          // ── LAYER B: Interleaved Angled Secondary Strands (~8-10 narrow strands) ──
-          float strandsB = 0.0;
-          float sB1 = sin(rx2 * 11.5 + 2.4) * 0.5 + 0.5;
-          sB1 = pow(sB1, 5.0);
-          float sB2 = sin(rx2 * 17.0 - 1.2) * 0.5 + 0.5;
-          sB2 = pow(sB2, 6.0);
-          float sB3 = cos(rx2 * 8.5 + 3.1) * 0.5 + 0.5;
-          sB3 = pow(sB3, 4.2);
-          float envB = cos(x * 3.4 + driftB * 1.4) * 0.45 + 0.55;
-          strandsB = (sB1 * 0.40 + sB2 * 0.38 + sB3 * 0.32) * envB;
+          // Modulate volumetric shafts
+          col += cSpecular * rays * 0.16 * (f * 0.75 + 0.25);
 
-          // ── LAYER C: High-Frequency Shimmering Filaments (~10-12 thin bright strands) ──
-          float strandsC = 0.0;
-          float sC1 = sin(rx3 * 22.0 + 0.5) * 0.5 + 0.5;
-          sC1 = pow(sC1, 8.0);
-          float sC2 = sin(rx3 * 29.0 + 3.8) * 0.5 + 0.5;
-          sC2 = pow(sC2, 10.0);
-          float sC3 = cos(rx3 * 18.0 - 2.1) * 0.5 + 0.5;
-          sC3 = pow(sC3, 7.5);
-          float envC = sin(x * 4.2 + driftFast * 0.8) * 0.5 + 0.5;
-          strandsC = (sC1 * 0.45 + sC2 * 0.40 + sC3 * 0.35) * envC;
+          // Ambient central breathing pool (subtle luminance behind glass auth card)
+          float centerDist = length((st - vec2(0.5, 0.48)) * vec2(1.0, 1.25));
+          float centerPool = smoothstep(0.75, 0.05, centerDist);
+          col += cDeepTeal * centerPool * 0.09;
 
-          // ── 4. SHARP FOCAL CAUSTIC PEAKS (BRILLIANT WHITE HIGHLIGHTS) ──
-          // Razor-sharp caustic focal lines that flash and sweep sideways
-          float causticLine1 = pow(sin((x + swell * 0.6 + warpX * 2.2) * 26.0 + t * 0.65) * 0.5 + 0.5, 18.0);
-          float causticLine2 = pow(sin((x - swell * 0.5 + warpX * 2.6 - depth * 0.22) * 34.0 - t * 0.55 + 2.5) * 0.5 + 0.5, 22.0);
-          float causticPeaks = (causticLine1 * 0.65 + causticLine2 * 0.55);
-
-          // Soft volumetric 2D caustic modulation network
-          vec2 cUV = vec2(x * 9.0 + warpX * 2.8 + driftA * 0.5, y * 2.4 + t * 0.22);
-          float cM1 = sin(cUV.x * 2.5 + t * 0.6) * sin(cUV.y * 2.0 - t * 0.4);
-          float cM2 = cos(cUV.x * 4.5 - t * 0.45 + cM1 * 1.6) * sin(cUV.y * 3.0 + t * 0.32);
-          float softCaustics = pow(abs(cM1 + cM2) * 0.5, 2.4);
-
-          // ── 5. VERTICAL ATTENUATION (TOP SUNLIGHT -> BOTTOM ABYSS) ──
-          // Top: bright sunlight entering water surface
-          // Middle: bending light curtains and visible rays
-          // Lower: soft diffuse haze
-          // Bottom: deep darkness
-          float topGlow = pow(y, 1.6) * 1.45;
-          float midFalloff = pow(y, 1.25) * 0.85 + 0.12;
-          float rayPower = (strandsA * 0.55 + strandsB * 0.50 + strandsC * 0.38) * midFalloff;
-
-          // ── 6. COLOR PALETTE: DARK UNDERWATER + WHITE/CYAN SUNLIGHT ──
-          // Deep abyss base (near-black, deep navy)
-          vec3 cAbyss    = vec3(0.006, 0.012, 0.026);
-          vec3 cDeepNavy = vec3(0.012, 0.035, 0.075);
-          vec3 cOceanBlue= vec3(0.025, 0.120, 0.250);
-          vec3 cDeepTeal = vec3(0.040, 0.300, 0.400);
-          vec3 cPaleCyan = vec3(0.180, 0.650, 0.820);
-          vec3 cCoolWhite= vec3(0.920, 0.980, 1.000); // Brilliant sunlight caustic focus
-
-          // Background base gradient
-          vec3 col = mix(cAbyss, cDeepNavy, smoothstep(0.0, 0.85, y));
-
-          // Ambient fluid depth
-          col = mix(col, cOceanBlue, turb * 0.6 * y);
-
-          // Add midground caustic rays (teal and pale cyan)
-          col += cDeepTeal * rayPower * 1.25;
-          col += cPaleCyan * pow(rayPower, 1.4) * (0.4 + 0.6 * topGlow) * 0.85;
-
-          // Add shimmering foreground filaments
-          col += cPaleCyan * strandsC * topGlow * 0.45;
-
-          // Add soft caustic web
-          col += cPaleCyan * softCaustics * topGlow * 0.25;
-
-          // Add BRILLIANT WHITE caustic focal lines (sweeping across the screen)
-          col += cCoolWhite * causticPeaks * topGlow * 0.75;
-          col += cCoolWhite * pow(strandsA + strandsB, 3.0) * topGlow * 0.22;
-
-          // Top water surface luminous crest
-          float surfaceCrest = smoothstep(0.70, 1.0, y);
-          col += cPaleCyan * surfaceCrest * (0.35 + 0.25 * sin(x * 5.0 + t * 0.7));
-          col += cCoolWhite * pow(surfaceCrest, 3.0) * 0.35;
-
-          // Peripheral subtle vignette to ensure no harsh viewport cutoffs
-          float edgeVig = smoothstep(0.0, 0.12, uv.x) * smoothstep(1.0, 0.88, uv.x) *
-                          smoothstep(0.0, 0.10, uv.y);
-          col = mix(cAbyss, col, 0.85 + 0.15 * edgeVig);
+          // Edge vignette to smoothly fade viewport borders
+          float edgeVig = smoothstep(0.0, 0.15, st.x) * smoothstep(1.0, 0.85, st.x) *
+                          smoothstep(0.0, 0.15, st.y) * smoothstep(1.0, 0.85, st.y);
+          col = mix(cAbyss, col, 0.75 + 0.25 * edgeVig);
 
           gl_FragColor = vec4(col, 1.0);
         }
@@ -261,7 +178,7 @@ export const AuthAuroraBackground: React.FC = () => {
 
       gl.useProgram(program);
 
-      // Quad covering viewport
+      // Quad vertices
       const posBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
       gl.bufferData(
@@ -288,7 +205,7 @@ export const AuthAuroraBackground: React.FC = () => {
         width = Math.max(320, rect.width);
         height = Math.max(480, rect.height);
 
-        // Optimal DPR for fluid 60fps and volumetric softness
+        // Render at half DPR for silky 60fps performance and atmospheric softness
         const dpr = Math.min(1.5, window.devicePixelRatio || 1);
         canvas.width = Math.floor(width * dpr);
         canvas.height = Math.floor(height * dpr);
@@ -299,7 +216,7 @@ export const AuthAuroraBackground: React.FC = () => {
         gl.uniform2f(uRes, canvas.width, canvas.height);
 
         if (prefersReducedMotion) {
-          gl.uniform1f(uTime, 12.0);
+          gl.uniform1f(uTime, 14.0);
           gl.drawArrays(gl.TRIANGLES, 0, 6);
         }
       };
@@ -328,7 +245,7 @@ export const AuthAuroraBackground: React.FC = () => {
         prefersReducedMotion = e.matches;
         if (prefersReducedMotion) {
           cancelAnimationFrame(animationFrameId);
-          gl.uniform1f(uTime, 12.0);
+          gl.uniform1f(uTime, 14.0);
           gl.drawArrays(gl.TRIANGLES, 0, 6);
         } else {
           startTime = performance.now();
@@ -341,7 +258,7 @@ export const AuthAuroraBackground: React.FC = () => {
       if (!prefersReducedMotion) {
         animationFrameId = requestAnimationFrame(renderLoop);
       } else {
-        gl.uniform1f(uTime, 12.0);
+        gl.uniform1f(uTime, 14.0);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
       }
 
@@ -380,75 +297,19 @@ export const AuthAuroraBackground: React.FC = () => {
       if (canvas.parentElement) resizeObserver.observe(canvas.parentElement);
 
       let t = 0;
-      const numStrands = 18;
-
       const draw2DFallback = () => {
         if (isDestroyed) return;
-
-        // Base linear gradient: top surface lighter, bottom deep abyss
-        const baseGrad = ctx.createLinearGradient(0, 0, 0, height);
-        baseGrad.addColorStop(0, '#062442');
-        baseGrad.addColorStop(0.35, '#04152a');
-        baseGrad.addColorStop(0.70, '#020914');
-        baseGrad.addColorStop(1, '#01040a');
-        ctx.fillStyle = baseGrad;
+        ctx.fillStyle = '#030814';
         ctx.fillRect(0, 0, width, height);
 
-        // Volumetric vertical ray strands descending from top with horizontal swell
-        ctx.save();
-        ctx.globalCompositeOperation = 'screen';
+        const grad = ctx.createLinearGradient(0, 0, width, height);
+        grad.addColorStop(0, '#040d1e');
+        grad.addColorStop(0.5, '#071828');
+        grad.addColorStop(1, '#02050b');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
 
-        const lateralSwell = Math.sin(t * 0.4) * (width * 0.08);
-
-        for (let i = 0; i < numStrands; i++) {
-          const normIndex = i / (numStrands - 1);
-          const baseOriginX = width * normIndex + lateralSwell;
-          const deformX = Math.sin(t * 0.75 + i * 1.3) * 35;
-          const rayWidthTop = 15 + Math.sin(t * 0.6 + i * 0.8) * 10;
-          const rayWidthBottom = 45 + Math.cos(t * 0.5 + i * 1.5) * 25;
-
-          const isHighlight = i % 3 === 0;
-
-          const rayGrad = ctx.createLinearGradient(0, 0, 0, height * 0.82);
-          if (isHighlight) {
-            rayGrad.addColorStop(0, 'rgba(240, 253, 255, 0.45)');
-            rayGrad.addColorStop(0.2, 'rgba(56, 189, 248, 0.28)');
-            rayGrad.addColorStop(0.55, 'rgba(11, 92, 115, 0.12)');
-            rayGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-          } else {
-            rayGrad.addColorStop(0, 'rgba(56, 189, 248, 0.22)');
-            rayGrad.addColorStop(0.3, 'rgba(14, 116, 144, 0.14)');
-            rayGrad.addColorStop(0.65, 'rgba(3, 40, 79, 0.06)');
-            rayGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-          }
-
-          ctx.fillStyle = rayGrad;
-          ctx.beginPath();
-          ctx.moveTo(baseOriginX - rayWidthTop * 0.5, 0);
-          ctx.lineTo(baseOriginX + rayWidthTop * 0.5, 0);
-          ctx.bezierCurveTo(
-            baseOriginX + rayWidthTop * 0.8 + deformX * 0.6,
-            height * 0.30,
-            baseOriginX + rayWidthBottom * 0.5 + deformX,
-            height * 0.60,
-            baseOriginX + rayWidthBottom * 0.5 + deformX,
-            height * 0.82
-          );
-          ctx.lineTo(baseOriginX - rayWidthBottom * 0.5 + deformX, height * 0.82);
-          ctx.bezierCurveTo(
-            baseOriginX - rayWidthBottom * 0.5 + deformX,
-            height * 0.60,
-            baseOriginX - rayWidthTop * 0.8 + deformX * 0.6,
-            height * 0.30,
-            baseOriginX - rayWidthTop * 0.5,
-            0
-          );
-          ctx.closePath();
-          ctx.fill();
-        }
-        ctx.restore();
-
-        t += 0.012;
+        t += 0.005;
         if (!prefersReducedMotion) {
           animationFrameId = requestAnimationFrame(draw2DFallback);
         }
@@ -466,13 +327,13 @@ export const AuthAuroraBackground: React.FC = () => {
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none select-none z-0" aria-hidden="true">
-      {/* Full-Viewport Underwater Sunlight & Caustic Light Field Canvas */}
+      {/* Full-Viewport Volumetric Aurora Canvas */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block" />
 
-      {/* Atmospheric depth vignette fading peripheral boundaries smoothly */}
-      <div className="absolute inset-0 bg-radial from-transparent via-black/10 to-black/50 pointer-events-none" />
+      {/* Atmospheric vignette blending seamlessly with the dark UI */}
+      <div className="absolute inset-0 bg-radial from-transparent via-black/15 to-black/55 pointer-events-none" />
 
-      {/* Filmic micro-texture to eliminate banding in deep 8-bit dark ocean gradients */}
+      {/* Extremely subtle organic filmic grain to eliminate any color banding */}
       <div
         className="absolute inset-0 opacity-[0.022] mix-blend-screen pointer-events-none"
         style={{

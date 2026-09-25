@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/ui/Button';
@@ -118,7 +118,7 @@ export const SignInPage: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 sm:py-16 relative bg-[#02050c] min-h-[calc(100vh-64px)] overflow-hidden">
-      {/* ── Full-viewport Animated Aurora Environment ── */}
+      {/* â”€â”€ Full-viewport Animated Aurora Environment â”€â”€ */}
       <AuthAuroraBackground />
 
       <div className="relative z-10 w-full max-w-[420px] flex flex-col items-center">
@@ -231,7 +231,7 @@ export const SignInPage: React.FC = () => {
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-white/[0.08]" />
             </div>
-            <span className="relative bg-[#0a1224]/85 backdrop-blur-md px-3 text-[11px] font-medium uppercase tracking-wider text-neutral-400 rounded-full border border-white/[0.08]">
+            <span className="relative bg-[#090f1d] px-3 text-[11px] font-medium uppercase tracking-wider text-neutral-400 rounded-full border border-white/[0.06]">
               OR
             </span>
           </div>
@@ -261,7 +261,7 @@ export const SignInPage: React.FC = () => {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••••••"
+              placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
               leftIcon="lock"
               disabled={isFormDisabled}
               rightElement={
@@ -317,7 +317,7 @@ export const SignInPage: React.FC = () => {
         <div className="mt-5 flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.07] backdrop-blur-md">
           <span className="material-symbols-outlined text-[13px] text-teal-400">shield_lock</span>
           <span className="text-[11px] font-medium text-neutral-400">
-            256-bit encrypted • TLS-secured connections
+            256-bit encrypted â€¢ TLS-secured connections
           </span>
         </div>
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/ui/Button';
@@ -17,12 +17,12 @@ const PLAN_INFO: Record<string, { name: string; price: string; description: stri
   starter: {
     name: 'Starter Plan',
     price: '$9/month',
-    description: '14-day free trial included • 15 active clients, smart reminders',
+    description: '14-day free trial included â€¢ 15 active clients, smart reminders',
   },
   pro: {
     name: 'Pro Plan',
     price: '$19/month',
-    description: '14-day free trial included • 100 active clients, AI assistance',
+    description: '14-day free trial included â€¢ 100 active clients, AI assistance',
   },
 };
 
@@ -214,7 +214,7 @@ export const SignUpPage: React.FC = () => {
 
   const isFormDisabled = isLoading || oauthLoading !== null;
 
-  // ── Email confirmation screen (Device A) ──────────────────────────────────
+  // â”€â”€ Email confirmation screen (Device A) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (emailConfirmationRequired) {
     if (isConfirmed) {
       return (
@@ -342,10 +342,10 @@ export const SignUpPage: React.FC = () => {
     );
   }
 
-  // ── Registration form ──────────────────────────────────────────────────────
+  // â”€â”€ Registration form â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 sm:py-16 relative bg-[#02050c] min-h-[calc(100vh-64px)] overflow-hidden">
-      {/* ── Full-viewport Animated Aurora Environment ── */}
+      {/* â”€â”€ Full-viewport Animated Aurora Environment â”€â”€ */}
       <AuthAuroraBackground />
 
       <div className="relative z-10 w-full max-w-[420px] flex flex-col items-center">
@@ -445,7 +445,7 @@ export const SignUpPage: React.FC = () => {
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-white/[0.08]" />
             </div>
-            <span className="relative bg-[#0a1224]/85 backdrop-blur-md px-3 text-[11px] font-medium uppercase tracking-wider text-neutral-400 rounded-full border border-white/[0.08]">
+            <span className="relative bg-[#090f1d] px-3 text-[11px] font-medium uppercase tracking-wider text-neutral-400 rounded-full border border-white/[0.06]">
               OR
             </span>
           </div>
