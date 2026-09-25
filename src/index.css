@@ -194,122 +194,88 @@
   background: radial-gradient(circle 700px at 50% -10%, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 50%, transparent 75%);
 }
 
-/* Hero Organic Elongated Light Beam Animation (15s Loop)
-   An elongated, soft, directional light strip travels organically behind the opaque black document in 3D space.
-   The strip itself is hidden behind the opaque document; only its soft directional edge spill and material highlights appear.
-   Full coverage: Top-Left -> Top Boundary -> Fold Notch -> Right Flank -> Lower-Right -> Bottom Base -> Lower-Left -> Left Flank -> Diagonal Crossing -> Top-Left */
-@keyframes hero-elongated-light-path {
+/* ═══════════════════════════════════════════════════
+   HERO TILTED WHITE ELLIPTICAL RING ANIMATIONS
+   A luminous bright section (highlight) travels smoothly around the stationary tilted white ring.
+   Organic timing curve (14s cycle): gentle acceleration, subtle lingering at the apices, variable bloom intensity.
+   ═══════════════════════════════════════════════════ */
+@keyframes ring-highlight-travel {
   0% {
-    /* 1. Upper-Left diagonal orientation */
-    transform: translate3d(-125px, -165px, 0) rotate(-28deg) scale(1.05);
-    opacity: 0.88;
+    stroke-dashoffset: 0;
   }
-  12% {
-    /* 2. Top Edge horizontal sweep */
-    transform: translate3d(15px, -225px, 0) rotate(6deg) scale(0.96);
-    opacity: 0.75;
+  18% {
+    /* Sweeps smoothly through the upper-right apex, accelerating slightly */
+    stroke-dashoffset: -210;
   }
-  24% {
-    /* 3. Folded Corner steep diagonal crest */
-    transform: translate3d(145px, -185px, 0) rotate(48deg) scale(1.18);
-    opacity: 0.98;
+  34% {
+    /* Lingers gently as it curves behind the upper document */
+    stroke-dashoffset: -360;
   }
-  36% {
-    /* 4. Descending Right Flank vertical strip */
-    transform: translate3d(165px, -25px, 0) rotate(88deg) scale(1.02);
-    opacity: 0.82;
+  52% {
+    /* Accelerates gracefully into the lower-left apex sweep */
+    stroke-dashoffset: -560;
   }
-  48% {
-    /* 5. Lower-Right Base diagonal tilt */
-    transform: translate3d(135px, 175px, 0) rotate(38deg) scale(1.10);
-    opacity: 0.90;
+  70% {
+    /* Blooms and slows down around the outer-left apex */
+    stroke-dashoffset: -740;
   }
-  60% {
-    /* 6. Bottom Margin horizontal beam */
-    transform: translate3d(-10px, 245px, 0) rotate(-10deg) scale(0.94);
-    opacity: 0.72;
+  86% {
+    /* Lingers subtly crossing behind the lower document */
+    stroke-dashoffset: -880;
   }
-  72% {
-    /* 7. Lower-Left Corner steep diagonal */
-    transform: translate3d(-145px, 185px, 0) rotate(-48deg) scale(1.14);
-    opacity: 0.92;
+  100% {
+    /* Seamless cycle completion */
+    stroke-dashoffset: -1000;
   }
-  84% {
-    /* 8. Ascending Left Flank vertical beam */
-    transform: translate3d(-170px, 15px, 0) rotate(-88deg) scale(1.0);
+}
+
+@keyframes ring-highlight-bloom {
+  0%, 100% {
     opacity: 0.80;
   }
-  94% {
-    /* 9. Crossing diagonally through upper center */
-    transform: translate3d(-140px, -115px, 0) rotate(-38deg) scale(1.04);
-    opacity: 0.84;
+  18% {
+    opacity: 1.0;
   }
-  100% {
-    /* Return to Upper-Left */
-    transform: translate3d(-125px, -165px, 0) rotate(-28deg) scale(1.05);
+  34% {
+    opacity: 0.68;
+  }
+  52% {
     opacity: 0.88;
   }
-}
-
-/* Synchronized elongated surface light beam (illuminates micro-texture and document lines) */
-@keyframes hero-surface-beam-path {
-  0% {
-    transform: translate3d(-85px, -115px, 0) rotate(-28deg) scale(1.02);
+  70% {
+    opacity: 0.98;
   }
-  12% {
-    transform: translate3d(10px, -155px, 0) rotate(6deg) scale(0.95);
-  }
-  24% {
-    transform: translate3d(105px, -130px, 0) rotate(48deg) scale(1.12);
-  }
-  36% {
-    transform: translate3d(115px, -18px, 0) rotate(88deg) scale(0.98);
-  }
-  48% {
-    transform: translate3d(95px, 125px, 0) rotate(38deg) scale(1.06);
-  }
-  60% {
-    transform: translate3d(-8px, 160px, 0) rotate(-10deg) scale(0.94);
-  }
-  72% {
-    transform: translate3d(-105px, 130px, 0) rotate(-48deg) scale(1.08);
-  }
-  84% {
-    transform: translate3d(-120px, 10px, 0) rotate(-88deg) scale(0.98);
-  }
-  94% {
-    transform: translate3d(-100px, -80px, 0) rotate(-38deg) scale(1.02);
-  }
-  100% {
-    transform: translate3d(-85px, -115px, 0) rotate(-28deg) scale(1.02);
+  86% {
+    opacity: 0.72;
   }
 }
 
-/* Localized Fold Specular Flare (Intense gleam when light reaches top-right fold at ~24%) */
-@keyframes hero-fold-flare {
-  0%, 14% {
-    opacity: 0.05;
-  }
-  24% {
-    opacity: 0.95;
-  }
-  36%, 100% {
-    opacity: 0.05;
-  }
+.animate-ring-highlight-wide {
+  stroke-dasharray: 240 760;
+  animation: ring-highlight-travel 14s cubic-bezier(0.42, 0.08, 0.58, 0.92) infinite;
+  will-change: stroke-dashoffset;
 }
 
-.animate-hero-elongated-light {
-  animation: hero-elongated-light-path 15s cubic-bezier(0.42, 0.05, 0.58, 0.95) infinite;
-  will-change: transform, opacity;
+.animate-ring-highlight-mid {
+  stroke-dasharray: 200 800;
+  animation: ring-highlight-travel 14s cubic-bezier(0.42, 0.08, 0.58, 0.92) infinite;
+  will-change: stroke-dashoffset;
 }
 
-.animate-hero-surface-beam {
-  animation: hero-surface-beam-path 15s cubic-bezier(0.42, 0.05, 0.58, 0.95) infinite;
-  will-change: transform;
+.animate-ring-highlight-soft {
+  stroke-dasharray: 160 840;
+  animation: ring-highlight-travel 14s cubic-bezier(0.42, 0.08, 0.58, 0.92) infinite;
+  will-change: stroke-dashoffset;
 }
 
-.animate-hero-fold-highlight {
-  animation: hero-fold-flare 15s cubic-bezier(0.42, 0.05, 0.58, 0.95) infinite;
+.animate-ring-highlight-core {
+  stroke-dasharray: 120 880;
+  animation: ring-highlight-travel 14s cubic-bezier(0.42, 0.08, 0.58, 0.92) infinite;
+  will-change: stroke-dashoffset;
+}
+
+.animate-ring-bloom-sync {
+  animation: ring-highlight-bloom 14s cubic-bezier(0.42, 0.08, 0.58, 0.92) infinite;
   will-change: opacity;
 }
 
@@ -323,21 +289,23 @@
   animation: page-beam 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Dark form context — overrides Input component appearance on dark cards */
+/* Dark form context — overrides Input component appearance on dark glass cards */
 .dark-form input,
 .dark-form select,
 .dark-form textarea {
-  background-color: rgba(255, 255, 255, 0.04) !important;
-  border-color: rgba(255, 255, 255, 0.10) !important;
+  background-color: rgba(10, 16, 28, 0.65) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
   color: #f4f4f5 !important;
+  backdrop-filter: blur(8px) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .dark-form input:focus,
 .dark-form select:focus,
 .dark-form textarea:focus {
-  border-color: rgba(255, 255, 255, 0.6) !important;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08) !important;
-  background-color: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(45, 212, 191, 0.5) !important;
+  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.14), 0 0 18px rgba(45, 212, 191, 0.09) !important;
+  background-color: rgba(12, 20, 36, 0.85) !important;
   outline: none !important;
 }
 
@@ -347,7 +315,7 @@
 }
 
 .dark-form label {
-  color: #a1a1aa !important;
+  color: #cbd5e1 !important;
 }
 
 /* ═══════════════════════════════════════════════════
@@ -392,14 +360,13 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .animate-hero-elongated-light {
+  .animate-ring-highlight-wide,
+  .animate-ring-highlight-mid,
+  .animate-ring-highlight-soft,
+  .animate-ring-highlight-core,
+  .animate-ring-bloom-sync {
     animation: none !important;
-    transform: translate3d(0, 0, 0) scale(1) !important;
-    opacity: 0.30 !important;
-  }
-  .animate-hero-surface-beam,
-  .animate-hero-fold-highlight {
-    animation: none !important;
-    opacity: 0.20 !important;
+    stroke-dashoffset: -200 !important;
+    opacity: 0.65 !important;
   }
 }

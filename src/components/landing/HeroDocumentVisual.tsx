@@ -3,10 +3,15 @@ import React from 'react';
 /**
  * HeroDocumentVisual
  * A pure, minimalist monochrome physical document centerpiece.
- * Features an opaque, solid dark document silhouette with tactile micro-texture and folded corner.
- * A hidden elongated light band (soft strip/beam) moves in 3D space behind the opaque document,
- * casting a soft directional atmospheric edge spill and illuminating the physical material surface,
- * wireframes, and fold geometry without ever exposing raw light sources through the document.
+ *
+ * Visual hierarchy:
+ * 1. Deep Floor Ambient Vignette (Background)
+ * 2. Glowing Elliptical Ring (White luminous tilted stationary ellipse with traveling highlight)
+ * 3. Solid Opaque Document (100% opaque near-black physical object with dimensional fold)
+ * 4. Subtle Document Edge (Micro-rim highlight)
+ *
+ * Completely eliminates any rear-light/beam/orb and surface translucency.
+ * The document physically occludes the ring so it passes seamlessly behind it.
  */
 export const HeroDocumentVisual: React.FC = () => {
   // SVG perimeter path coordinates (440x560 viewBox)
@@ -18,177 +23,259 @@ export const HeroDocumentVisual: React.FC = () => {
     'M 296 36 L 296 134 A 10 10 0 0 0 306 144 L 404 144 Z';
 
   return (
-    <div className="relative w-full max-w-[270px] sm:max-w-[320px] lg:max-w-[352px] mx-auto select-none aspect-[440/560] flex items-center justify-center">
-      {/* 1. Static Deep Floor Ambient Vignette */}
-      <div
-        className="absolute -inset-12 bg-radial from-white/[0.04] via-transparent to-transparent blur-3xl rounded-full pointer-events-none"
-        aria-hidden="true"
-      />
-
-      {/* 2. Hidden Elongated Light Band (Moving behind the opaque document)
-          CRITICAL: This is an elongated soft light strip that travels in 3D space.
-          The document in front is 100% opaque, so only the soft edge spill and surface reaction are visible. */}
-      <div
-        className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-visible"
-        aria-hidden="true"
-      >
-        <div className="relative flex items-center justify-center animate-hero-elongated-light pointer-events-none">
-          {/* Elongated soft beam/strip: brighter in center, gradually fading to both ends */}
-          <div
-            className="w-[340px] h-[95px] sm:w-[400px] sm:h-[110px] rounded-full absolute"
-            style={{
-              background:
-                'radial-gradient(ellipse 65% 50% at 50% 50%, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.22) 35%, rgba(255, 255, 255, 0.05) 70%, transparent 95%)',
-              filter: 'blur(32px)',
-            }}
-          />
-        </div>
-      </div>
-
-      {/* 3. Solid Opaque Geometric Document Centerpiece */}
+    <div className="relative w-full max-w-[270px] sm:max-w-[320px] lg:max-w-[352px] mx-auto select-none aspect-[440/560] flex items-center justify-center bg-transparent">
+      {/* ── 2. Glowing Elliptical White Light Ring — BACK LAYER (z-0) ──
+          Stationary ellipse tilted in 3D perspective, substantially enlarged (rx=370, ry=180).
+          Renders the upper rear sweep behind the opaque document.
+          Clipped along the 3D tilt horizon with infinite coordinate bounds to avoid any visible container box. */}
       <svg
         viewBox="0 0 440 560"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full h-full relative z-10 drop-shadow-[0_28px_56px_rgba(0,0,0,0.98)]"
+        className="w-full h-full absolute inset-0 overflow-visible pointer-events-none z-0"
         aria-hidden="true"
       >
         <defs>
-          {/* Document Silhouette Clip Path - strictly confines internal surface reactions */}
-          <clipPath id="hero-doc-clip">
-            <path d={perimeterPath} />
+          {/* Back half clipping polygon: covers the rear/upper arc above the 3D perspective horizon with vast bounds */}
+          <clipPath id="hero-back-ring-clip">
+            <polygon points="-2500,-2500 2500,-2500 2500,-603 -2500,1314" />
           </clipPath>
 
-          {/* Procedural High-Fidelity Micro-Texture Filter */}
-          <filter id="hero-material-roughness" x="0%" y="0%" width="100%" height="100%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.82" numOctaves="4" result="noise" />
-            <feColorMatrix
-              type="matrix"
-              values="1 0 0 0 1
-                      0 1 0 0 1
-                      0 0 1 0 1
-                      0 0 0 0.16 0"
-              in="noise"
-              result="coloredNoise"
-            />
-            <feComposite operator="in" in2="SourceGraphic" />
+          {/* Blurred outer halo with generous filter bounds */}
+          <filter id="hero-ring-halo" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur stdDeviation="34" />
           </filter>
+          {/* Diffuse glow */}
+          <filter id="hero-ring-glow-wide" x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur stdDeviation="16" />
+          </filter>
+          {/* Soft mid glow */}
+          <filter id="hero-ring-glow-mid" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="7" />
+          </filter>
+          {/* Bright core bloom */}
+          <filter id="hero-highlight-core-bloom" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="2.4" />
+          </filter>
+        </defs>
 
-          {/* Solid Opaque Document Base Material */}
-          <linearGradient id="hero-opaque-base" x1="60" y1="40" x2="380" y2="520" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#17171d" />
-            <stop offset="40%" stopColor="#101014" />
-            <stop offset="100%" stopColor="#09090c" />
+        {/* ── Back Ring Group (Clipped to rear sweep) ── */}
+        <g clipPath="url(#hero-back-ring-clip)">
+          {/* Stationary Base Ring (Visible around/behind the document) */}
+          <g opacity="0.95">
+            {/* 1. Outer glow: thick, soft, blurred atmospheric falloff */}
+            <ellipse
+              cx="220"
+              cy="270"
+              rx="370"
+              ry="180"
+              transform="rotate(-21 220 270)"
+              stroke="#ffffff"
+              strokeWidth="36"
+              opacity="0.06"
+              filter="url(#hero-ring-halo)"
+            />
+            <ellipse
+              cx="220"
+              cy="270"
+              rx="370"
+              ry="180"
+              transform="rotate(-21 220 270)"
+              stroke="#ffffff"
+              strokeWidth="16"
+              opacity="0.12"
+              filter="url(#hero-ring-glow-wide)"
+            />
+            {/* 2. Middle glow: noticeably thicker, brighter */}
+            <ellipse
+              cx="220"
+              cy="270"
+              rx="370"
+              ry="180"
+              transform="rotate(-21 220 270)"
+              stroke="#ffffff"
+              strokeWidth="6.5"
+              opacity="0.28"
+              filter="url(#hero-ring-glow-mid)"
+            />
+            {/* 3. Inner ring: clearly visible, thicker than previous version */}
+            <ellipse
+              cx="220"
+              cy="270"
+              rx="370"
+              ry="180"
+              transform="rotate(-21 220 270)"
+              stroke="#ffffff"
+              strokeWidth="2.8"
+              opacity="0.55"
+            />
+            <ellipse
+              cx="220"
+              cy="270"
+              rx="370"
+              ry="180"
+              transform="rotate(-21 220 270)"
+              stroke="#ffffff"
+              strokeWidth="1.3"
+              opacity="0.75"
+            />
+          </g>
+
+          {/* ── Luminous Traveling Section (✦) across rear sweep ── */}
+          <g className="animate-ring-bloom-sync">
+            {/* Wide traveling atmospheric bloom */}
+            <ellipse
+              cx="220"
+              cy="270"
+              rx="370"
+              ry="180"
+              transform="rotate(-21 220 270)"
+              stroke="#ffffff"
+              strokeWidth="54"
+              strokeLinecap="round"
+              pathLength="1000"
+              opacity="0.32"
+              filter="url(#hero-ring-halo)"
+              className="animate-ring-highlight-wide"
+            />
+            {/* Mid traveling glow */}
+            <ellipse
+              cx="220"
+              cy="270"
+              rx="370"
+              ry="180"
+              transform="rotate(-21 220 270)"
+              stroke="#ffffff"
+              strokeWidth="26"
+              strokeLinecap="round"
+              pathLength="1000"
+              opacity="0.55"
+              filter="url(#hero-ring-glow-wide)"
+              className="animate-ring-highlight-mid"
+            />
+            {/* Soft traveling inner bloom */}
+            <ellipse
+              cx="220"
+              cy="270"
+              rx="370"
+              ry="180"
+              transform="rotate(-21 220 270)"
+              stroke="#ffffff"
+              strokeWidth="10"
+              strokeLinecap="round"
+              pathLength="1000"
+              opacity="0.85"
+              filter="url(#hero-ring-glow-mid)"
+              className="animate-ring-highlight-soft"
+            />
+            {/* Intense defined bright traveling core */}
+            <ellipse
+              cx="220"
+              cy="270"
+              rx="370"
+              ry="180"
+              transform="rotate(-21 220 270)"
+              stroke="#ffffff"
+              strokeWidth="3.8"
+              strokeLinecap="round"
+              pathLength="1000"
+              opacity="1.0"
+              filter="url(#hero-highlight-core-bloom)"
+              className="animate-ring-highlight-core"
+            />
+          </g>
+        </g>
+      </svg>
+
+      {/* ── 3. Solid Opaque Geometric Document Centerpiece (z-10) ──
+          Completely blocks all light from behind. No translucency. No rear beam shines through. */}
+      <svg
+        viewBox="0 0 440 560"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-full h-full relative z-10 drop-shadow-[0_28px_64px_rgba(0,0,0,0.98)]"
+        aria-hidden="true"
+      >
+        <defs>
+          {/* Solid 100% Opaque Document Base Material (#111114 -> #0C0C0E -> #09090B) */}
+          <linearGradient id="hero-doc-solid-base" x1="60" y1="40" x2="380" y2="520" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#141418" />
+            <stop offset="45%" stopColor="#0e0e12" />
+            <stop offset="100%" stopColor="#09090b" />
           </linearGradient>
 
           {/* Fold Flap Material */}
-          <linearGradient id="hero-fold-base" x1="296" y1="36" x2="380" y2="144" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#25252f" />
-            <stop offset="55%" stopColor="#181820" />
-            <stop offset="100%" stopColor="#0d0d12" />
+          <linearGradient id="hero-fold-solid-base" x1="296" y1="36" x2="380" y2="144" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#1e1e26" />
+            <stop offset="55%" stopColor="#131318" />
+            <stop offset="100%" stopColor="#0b0b0e" />
           </linearGradient>
 
           {/* Internal Wireframe Lines */}
           <linearGradient id="hero-wire-grad" x1="70" y1="0" x2="370" y2="0" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="rgba(255,255,255,0.02)" />
-            <stop offset="25%" stopColor="rgba(255,255,255,0.09)" />
-            <stop offset="75%" stopColor="rgba(255,255,255,0.09)" />
-            <stop offset="100%" stopColor="rgba(255,255,255,0.02)" />
+            <stop offset="0%" stopColor="rgba(255,255,255,0.015)" />
+            <stop offset="25%" stopColor="rgba(255,255,255,0.065)" />
+            <stop offset="75%" stopColor="rgba(255,255,255,0.065)" />
+            <stop offset="100%" stopColor="rgba(255,255,255,0.015)" />
           </linearGradient>
-
-          {/* Elongated Surface Light Beam Gradient */}
-          <radialGradient id="hero-surface-beam-grad" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="rgba(255, 255, 255, 0.38)" />
-            <stop offset="30%" stopColor="rgba(255, 255, 255, 0.18)" />
-            <stop offset="65%" stopColor="rgba(255, 255, 255, 0.04)" />
-            <stop offset="100%" stopColor="transparent" />
-          </radialGradient>
         </defs>
 
-        {/* ── 1. SOLID 100% OPAQUE BASE (Blocks rear light completely) ── */}
+        {/* ── A. SOLID 100% OPAQUE BASE (Occludes the ring completely) ── */}
         <path
           d={perimeterPath}
-          fill="url(#hero-opaque-base)"
-          stroke="rgba(255, 255, 255, 0.12)"
+          fill="url(#hero-doc-solid-base)"
+          stroke="rgba(255, 255, 255, 0.11)"
           strokeWidth="1.3"
         />
 
-        {/* ── 2. ILLUMINATED PHYSICAL SURFACE & MICRO-TEXTURE ── */}
-        <g clipPath="url(#hero-doc-clip)">
-          {/* Tactile Micro-Texture Grain (Revealed under moving surface illumination) */}
-          <rect
-            x="0"
-            y="0"
-            width="440"
-            height="560"
-            fill="#ffffff"
-            filter="url(#hero-material-roughness)"
-            opacity="0.85"
-            className="pointer-events-none"
-          />
-
-          {/* Synchronized Elongated Moving Surface Light Beam */}
-          <g className="animate-hero-surface-beam pointer-events-none">
-            {/* Elongated directional beam on the document surface */}
-            <ellipse
-              cx="220"
-              cy="280"
-              rx="180"
-              ry="65"
-              fill="url(#hero-surface-beam-grad)"
-              className="transform -rotate-12"
-            />
-          </g>
-
-          {/* ── 3. Abstract Geometric Wireframe Document Content ── */}
-          <g stroke="url(#hero-wire-grad)" strokeWidth="1" strokeLinecap="round" opacity="0.9">
-            <line x1="72" y1="180" x2="368" y2="180" />
-            <line x1="72" y1="216" x2="368" y2="216" />
-            <line x1="72" y1="252" x2="368" y2="252" />
-            <line x1="72" y1="288" x2="368" y2="288" />
-            <line x1="72" y1="324" x2="368" y2="324" />
-            <line x1="72" y1="360" x2="368" y2="360" />
-            <line x1="72" y1="396" x2="368" y2="396" />
-            <line x1="72" y1="432" x2="368" y2="432" />
-          </g>
-
-          {/* ── 4. Central Geometric Security Watermark ── */}
-          <g transform="translate(220, 306)" stroke="rgba(255, 255, 255, 0.05)" strokeWidth="1" fill="none">
-            <circle r="60" />
-            <circle r="42" strokeDasharray="3 4" />
-            <polygon points="0,-28 24,14 -24,14" />
-            <polygon points="0,28 24,-14 -24,-14" />
-          </g>
-
-          {/* ── 5. Precision Registration Micro-Crosshairs ── */}
-          <g stroke="rgba(255, 255, 255, 0.22)" strokeWidth="1">
-            {/* Top Left */}
-            <line x1="68" y1="76" x2="76" y2="76" />
-            <line x1="72" y1="72" x2="72" y2="80" />
-
-            {/* Bottom Left */}
-            <line x1="68" y1="480" x2="76" y2="480" />
-            <line x1="72" y1="476" x2="72" y2="484" />
-
-            {/* Bottom Right */}
-            <line x1="364" y1="480" x2="372" y2="480" />
-            <line x1="368" y1="476" x2="368" y2="484" />
-          </g>
+        {/* ── B. Precision Geometric Wireframe Document Content ── */}
+        <g stroke="url(#hero-wire-grad)" strokeWidth="1" strokeLinecap="round" opacity="0.95">
+          <line x1="72" y1="180" x2="368" y2="180" />
+          <line x1="72" y1="216" x2="368" y2="216" />
+          <line x1="72" y1="252" x2="368" y2="252" />
+          <line x1="72" y1="288" x2="368" y2="288" />
+          <line x1="72" y1="324" x2="368" y2="324" />
+          <line x1="72" y1="360" x2="368" y2="360" />
+          <line x1="72" y1="396" x2="368" y2="396" />
+          <line x1="72" y1="432" x2="368" y2="432" />
         </g>
 
-        {/* ── 6. Dimensioned Folded Corner Geometry ── */}
+        {/* ── C. Central Geometric Security Watermark ── */}
+        <g transform="translate(220, 306)" stroke="rgba(255, 255, 255, 0.04)" strokeWidth="1" fill="none">
+          <circle r="60" />
+          <circle r="42" strokeDasharray="3 4" />
+          <polygon points="0,-28 24,14 -24,14" />
+          <polygon points="0,28 24,-14 -24,-14" />
+        </g>
+
+        {/* ── D. Precision Registration Micro-Crosshairs ── */}
+        <g stroke="rgba(255, 255, 255, 0.18)" strokeWidth="1">
+          {/* Top Left */}
+          <line x1="68" y1="76" x2="76" y2="76" />
+          <line x1="72" y1="72" x2="72" y2="80" />
+
+          {/* Bottom Left */}
+          <line x1="68" y1="480" x2="76" y2="480" />
+          <line x1="72" y1="476" x2="72" y2="484" />
+
+          {/* Bottom Right */}
+          <line x1="364" y1="480" x2="372" y2="480" />
+          <line x1="368" y1="476" x2="368" y2="484" />
+        </g>
+
+        {/* ── E. Physical Folded Corner Geometry ── */}
         {/* Fold Flap Shadow */}
         <path
           d="M 296 36 L 296 144 L 404 144 Z"
-          fill="rgba(0, 0, 0, 0.8)"
-          filter="blur(6px)"
+          fill="rgba(0, 0, 0, 0.88)"
+          filter="blur(5px)"
         />
 
         {/* Fold Flap Solid Body */}
         <path
           d={foldFlapPath}
-          fill="url(#hero-fold-base)"
-          stroke="rgba(255, 255, 255, 0.20)"
+          fill="url(#hero-fold-solid-base)"
+          stroke="rgba(255, 255, 255, 0.18)"
           strokeWidth="1.3"
         />
 
@@ -198,18 +285,160 @@ export const HeroDocumentVisual: React.FC = () => {
           y1="36"
           x2="404"
           y2="144"
-          stroke="rgba(255, 255, 255, 0.32)"
-          strokeWidth="1.4"
+          stroke="rgba(255, 255, 255, 0.28)"
+          strokeWidth="1.3"
         />
+      </svg>
 
-        {/* Fold Specular Highlight (Blooms when light traverses top-right) */}
-        <path
-          d={foldFlapPath}
-          fill="none"
-          stroke="rgba(255, 255, 255, 0.65)"
-          strokeWidth="1.6"
-          className="animate-hero-fold-highlight pointer-events-none"
-        />
+      {/* ── 4. Glowing Elliptical White Light Ring — FRONT ARC SEGMENT (z-20) ──
+          Passes IN FRONT of the document to establish true 3D spatial enclosure:
+          BACK RING (z-0) ──► DOCUMENT (z-10) ──► FRONT RING SEGMENT (z-20).
+          Clipped along the 3D perspective horizon line: passes unbroken across the lower front of the document.
+          Generous breathing room (~167px clearance on both sides) ensures the document sits comfortably inside the ring. */}
+      <svg
+        viewBox="0 0 440 560"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-full h-full absolute inset-0 overflow-visible pointer-events-none z-20"
+        aria-hidden="true"
+      >
+        <defs>
+          {/* Front arc clipping polygon: covers the lower front sweep below the 3D perspective horizon with vast bounds */}
+          <clipPath id="hero-front-ring-clip">
+            <polygon points="-2500,1310 2500,-607 2500,2500 -2500,2500" />
+          </clipPath>
+
+          {/* Front-layer glow filters with generous filter bounds */}
+          <filter id="hero-front-ring-halo" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur stdDeviation="34" />
+          </filter>
+          <filter id="hero-front-ring-glow-wide" x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur stdDeviation="16" />
+          </filter>
+          <filter id="hero-front-ring-glow-mid" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="7" />
+          </filter>
+          <filter id="hero-front-highlight-core" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="2.4" />
+          </filter>
+        </defs>
+
+        {/* Clipped Front Ring Segment Group */}
+        <g clipPath="url(#hero-front-ring-clip)">
+          {/* Base stationary front ring strokes */}
+          <g opacity="0.95">
+            {/* Diffuse glow layer */}
+            <ellipse
+              cx="220"
+              cy="270"
+              rx="370"
+              ry="180"
+              transform="rotate(-21 220 270)"
+              stroke="#ffffff"
+              strokeWidth="16"
+              opacity="0.14"
+              filter="url(#hero-front-ring-glow-wide)"
+            />
+            {/* Middle luminous body */}
+            <ellipse
+              cx="220"
+              cy="270"
+              rx="370"
+              ry="180"
+              transform="rotate(-21 220 270)"
+              stroke="#ffffff"
+              strokeWidth="6.5"
+              opacity="0.32"
+              filter="url(#hero-front-ring-glow-mid)"
+            />
+            {/* Main visible ring */}
+            <ellipse
+              cx="220"
+              cy="270"
+              rx="370"
+              ry="180"
+              transform="rotate(-21 220 270)"
+              stroke="#ffffff"
+              strokeWidth="2.8"
+              opacity="0.70"
+            />
+            {/* Crisp inner edge */}
+            <ellipse
+              cx="220"
+              cy="270"
+              rx="370"
+              ry="180"
+              transform="rotate(-21 220 270)"
+              stroke="#ffffff"
+              strokeWidth="1.3"
+              opacity="0.90"
+            />
+          </g>
+
+          {/* Synchronized Traveling Highlight across front arc */}
+          <g className="animate-ring-bloom-sync">
+            {/* Wide traveling atmospheric bloom */}
+            <ellipse
+              cx="220"
+              cy="270"
+              rx="370"
+              ry="180"
+              transform="rotate(-21 220 270)"
+              stroke="#ffffff"
+              strokeWidth="54"
+              strokeLinecap="round"
+              pathLength="1000"
+              opacity="0.32"
+              filter="url(#hero-front-ring-halo)"
+              className="animate-ring-highlight-wide"
+            />
+            {/* Mid traveling glow */}
+            <ellipse
+              cx="220"
+              cy="270"
+              rx="370"
+              ry="180"
+              transform="rotate(-21 220 270)"
+              stroke="#ffffff"
+              strokeWidth="26"
+              strokeLinecap="round"
+              pathLength="1000"
+              opacity="0.55"
+              filter="url(#hero-front-ring-glow-wide)"
+              className="animate-ring-highlight-mid"
+            />
+            {/* Soft traveling inner bloom */}
+            <ellipse
+              cx="220"
+              cy="270"
+              rx="370"
+              ry="180"
+              transform="rotate(-21 220 270)"
+              stroke="#ffffff"
+              strokeWidth="10"
+              strokeLinecap="round"
+              pathLength="1000"
+              opacity="0.85"
+              filter="url(#hero-front-ring-glow-mid)"
+              className="animate-ring-highlight-soft"
+            />
+            {/* Intense defined bright traveling core */}
+            <ellipse
+              cx="220"
+              cy="270"
+              rx="370"
+              ry="180"
+              transform="rotate(-21 220 270)"
+              stroke="#ffffff"
+              strokeWidth="3.8"
+              strokeLinecap="round"
+              pathLength="1000"
+              opacity="1.0"
+              filter="url(#hero-front-highlight-core)"
+              className="animate-ring-highlight-core"
+            />
+          </g>
+        </g>
       </svg>
     </div>
   );

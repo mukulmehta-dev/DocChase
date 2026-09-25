@@ -6,6 +6,7 @@ import { Input } from '../../components/ui/Input';
 import { Logo } from '../../components/ui/Logo';
 import { supabase, isProduction } from '../../lib/supabase';
 import { authService, getFriendlyAuthErrorMessage } from '../../services/auth';
+import { AuthAuroraBackground } from '../../components/auth/AuthAuroraBackground';
 
 const PLAN_INFO: Record<string, { name: string; price: string; description: string }> = {
   free: {
@@ -30,6 +31,7 @@ export const SignUpPage: React.FC = () => {
   const [firmName, setFirmName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<'google' | 'github' | null>(null);
@@ -96,6 +98,13 @@ export const SignUpPage: React.FC = () => {
         state: {
           email,
           verifiedMessage: 'Email verified! Please enter your password to sign in on this device.',
+        },
+      });
+    } catch {
+      navigate('/sign-in', {
+        state: {
+          email,
+          verifiedMessage: 'Email verified! Please enter your password to sign in.',
         },
       });
     } finally {
@@ -182,10 +191,11 @@ export const SignUpPage: React.FC = () => {
   };
 
   const handleResend = async () => {
-    if (cooldown > 0 || isResending || !email) return;
+    if (!email || cooldown > 0) return;
     setIsResending(true);
-    setResendError(null);
     setResendSuccess(false);
+    setResendError(null);
+
     try {
       await resendConfirmationEmail(email);
       setResendSuccess(true);
@@ -208,10 +218,10 @@ export const SignUpPage: React.FC = () => {
   if (emailConfirmationRequired) {
     if (isConfirmed) {
       return (
-        <div className="flex-1 flex flex-col items-center justify-center px-4 py-16 bg-[#09090b] relative">
-          <div className="absolute inset-0 bg-dot-dark opacity-30 pointer-events-none" aria-hidden="true" />
-          <div className="relative w-full max-w-md bg-[#121215] rounded-2xl border border-white/[0.09] shadow-[0_24px_60px_rgba(0,0,0,0.6)] p-8 flex flex-col items-center text-center">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 flex items-center justify-center mb-5">
+        <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 sm:py-16 bg-[#02050c] min-h-[calc(100vh-64px)] relative overflow-hidden">
+          <AuthAuroraBackground />
+          <div className="relative z-10 w-full max-w-md bg-[#070c18]/75 backdrop-blur-2xl rounded-2xl border border-white/[0.09] shadow-[0_24px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(6,30,50,0.22)] p-8 flex flex-col items-center text-center ring-1 ring-white/[0.04]">
+            <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 flex items-center justify-center mb-5 shadow-[0_0_24px_rgba(16,185,129,0.15)]">
               <span className="material-symbols-outlined text-[36px]">verified</span>
             </div>
 
@@ -223,11 +233,11 @@ export const SignUpPage: React.FC = () => {
             </p>
 
             <Button
-              variant="primary"
               size="lg"
               fullWidth
               onClick={() => navigate('/dashboard')}
               icon="arrow_forward"
+              className="bg-gradient-to-r from-teal-500/20 via-cyan-400/25 to-indigo-500/20 hover:from-teal-500/30 hover:via-cyan-400/35 hover:to-indigo-500/30 text-white font-semibold border border-cyan-400/35 hover:border-cyan-300/50 shadow-[0_0_24px_rgba(20,184,166,0.18)]"
             >
               Go to DocChase
             </Button>
@@ -237,12 +247,11 @@ export const SignUpPage: React.FC = () => {
     }
 
     return (
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-16 bg-[#09090b] relative">
-        <div className="absolute inset-0 bg-dot-dark opacity-30 pointer-events-none" aria-hidden="true" />
-        <div className="absolute inset-0 bg-dc-center-glow opacity-50 pointer-events-none" aria-hidden="true" />
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 sm:py-16 bg-[#02050c] min-h-[calc(100vh-64px)] relative overflow-hidden">
+        <AuthAuroraBackground />
 
-        <div className="relative w-full max-w-md flex flex-col items-center">
-          <div className="w-14 h-14 rounded-xl bg-white text-neutral-950 flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.2)] mb-5">
+        <div className="relative z-10 w-full max-w-md flex flex-col items-center">
+          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-400 to-teal-500 text-neutral-950 flex items-center justify-center shadow-[0_0_28px_rgba(45,212,191,0.35)] mb-5">
             <span className="material-symbols-outlined text-[30px]">mark_email_read</span>
           </div>
 
@@ -255,16 +264,16 @@ export const SignUpPage: React.FC = () => {
             Confirm your email to activate your DocChase account.
           </p>
 
-          <div className="w-full bg-[#121215] rounded-2xl border border-white/[0.09] shadow-[0_24px_60px_rgba(0,0,0,0.6)] p-6 flex flex-col text-center">
-            <div className="p-3 bg-white/[0.04] rounded-lg border border-white/[0.06] text-xs text-neutral-300 font-mono mb-4 break-all">
+          <div className="w-full bg-[#070c18]/75 backdrop-blur-2xl rounded-2xl border border-white/[0.09] shadow-[0_24px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(6,30,50,0.22)] p-6 flex flex-col text-center ring-1 ring-white/[0.04]">
+            <div className="p-3 bg-white/[0.03] rounded-lg border border-white/[0.06] text-xs text-cyan-200 font-mono mb-4 break-all">
               {email}
             </div>
 
             {/* Waiting indicator */}
-            <div className="flex items-center justify-center gap-2.5 p-3 mb-5 bg-white/[0.05] rounded-lg border border-white/[0.12] text-xs text-neutral-200 font-medium">
+            <div className="flex items-center justify-center gap-2.5 p-3 mb-5 bg-white/[0.04] rounded-lg border border-cyan-400/20 text-xs text-neutral-200 font-medium">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400"></span>
               </span>
               <span>Waiting for email confirmation...</span>
             </div>
@@ -290,19 +299,19 @@ export const SignUpPage: React.FC = () => {
             <div className="flex flex-col gap-3">
               <Button
                 id="verified-continue-btn"
-                variant="primary"
                 size="md"
                 fullWidth
                 isLoading={isCheckingVerification}
                 onClick={handleVerifiedCheck}
                 icon="task_alt"
+                className="bg-gradient-to-r from-teal-500/25 via-cyan-400/30 to-indigo-500/25 text-white font-semibold border border-cyan-400/40 shadow-[0_0_20px_rgba(20,184,166,0.18)]"
               >
                 I've verified my email
               </Button>
 
               <Button
                 id="resend-confirmation-btn"
-                variant="secondary-dark"
+                variant="outline-dark"
                 size="md"
                 fullWidth
                 disabled={isResending || cooldown > 0}
@@ -314,7 +323,7 @@ export const SignUpPage: React.FC = () => {
               </Button>
 
               <Button
-                variant="secondary-dark"
+                variant="outline-dark"
                 size="md"
                 fullWidth
                 onClick={() => navigate('/sign-in', { state: { email } })}
@@ -335,14 +344,14 @@ export const SignUpPage: React.FC = () => {
 
   // ── Registration form ──────────────────────────────────────────────────────
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-4 py-16 relative bg-[#09090b]">
-      <div className="absolute inset-0 bg-dot-dark opacity-30 pointer-events-none" aria-hidden="true" />
-      <div className="absolute inset-0 bg-dc-center-glow opacity-60 pointer-events-none" aria-hidden="true" />
+    <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 sm:py-16 relative bg-[#02050c] min-h-[calc(100vh-64px)] overflow-hidden">
+      {/* ── Full-viewport Animated Aurora Environment ── */}
+      <AuthAuroraBackground />
 
-      <div className="relative w-full max-w-[420px] flex flex-col items-center">
+      <div className="relative z-10 w-full max-w-[420px] flex flex-col items-center">
 
         {/* Brand mark */}
-        <Link to="/" className="mb-8 group" aria-label="DocChase Home">
+        <Link to="/" className="mb-6 sm:mb-8 group" aria-label="DocChase Home">
           <Logo size="lg" />
         </Link>
 
@@ -354,25 +363,27 @@ export const SignUpPage: React.FC = () => {
         {selectedPlan ? (
           <div
             id="signup-selected-plan-badge"
-            className="mt-2 mb-8 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-xs font-medium"
+            className="mt-2 mb-7 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-950/40 border border-cyan-400/30 text-cyan-200 text-xs font-medium backdrop-blur-md shadow-[0_0_16px_rgba(6,182,212,0.12)]"
           >
-            <span className="material-symbols-outlined text-[15px]">bookmark_added</span>
+            <span className="material-symbols-outlined text-[15px] text-cyan-400">bookmark_added</span>
             <span>
               Selected Plan: <strong>{selectedPlan.name}</strong> ({selectedPlan.price})
             </span>
           </div>
         ) : (
-          <p className="text-sm text-neutral-400 text-center mb-8">
+          <p className="text-sm text-neutral-400 text-center mb-7 max-w-sm">
             Start collecting client documents automatically. Free starter plan includes full document tracking.
           </p>
         )}
 
-        {/* Card */}
-        <div className="w-full bg-[#121215] rounded-2xl border border-white/[0.08] shadow-[0_24px_60px_rgba(0,0,0,0.6)] p-7 flex flex-col">
+        {/* Smoked Dark Glass Card */}
+        <div className="w-full bg-[#070c18]/70 backdrop-blur-2xl rounded-2xl border border-white/[0.09] shadow-[0_24px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(6,30,50,0.22)] p-6 sm:p-7 flex flex-col relative overflow-hidden ring-1 ring-white/[0.04]">
+          {/* Subtle top edge luminous specular line */}
+          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/25 to-transparent pointer-events-none" />
 
           {/* Error banner */}
           {error && (
-            <div className="mb-5 p-3 bg-rose-500/10 border border-rose-500/25 rounded-xl text-xs text-rose-400 flex flex-col gap-2">
+            <div className="mb-5 p-3 bg-rose-500/10 border border-rose-500/25 rounded-xl text-xs text-rose-400 flex flex-col gap-2 backdrop-blur-sm">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-[16px] shrink-0">error</span>
                 <span>{error}</span>
@@ -380,7 +391,7 @@ export const SignUpPage: React.FC = () => {
               {isExistingAccount && (
                 <Link
                   to="/sign-in"
-                  className="self-start text-xs font-semibold text-white hover:underline mt-0.5 flex items-center gap-1 cursor-pointer"
+                  className="self-start text-xs font-semibold text-white hover:text-cyan-300 hover:underline mt-0.5 flex items-center gap-1 cursor-pointer transition-colors"
                 >
                   <span className="material-symbols-outlined text-[14px]">login</span>
                   Sign in to your account
@@ -396,7 +407,7 @@ export const SignUpPage: React.FC = () => {
               id="google-signup-btn"
               onClick={() => handleOAuth('google')}
               disabled={isFormDisabled}
-              className="w-full h-10 px-4 rounded-lg border border-white/[0.10] bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/30 hover:text-white hover:shadow-[0_0_16px_rgba(255,255,255,0.06)] text-neutral-200 text-xs font-semibold flex items-center justify-center gap-2.5 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+              className="w-full h-10 px-4 rounded-lg border border-white/[0.09] bg-white/[0.03] hover:bg-white/[0.07] hover:border-cyan-400/30 hover:text-white hover:shadow-[0_0_20px_rgba(20,184,166,0.1)] text-neutral-200 text-xs font-semibold flex items-center justify-center gap-2.5 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/40 backdrop-blur-md"
             >
               {oauthLoading === 'google' ? (
                 <span className="material-symbols-outlined text-[18px] animate-spin text-neutral-400">progress_activity</span>
@@ -416,7 +427,7 @@ export const SignUpPage: React.FC = () => {
               id="github-signup-btn"
               onClick={() => handleOAuth('github')}
               disabled={isFormDisabled}
-              className="w-full h-10 px-4 rounded-lg border border-white/[0.10] bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/30 hover:text-white hover:shadow-[0_0_16px_rgba(255,255,255,0.06)] text-neutral-200 text-xs font-semibold flex items-center justify-center gap-2.5 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+              className="w-full h-10 px-4 rounded-lg border border-white/[0.09] bg-white/[0.03] hover:bg-white/[0.07] hover:border-cyan-400/30 hover:text-white hover:shadow-[0_0_20px_rgba(20,184,166,0.1)] text-neutral-200 text-xs font-semibold flex items-center justify-center gap-2.5 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/40 backdrop-blur-md"
             >
               {oauthLoading === 'github' ? (
                 <span className="material-symbols-outlined text-[18px] animate-spin text-neutral-400">progress_activity</span>
@@ -432,9 +443,9 @@ export const SignUpPage: React.FC = () => {
           {/* Divider */}
           <div className="relative flex items-center justify-center mb-5">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/[0.07]" />
+              <div className="w-full border-t border-white/[0.08]" />
             </div>
-            <span className="relative bg-[#121215] px-3 text-[11px] font-medium uppercase tracking-wider text-neutral-500">
+            <span className="relative bg-[#0a1224]/85 backdrop-blur-md px-3 text-[11px] font-medium uppercase tracking-wider text-neutral-400 rounded-full border border-white/[0.08]">
               OR
             </span>
           </div>
@@ -468,13 +479,26 @@ export const SignUpPage: React.FC = () => {
             <Input
               id="signup-password"
               label="Password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 6 characters"
               leftIcon="lock"
               disabled={isFormDisabled}
+              rightElement={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="p-1 text-neutral-400 hover:text-cyan-300 focus:outline-none cursor-pointer transition-colors"
+                  aria-label="Toggle password visibility"
+                  disabled={isFormDisabled}
+                >
+                  <span className="material-symbols-outlined text-[18px]">
+                    {showPassword ? 'visibility_off' : 'visibility'}
+                  </span>
+                </button>
+              }
             />
 
             <Input
@@ -492,14 +516,13 @@ export const SignUpPage: React.FC = () => {
 
             <Button
               type="submit"
-              variant="primary"
               size="lg"
               fullWidth
               isLoading={isLoading}
               disabled={isFormDisabled}
               icon="arrow_forward"
               iconPosition="right"
-              className="mt-2"
+              className="mt-2 bg-gradient-to-r from-teal-500/20 via-cyan-400/25 to-indigo-500/20 hover:from-teal-500/30 hover:via-cyan-400/35 hover:to-indigo-500/30 text-white font-semibold border border-cyan-400/35 hover:border-cyan-300/50 shadow-[0_0_24px_rgba(20,184,166,0.18),inset_0_1px_0_rgba(255,255,255,0.2)] hover:shadow-[0_0_32px_rgba(20,184,166,0.28),inset_0_1px_0_rgba(255,255,255,0.3)] backdrop-blur-sm transition-all duration-200"
             >
               Create Account
             </Button>
@@ -510,18 +533,18 @@ export const SignUpPage: React.FC = () => {
         <div className="mt-6 flex flex-col items-center gap-2 text-center text-xs text-neutral-500">
           <p>
             By signing up, you agree to our{' '}
-            <Link to="/terms" id="signup-terms-link" className="font-medium text-neutral-400 underline hover:text-white transition-colors">
+            <Link to="/terms" id="signup-terms-link" className="font-medium text-neutral-400 underline hover:text-cyan-300 transition-colors">
               Terms of Service
             </Link>{' '}
             and{' '}
-            <Link to="/privacy" id="signup-privacy-link" className="font-medium text-neutral-400 underline hover:text-white transition-colors">
+            <Link to="/privacy" id="signup-privacy-link" className="font-medium text-neutral-400 underline hover:text-cyan-300 transition-colors">
               Privacy Policy
             </Link>
             .
           </p>
           <div className="flex items-center gap-1.5">
             <span>Already have an account?</span>
-            <Link to="/sign-in" className="font-semibold text-white hover:underline transition-colors">
+            <Link to="/sign-in" className="font-semibold text-white hover:text-cyan-300 hover:underline transition-colors">
               Sign In
             </Link>
           </div>

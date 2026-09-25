@@ -89,8 +89,28 @@ export const LandingPage: React.FC = () => {
 
       {/* ══════════ HERO ══════════ */}
       <section className="relative overflow-hidden pt-16 sm:pt-20 pb-0 px-4 sm:px-6 lg:px-8 bg-[#09090b]">
-        <div className="absolute inset-0 bg-dot-dark opacity-40 pointer-events-none" aria-hidden="true" />
-        <div className="absolute inset-0 bg-dc-hero-glow pointer-events-none" aria-hidden="true" />
+        {/* Subtle dot matrix */}
+        <div className="absolute inset-0 bg-dot-dark opacity-35 pointer-events-none" aria-hidden="true" />
+
+        {/* ── Continuous Shared Hero Atmospheric Light Field ──
+            Spans seamlessly across BOTH the copy (left) and the orbital document (right).
+            Eliminates any visual separation, container box, or rectangular boundary. */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'radial-gradient(ellipse 1300px 800px at 54% 42%, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.02) 40%, rgba(14, 165, 233, 0.008) 55%, transparent 75%)',
+          }}
+          aria-hidden="true"
+        />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'radial-gradient(circle 600px at 72% 45%, rgba(255, 255, 255, 0.035) 0%, transparent 65%)',
+          }}
+          aria-hidden="true"
+        />
 
         <div className="relative max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center pb-16 sm:pb-24">
